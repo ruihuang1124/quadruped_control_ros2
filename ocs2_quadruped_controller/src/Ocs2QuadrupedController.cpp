@@ -248,9 +248,15 @@ namespace ocs2::legged_robot
     controller_interface::CallbackReturn Ocs2QuadrupedController::on_configure(
         const rclcpp_lifecycle::State & /*previous_state*/)
     {
+        std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
+        std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
+        std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
+        std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
+        std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
         control_input_subscription_ = get_node()->create_subscription<custom_msgs::msg::UserCmds>(
             "user_cmd", 10, [this](const custom_msgs::msg::UserCmds::SharedPtr msg)
             {
+                std::cerr << "\n### Start subscribers user command!!!!!!!!!"<<std::endl;
                 // Handle message
                 ctrl_comp_.user_cmds_.linear_x_input = msg->linear_x_input;
                 ctrl_comp_.user_cmds_.linear_y_input = msg->linear_y_input;

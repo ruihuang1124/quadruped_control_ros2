@@ -1,5 +1,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <custom_msgs/msg/user_cmds.hpp>
+#include <control_input_msgs/msg/inputs.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <controller_manager_msgs/srv/switch_controller.hpp>
 
@@ -16,20 +17,25 @@ public:
         keyboard_subscriptor = this->create_subscription<std_msgs::msg::String>(
             "keyboard_input", 10, std::bind(&CmdMapping::cmdMappingCallback, this, _1));
         cmd_publisher = this->create_publisher<custom_msgs::msg::UserCmds>("user_cmd", 10);
+        control_input_publisher_ = this->create_publisher<control_input_msgs::msg::Inputs>("/control_input", 10);
 
         switch_controller_client = this->create_client<controller_manager_msgs::srv::SwitchController>(
             "/controller_manager/switch_controller");
 
         initUserCmd();
+        initControlInputCmd();
+
         RCLCPP_INFO(this->get_logger(), "Command mapping node started in 50ms.");
     }
 
 private:
     custom_msgs::msg::UserCmds user_cmd_;
+    control_input_msgs::msg::Inputs control_input_cmd_;
     rclcpp::TimerBase::SharedPtr timer_;
 
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr keyboard_subscriptor;
     rclcpp::Publisher<custom_msgs::msg::UserCmds>::SharedPtr cmd_publisher;
+    rclcpp::Publisher<control_input_msgs::msg::Inputs>::SharedPtr control_input_publisher_;
 
     rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_client;
 
@@ -86,21 +92,27 @@ private:
             break;
         case '1':
             user_cmd_.gait_name = "stance";
+            control_input_cmd_.command = 1;
             break;
         case '2':
             user_cmd_.gait_name = "trot";
+            control_input_cmd_.command = 2;
             break;
         case '3':
             user_cmd_.gait_name = "standing_trot";
+            control_input_cmd_.command = 3;
             break;
         case '4':
             user_cmd_.gait_name = "flying_trot";
+            control_input_cmd_.command = 4;
             break;
         case '5':
             user_cmd_.gait_name = "standing_pace";
+            control_input_cmd_.command = 5;
             break;
         case '6':
             user_cmd_.gait_name = "dynamic_walk";
+            control_input_cmd_.command = 6;
             break;
         case '7':
             user_cmd_.gait_name = "bound";
@@ -116,6 +128,7 @@ private:
         user_cmd_.height_ratio = std::clamp(user_cmd_.height_ratio, 0.0, 1.0);
 
         cmd_publisher->publish(user_cmd_);
+        control_input_publisher_->publish(control_input_cmd_);
     }
 
     void initUserCmd()
@@ -128,6 +141,15 @@ private:
         user_cmd_.height_ratio = 0.2;
         user_cmd_.gait_name = "stance";
         user_cmd_.passive_enable = false;
+    }
+
+    void initControlInputCmd()
+    {
+        control_input_cmd_.command = 0;
+        control_input_cmd_.lx = 0.0;
+        control_input_cmd_.ly = 0.0;
+        control_input_cmd_.rx = 0.0;
+        control_input_cmd_.ry = 0.0;
     }
 
     void handleSwitchController()
