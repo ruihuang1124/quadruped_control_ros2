@@ -44,6 +44,7 @@ void StateTrotting::enter() {
 }
 
 void StateTrotting::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
+    // std::cerr<<"running trot controller!!!!!!!!!!!"<<std::endl;
     pos_body_ = estimator_->getPosition();
     vel_body_ = estimator_->getVelocity();
 
@@ -85,8 +86,8 @@ FSMStateName StateTrotting::checkChange() {
 
 void StateTrotting::getUserCmd() {
     /* Movement */
-    v_cmd_body_(0) = invNormalize(ctrl_interfaces_.control_inputs_.ly, v_x_limit_(0), v_x_limit_(1));
-    v_cmd_body_(1) = -invNormalize(ctrl_interfaces_.control_inputs_.lx, v_y_limit_(0), v_y_limit_(1));
+    v_cmd_body_(0) = invNormalize(ctrl_interfaces_.control_inputs_.lx, v_x_limit_(0), v_x_limit_(1));
+    v_cmd_body_(1) = -invNormalize(ctrl_interfaces_.control_inputs_.ly, v_y_limit_(0), v_y_limit_(1));
     v_cmd_body_(2) = 0;
 
     /* Turning */

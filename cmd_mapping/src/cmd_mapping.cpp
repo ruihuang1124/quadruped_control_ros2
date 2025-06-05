@@ -41,6 +41,7 @@ private:
 
     void cmdMappingCallback(const std_msgs::msg::String keyboard_input)
     {
+        initControlInputCmd();
         switch (keyboard_input.data[0])
         {
         case 'w':
@@ -89,6 +90,16 @@ private:
         case 'f':
         case 'F':
             user_cmd_.height_ratio -= 0.2;
+            break;
+        case '=':
+        case '+':
+            control_input_cmd_.lx = 0.25;
+            control_input_cmd_.command = 4;
+            break;
+        case '-':
+        case '_':
+            control_input_cmd_.lx = -0.25;
+            control_input_cmd_.command = 4;
             break;
         case '1':
             user_cmd_.gait_name = "stance";
