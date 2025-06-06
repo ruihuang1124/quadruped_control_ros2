@@ -1,0 +1,9 @@
+<library path="hardware_arcdog">
+  <class name="hardware_arcdog/HardwareArcdog"
+         type="HardwareArcdog"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for arcdog real robot platform.
+    </description>
+  </class>
+</library>
