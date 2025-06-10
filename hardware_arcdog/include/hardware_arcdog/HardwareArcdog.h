@@ -11,6 +11,7 @@
 #include "custom_msgs/msg/actuator_cmds.hpp"
 #include "custom_msgs/msg/mujoco_msg.hpp"
 #include "rt_usb_cdc.h"
+#include "custom_msgs/srv/execute_motor_activation.hpp"
 
 class HardwareArcdog final : public hardware_interface::SystemInterface
 {
@@ -28,7 +29,11 @@ public:
 protected:
     int tty_descriptor_;
     int iterations_;
+    int motor_mode_;
+    // bool motor_activation_flag_;
     void imu_callback(const sensor_msgs::msg::Imu imu_state);
+    void motor_activation_callback(const custom_msgs::srv::ExecuteMotorActivation::Request::SharedPtr req,
+                                   const custom_msgs::srv::ExecuteMotorActivation::Response::SharedPtr res);
     // void joint_state_callback(const sensor_msgs::msg::JointState joint_state);
 
     // cmd
@@ -51,5 +56,7 @@ protected:
     // rclcpp::Publisher<custom_msgs::msg::ActuatorCmds>::SharedPtr actuator_cmd_publisher_;
     /*subscriber*/
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber_;
+
+    rclcpp::Service<custom_msgs::srv::ExecuteMotorActivation>::SharedPtr motor_activation_server_;
     // rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
 };

@@ -42,7 +42,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     // auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
     // actuator_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::ActuatorCmds>("actuators_cmds", qos);
 
-
+    motor_mode_ = 1;
+    motor_activation_server_ = node_->create_service<custom_msgs::srv::ExecuteMotorActivation>(
+        "motor_activation", std::bind(&HardwareArcdog::motor_activation_callback, this, std::placeholders::_1, std::placeholders::_2));
     iterations_ = 0;
     tty_descriptor_ = usb_driver_start();
 
@@ -107,15 +109,21 @@ return_type HardwareArcdog::read(const rclcpp::Time & /*time*/, const rclcpp::Du
 {
     iterations_++;
     // read motor states through tty and the imu info will be updated with imucallback().
-    custom_msgs::msg::JointStates* leg_data = get_joint_states_msgtype();
+    custom_msgs::msg::JointStates* joints_data = get_joint_states_msgtype();
     if (rclcpp::ok())
     {
-        // for (size_t i = 0; i < 3; i++)
-        // {
-        //     joint_position_states_[joint_state.name[i]] = joint_state.position[i];
-        //     joint_velocity_states_[joint_state.name[i]] = joint_state.velocity[i];
-        //     joint_effort_states_[joint_state.name[i]] = joint_state.effort[i];
-        // }
+        for (size_t i = 0; i < LEG_AMOUNT; i++)
+        {
+            joint_position_states_[info_.joints[0 + i*3].name] = joints_data->q_abad[i];
+            joint_position_states_[info_.joints[1 + i*3].name] = joints_data->q_hip[i];
+            joint_position_states_[info_.joints[2 + i*3].name] = joints_data->q_knee[i];
+            joint_velocity_states_[info_.joints[0 + i*3].name] = joints_data->qd_abad[i];
+            joint_velocity_states_[info_.joints[1 + i*3].name] = joints_data->qd_hip[i];
+            joint_velocity_states_[info_.joints[2 + i*3].name] = joints_data->qd_knee[i];
+            joint_effort_states_[info_.joints[0 + i*3].name] = joints_data->tau_abad[i];
+            joint_effort_states_[info_.joints[1 + i*3].name] = joints_data->tau_hip[i];
+            joint_effort_states_[info_.joints[2 + i*3].name] = joints_data->tau_knee[i];
+        }
         rclcpp::spin_some(node_);
     }
 
@@ -125,18 +133,79 @@ return_type HardwareArcdog::read(const rclcpp::Time & /*time*/, const rclcpp::Du
 return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
     // TODO: emplace_back or push_back
-    // custom_msgs::msg::ActuatorCmds actuator_cmds;
-    // for (size_t i = 0; i < info_.joints.size(); i++)
-    // {
-    //     actuator_cmds.actuators_name.push_back(info_.joints[i].name);
-    //     actuator_cmds.pos.push_back(joint_position_commands_[info_.joints[i].name]);
-    //     actuator_cmds.vel.push_back(joint_velocity_commands_[info_.joints[i].name]);
-    //     actuator_cmds.torque.push_back(joint_effort_commands_[info_.joints[i].name]);
-    //     actuator_cmds.kp.push_back(joint_kp_commands_[info_.joints[i].name]);
-    //     actuator_cmds.kd.push_back(joint_kd_commands_[info_.joints[i].name]);
-    // }
-    // actuator_cmd_publisher_->publish(actuator_cmds);
+    custom_msgs::msg::JointCommands* joints_command = get_joint_commands_msgtype();
+    CAN_HOST_DATA *can_host_cmd = get_can_host_data();
+    for (size_t i = 0; i < LEG_AMOUNT; i++)
+    {
+        joints_command->kp_abad[i] = joint_kp_commands_[info_.joints[0 + i*3].name];
+        joints_command->kp_hip[i] = joint_kp_commands_[info_.joints[1 + i*3].name];
+        joints_command->kp_knee[i] = joint_kp_commands_[info_.joints[2 + i*3].name];
 
+        joints_command->kd_abad[i] = joint_kd_commands_[info_.joints[0 + i*3].name];
+        joints_command->kd_hip[i] = joint_kd_commands_[info_.joints[1 + i*3].name];
+        joints_command->kd_knee[i] = joint_kd_commands_[info_.joints[2 + i*3].name];
+
+        joints_command->q_des_abad[i] = joint_position_commands_[info_.joints[0 + i*3].name];
+        joints_command->q_des_hip[i] = joint_position_commands_[info_.joints[1 + i*3].name];
+        joints_command->q_des_knee[i] = joint_position_commands_[info_.joints[2 + i*3].name];
+
+        joints_command->qd_des_abad[i] = joint_velocity_commands_[info_.joints[0 + i*3].name];
+        joints_command->qd_des_hip[i] = joint_velocity_commands_[info_.joints[1 + i*3].name];
+        joints_command->qd_des_knee[i] = joint_velocity_commands_[info_.joints[2 + i*3].name];
+
+        joints_command->tau_abad_ff[i] = joint_effort_commands_[info_.joints[0 + i*3].name];
+        joints_command->tau_hip_ff[i] = joint_effort_commands_[info_.joints[1 + i*3].name];
+        joints_command->tau_knee_ff[i] = joint_effort_commands_[info_.joints[2 + i*3].name];
+    }
+
+    bool motor_mode_flag = false; // true if we want the motor move. activated_values input TODO.
+    switch (motor_mode_) {
+    case 0:// motors are ready to move, after activated:
+        // printf("Motor ready to received move cmd!\n");
+        motor_mode_flag = true;
+        break;
+    case 1:
+        // printf("Motor deactivate!\n");
+        motor_mode_flag = false;
+        for (int leg = 0; leg < 4; leg++) {
+            for(int i=0;i<7;i++)
+            {
+                can_host_cmd[leg].dataA[i]=0xFF;
+                can_host_cmd[leg].dataB[i]=0xFF;
+                can_host_cmd[leg].dataC[i]=0xFF;
+                can_host_cmd[leg].dataD[i]=0x00;
+            }
+            for(int i=7;i<8;i++)
+            {
+                can_host_cmd[leg].dataA[i]=0xFD;
+                can_host_cmd[leg].dataB[i]=0xFD;
+                can_host_cmd[leg].dataC[i]=0xFD;
+                can_host_cmd[leg].dataD[i]=0x00;
+            }
+        }
+        break;
+    case 8:
+        // printf("Motor activate!\n");
+        motor_mode_flag = false;
+        for (int leg = 0; leg < 4; leg++) {
+            for(int i=0;i<7;i++)
+            {
+                can_host_cmd[leg].dataA[i]=0xFF;
+                can_host_cmd[leg].dataB[i]=0xFF;
+                can_host_cmd[leg].dataC[i]=0xFF;
+                can_host_cmd[leg].dataD[i]=0x00;
+            }
+            for(int i=7;i<8;i++)
+            {
+                can_host_cmd[leg].dataA[i]=0xFC;
+                can_host_cmd[leg].dataB[i]=0xFC;
+                can_host_cmd[leg].dataC[i]=0xFC;
+                can_host_cmd[leg].dataD[i]=0x00;
+            }
+        }
+        break;
+    }
+    usb_driver_run(tty_descriptor_,motor_mode_flag,iterations_);
     // {
     //     auto now = std::chrono::system_clock::now();
     //     auto now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -174,6 +243,14 @@ void HardwareArcdog::imu_callback(const sensor_msgs::msg::Imu imu_state)
 //         joint_effort_states_[joint_state.name[i]] = joint_state.effort[i];
 //     }
 // }
+
+void HardwareArcdog::motor_activation_callback(const custom_msgs::srv::ExecuteMotorActivation::Request::SharedPtr req,
+                                               const custom_msgs::srv::ExecuteMotorActivation::Response::SharedPtr res)
+{
+    motor_mode_ = req->motor_mode;
+    res->result_status = res->SUCCEEDED;
+}
+
 
 #include "pluginlib/class_list_macros.hpp"
 

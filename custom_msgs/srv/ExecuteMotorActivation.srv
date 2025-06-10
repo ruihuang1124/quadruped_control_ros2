@@ -1,0 +1,10 @@
+# Execute activating all motors for quadruped robot developed by ArcLab
+
+# Requests
+# motor_mode: 0 for activated with moving mode; 1 for deactivated; 8 for activated.
+
+int32 motor_mode
+---
+uint8 SUCCEEDED=0
+uint8 FAILED=1
+uint8 result_status
