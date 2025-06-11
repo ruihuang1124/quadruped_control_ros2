@@ -223,6 +223,7 @@ return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::D
 
 void HardwareArcdog::imu_callback(const sensor_msgs::msg::Imu imu_state)
 {
+    // std::cerr<<"received imu callback"<<std::endl;
     imu_states_[0] = imu_state.orientation.w;
     imu_states_[1] = imu_state.orientation.x;
     imu_states_[2] = imu_state.orientation.y;
