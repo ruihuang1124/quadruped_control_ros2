@@ -248,6 +248,19 @@ void HardwareArcdog::imu_callback(const sensor_msgs::msg::Imu imu_state)
 void HardwareArcdog::motor_activation_callback(const custom_msgs::srv::ExecuteMotorActivation::Request::SharedPtr req,
                                                const custom_msgs::srv::ExecuteMotorActivation::Response::SharedPtr res)
 {
+    if (req->motor_mode == 8)
+    {
+        RCLCPP_WARN(node_->get_logger(), "robot motors activated! be careful!");
+    } else if (req->motor_mode == 0)
+    {
+        RCLCPP_WARN(node_->get_logger(), "robot motors activated and are allow actuated by the commands!");
+    } else if (req->motor_mode == 1)
+    {
+        RCLCPP_WARN(node_->get_logger(), "robot motors deactivated.");
+    } else
+    {
+        RCLCPP_WARN(node_->get_logger(), "Nothing changed, 1 for motors deactivated, 8 for motors activated and 0 for controlling robots");
+    }
     motor_mode_ = req->motor_mode;
     res->result_status = res->SUCCEEDED;
 }
