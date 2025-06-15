@@ -342,14 +342,14 @@ int usb_driver_start() {
 
 void usb_send_receive(CAN_HOST_DATA* command, CAN_SLAVE_DATA* data,int tty_descriptor)
 {
-//  printf("command leg %d is:\n", command->leg);
-//  for (int i = 0; i < 8; ++i) {
-//    printf("%X ", command->dataA[i]);
-//    printf("%X ", command->dataB[i]);
-//    printf("%X ", command->dataC[i]);
-//    printf("%X ", command->dataD[i]);
-//  }
-//  printf("\n");
+  // printf("command leg %d is:\n", command->leg);
+  // for (int i = 0; i < 8; ++i) {
+  //   printf("%X ", command->dataA[i]);
+  //   printf("%X ", command->dataB[i]);
+  //   printf("%X ", command->dataC[i]);
+  //   printf("%X ", command->dataD[i]);
+  // }
+  // printf("\n");
 
   if(tty_descriptor == -1 || command == NULL || data==NULL)
     {
@@ -494,17 +494,17 @@ int float_to_uint(float x, float x_min, float x_max, int bits){
  }
 
 void leg_command_to_can_command(LEG_COMMAND_T *leg_cmd, CAN_COMMAND *can_cmd) {
-    can_cmd[0].p_des = float_to_uint(leg_cmd->q_des_abad, P_MIN_HT, P_MAX_HT,16);
-    can_cmd[0].v_des = float_to_uint(leg_cmd->qd_des_abad, V_MIN_HT, V_MAX_HT,12);
-    can_cmd[0].kp = float_to_uint(leg_cmd->kp_abad, KP_MIN_HT, KP_MAX_HT, 12);
-    can_cmd[0].kd = float_to_uint(leg_cmd->kd_abad, KD_MIN_HT, KD_MAX_HT, 12);
-    can_cmd[0].t_ff = float_to_uint(leg_cmd->tau_abad_ff, T_MIN_HT_03, T_MAX_HT_03, 12);
+    can_cmd[0].p_des = float_to_uint(leg_cmd->q_des_abad, P_MIN_LK, P_MAX_LK,16);
+    can_cmd[0].v_des = float_to_uint(leg_cmd->qd_des_abad, V_MIN_LK, V_MAX_LK,12);
+    can_cmd[0].kp = float_to_uint(leg_cmd->kp_abad, KP_MIN_LK, KP_MAX_LK, 12);
+    can_cmd[0].kd = float_to_uint(leg_cmd->kd_abad, KD_MIN_LK, KD_MAX_LK, 12);
+    can_cmd[0].t_ff = float_to_uint(leg_cmd->tau_abad_ff, T_MIN_LK, T_MAX_LK, 12);
 
-    can_cmd[1].p_des = float_to_uint(leg_cmd->q_des_hip, P_MIN_HT, P_MAX_HT,16);
-    can_cmd[1].v_des = float_to_uint(leg_cmd->qd_des_hip, V_MIN_HT, V_MAX_HT,12);
-    can_cmd[1].kp = float_to_uint(leg_cmd->kp_hip, KP_MIN_HT, KP_MAX_HT, 12);
-    can_cmd[1].kd = float_to_uint(leg_cmd->kd_hip, KD_MIN_HT, KD_MAX_HT, 12);
-    can_cmd[1].t_ff = float_to_uint(leg_cmd->tau_hip_ff, T_MIN_HT_04, T_MAX_HT_04, 12);
+    can_cmd[1].p_des = float_to_uint(leg_cmd->q_des_hip, P_MIN_LK, P_MAX_LK,16);
+    can_cmd[1].v_des = float_to_uint(leg_cmd->qd_des_hip, V_MIN_LK, V_MAX_LK,12);
+    can_cmd[1].kp = float_to_uint(leg_cmd->kp_hip, KP_MIN_LK, KP_MAX_LK, 12);
+    can_cmd[1].kd = float_to_uint(leg_cmd->kd_hip, KD_MIN_LK, KD_MAX_LK, 12);
+    can_cmd[1].t_ff = float_to_uint(leg_cmd->tau_hip_ff, T_MIN_LK, T_MAX_LK, 12);
 
     can_cmd[2].p_des = float_to_uint(leg_cmd->q_des_knee, P_MIN_DM, P_MAX_DM,16);
     can_cmd[2].v_des = float_to_uint(leg_cmd->qd_des_knee, V_MIN_DM, V_MAX_DM,12);
@@ -520,13 +520,13 @@ void leg_command_to_can_command(LEG_COMMAND_T *leg_cmd, CAN_COMMAND *can_cmd) {
 }
 
 void can_data_to_leg_data(CAN_DATA *can_data, LEG_DATA_T *leg_data) {
-    leg_data->q_abad = uint_to_float(can_data[0].POS, P_MIN_HT, P_MAX_HT,16);
-    leg_data->qd_abad = uint_to_float(can_data[0].VEL, V_MIN_HT, V_MAX_HT,12);
-    leg_data->tau_abad = uint_to_float(can_data[0].T, T_MIN_HT_03, T_MAX_HT_03,12);
+    leg_data->q_abad = uint_to_float(can_data[0].POS, P_MIN_LK, P_MAX_LK,16);
+    leg_data->qd_abad = uint_to_float(can_data[0].VEL, V_MIN_LK, V_MAX_LK,12);
+    leg_data->tau_abad = uint_to_float(can_data[0].T, T_MIN_LK, T_MAX_LK,12);
 
-    leg_data->q_hip = uint_to_float(can_data[1].POS, P_MIN_HT, P_MAX_HT,16);
-    leg_data->qd_hip = uint_to_float(can_data[1].VEL, V_MIN_HT, V_MAX_HT,12);
-    leg_data->tau_hip = uint_to_float(can_data[1].T, T_MIN_HT_04, T_MAX_HT_04,12);
+    leg_data->q_hip = uint_to_float(can_data[1].POS, P_MIN_LK, P_MAX_LK,16);
+    leg_data->qd_hip = uint_to_float(can_data[1].VEL, V_MIN_LK, V_MAX_LK,12);
+    leg_data->tau_hip = uint_to_float(can_data[1].T, T_MIN_LK, T_MAX_LK,12);
 
     leg_data->q_knee = uint_to_float(can_data[2].POS, P_MIN_DM, P_MAX_DM,16);
     leg_data->qd_knee = uint_to_float(can_data[2].VEL, V_MIN_DM, V_MAX_DM,12);
@@ -731,6 +731,7 @@ void usb_driver_run(int tty_descriptor, bool motor_mode_flag){
 
 
 void usb_driver_run(int tty_descriptor, bool motor_mode_flag, uint64_t current_iteration){
+    // std::cerr<<"usb_driver_run started!!!"<<std::endl;
   // do usb cdc can board calculations
   // in here, the driver is good
   pthread_mutex_lock(&usb_mutex);
@@ -750,12 +751,15 @@ void usb_driver_run(int tty_descriptor, bool motor_mode_flag, uint64_t current_i
   }
   pthread_mutex_unlock(&usb_mutex);
   if (current_iteration == 1500) {
+      // std::cerr<<"usb_driver_run started!!!"<<std::endl;
+      // std::cerr<<"usb_driver_run started!!!"<<std::endl;
+      // std::cerr<<"usb_driver_run started!!!"<<std::endl;
     for (int i = 0; i < 4; ++i) {
       arcdog_abad_offset[i] = 2 * arcdog_abad_offset[i] - joint_states_drv_msgtype.q_abad[i];
       arcdog_hip_offset[i] = 2 * arcdog_hip_offset[i] - joint_states_drv_msgtype.q_hip[i];
       arcdog_knee_offset[i] = 2 * arcdog_knee_offset[i] - joint_states_drv_msgtype.q_knee[i];
     }
-    printf("Finish setting offset for arcdog's motor! NO ACTIVE ON ARCDOG MINI\n");
+    std::cerr<<"Finish setting offset for arcdog's motor! NO ACTIVE ON ARCDOG MINI"<<std::endl;
   }
 }
 

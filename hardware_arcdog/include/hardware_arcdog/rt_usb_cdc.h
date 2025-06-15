@@ -71,6 +71,18 @@ extern "C" {
 #define T_MIN_DM -54.0f
 #define T_MAX_DM 54.0f
 
+// DM motor LIMITS.
+#define P_MIN_LK 0.0f
+#define P_MAX_LK 6.2831852f
+#define V_MIN_LK -30.0f
+#define V_MAX_LK 30.0f
+#define KP_MIN_LK 0.0f
+#define KP_MAX_LK 500.0f
+#define KD_MIN_LK 0.0f
+#define KD_MAX_LK 100.0f
+#define T_MIN_LK -33.0f
+#define T_MAX_LK 33.0f
+
 
 // original value: 0.364
 // #define ARCDOG_K_ABAD_OFFSET_POS_0  0.3425f  //0.364+(0-(0.019+0.024)*0.5)
