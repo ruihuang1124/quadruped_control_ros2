@@ -11,7 +11,7 @@ def generate_launch_description():
     # 设置参数的默认值和描述
     robot_pkg = DeclareLaunchArgument(
         "robot_pkg",
-        default_value="arcdog_description",
+        default_value="piper_description", # arcdog_description, piper_description
         description="package for robot description",
     )
 

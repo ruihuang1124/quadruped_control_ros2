@@ -28,6 +28,7 @@
 #include "simulate.h"
 #include "array_safety.h"
 #include "mujoco_msg_handler.h"
+#include "piper_mujoco_msg_handler.h"
 
 #define MUJOCO_PLUGIN_DIR "mujoco_plugin"
 
@@ -58,7 +59,7 @@ namespace
   mjModel *m = nullptr;
   mjData *d = nullptr;
 
-  std::shared_ptr<Galileo::MujocoMsgHandler::ActuatorCmds> actuator_cmds_ptr;
+  // std::shared_ptr<Galileo::MujocoMsgHandler::ActuatorCmds> actuator_cmds_ptr;
 
   using Seconds = std::chrono::duration<double>;
 
@@ -309,36 +310,36 @@ namespace
     return mnew;
   }
 
-  void apply_ctrl(mjModel *m, mjData *d)
-  {
-    for (size_t k = 0; k < actuator_cmds_ptr->actuators_name.size(); k++)
-    {
-      int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR,
-                                   actuator_cmds_ptr->actuators_name[k].c_str());
-      if (actuator_id == -1)
-      {
-        RCLCPP_INFO(rclcpp::get_logger("MuJoCo"),
-                    "not found the name from the received message in mujoco");
-        continue;
-      }
-      int pos_sensor_id =
-          mj_name2id(m, mjOBJ_SENSOR,
-                     (actuator_cmds_ptr->actuators_name[k] + "_pos").c_str());
-      int vel_sensor_id =
-          mj_name2id(m, mjOBJ_SENSOR,
-                     (actuator_cmds_ptr->actuators_name[k] + "_vel").c_str());
-
-      d->ctrl[actuator_id] = actuator_cmds_ptr->kp[k] *
-                                 (actuator_cmds_ptr->pos[k] -
-                                  d->sensordata[m->sensor_adr[pos_sensor_id]]) +
-                             actuator_cmds_ptr->kd[k] *
-                                 (actuator_cmds_ptr->vel[k] -
-                                  d->sensordata[m->sensor_adr[vel_sensor_id]]) +
-                             actuator_cmds_ptr->torque[k];
-      d->ctrl[actuator_id] =
-          std::min(std::max(-100.0, d->ctrl[actuator_id]), 100.0);
-    }
-  }
+  // void apply_ctrl(mjModel *m, mjData *d)
+  // {
+  //   for (size_t k = 0; k < actuator_cmds_ptr->actuators_name.size(); k++)
+  //   {
+  //     int actuator_id = mj_name2id(m, mjOBJ_ACTUATOR,
+  //                                  actuator_cmds_ptr->actuators_name[k].c_str());
+  //     if (actuator_id == -1)
+  //     {
+  //       RCLCPP_INFO(rclcpp::get_logger("MuJoCo"),
+  //                   "not found the name from the received message in mujoco");
+  //       continue;
+  //     }
+  //     int pos_sensor_id =
+  //         mj_name2id(m, mjOBJ_SENSOR,
+  //                    (actuator_cmds_ptr->actuators_name[k] + "_pos").c_str());
+  //     int vel_sensor_id =
+  //         mj_name2id(m, mjOBJ_SENSOR,
+  //                    (actuator_cmds_ptr->actuators_name[k] + "_vel").c_str());
+  //
+  //     d->ctrl[actuator_id] = actuator_cmds_ptr->kp[k] *
+  //                                (actuator_cmds_ptr->pos[k] -
+  //                                 d->sensordata[m->sensor_adr[pos_sensor_id]]) +
+  //                            actuator_cmds_ptr->kd[k] *
+  //                                (actuator_cmds_ptr->vel[k] -
+  //                                 d->sensordata[m->sensor_adr[vel_sensor_id]]) +
+  //                            actuator_cmds_ptr->torque[k];
+  //     d->ctrl[actuator_id] =
+  //         std::min(std::max(-100.0, d->ctrl[actuator_id]), 100.0);
+  //   }
+  // }
 
   // simulate in background thread (while rendering in main thread)
   void PhysicsLoop(mj::Simulate &sim)
@@ -596,25 +597,46 @@ int main(int argc, char *argv[])
   mjvPerturb pert;
   mjv_defaultPerturb(&pert);
 
-  // simulate object encapsulates the UI
-  auto sim = std::make_unique<mj::Simulate>(
-      std::make_unique<mj::GlfwAdapter>(),
-      &cam, &opt, &pert, /* is_passive = */ false);
+  int robot_type = 0; // 0 for arcdog; 1 for piper; 2 for arcdog with piper
+  if (robot_type == 0){
+    // simulate object encapsulates the UI
+    auto sim = std::make_unique<mj::Simulate>(
+        std::make_unique<mj::GlfwAdapter>(),
+        &cam, &opt, &pert, /* is_passive = */ false);
+    auto message_handle = std::make_shared<Galileo::MujocoMsgHandler>(sim.get());
+    const char *xml_filename = strdup(message_handle->xml_file_path().c_str());
 
-  auto message_handle = std::make_shared<Galileo::MujocoMsgHandler>(sim.get());
-  const char *xml_filename = strdup(message_handle->xml_file_path().c_str());
+    // start physics thread
+    std::thread physicsthreadhandle(&PhysicsThread, sim.get(), xml_filename);
+    auto spin_func = [](std::shared_ptr<Galileo::MujocoMsgHandler> node_ptr)
+    {
+      rclcpp::spin(node_ptr);
+    };
+    auto spin_thread = std::thread(spin_func, message_handle);
+    // start simulation UI loop (blocking call)
+    sim->RenderLoop();
+    spin_thread.join();
+    physicsthreadhandle.join();
+  } else if (robot_type == 1){
+    // simulate object encapsulates the UI
+    auto sim = std::make_unique<mj::Simulate>(
+        std::make_unique<mj::GlfwAdapter>(),
+        &cam, &opt, &pert, /* is_passive = */ false);
+    auto message_handle = std::make_shared<ArcLab::PiperMujocoMsgHandler>(sim.get());
+    const char *xml_filename = strdup(message_handle->xml_file_path().c_str());
 
-  // start physics thread
-  std::thread physicsthreadhandle(&PhysicsThread, sim.get(), xml_filename);
-  auto spin_func = [](std::shared_ptr<Galileo::MujocoMsgHandler> node_ptr)
-  {
-    rclcpp::spin(node_ptr);
-  };
-  auto spin_thread = std::thread(spin_func, message_handle);
-  // start simulation UI loop (blocking call)
-  sim->RenderLoop();
-  spin_thread.join();
-  physicsthreadhandle.join();
+    // start physics thread
+    std::thread physicsthreadhandle(&PhysicsThread, sim.get(), xml_filename);
+    auto spin_func = [](std::shared_ptr<ArcLab::PiperMujocoMsgHandler> node_ptr)
+    {
+      rclcpp::spin(node_ptr);
+    };
+    auto spin_thread = std::thread(spin_func, message_handle);
+    // start simulation UI loop (blocking call)
+    sim->RenderLoop();
+    spin_thread.join();
+    physicsthreadhandle.join();
+  }
 
   // free model and data
   mj_deleteData(d);
