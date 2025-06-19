@@ -1,0 +1,9 @@
+<library path="hardware_mujoco_piper">
+  <class name="hardware_mujoco_piper/HardwareMujocoPiper"
+         type="HardwareMujocoPiper"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for mujoco piper.
+    </description>
+  </class>
+</library>

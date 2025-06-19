@@ -22,6 +22,9 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <vector>
 
+#include "../../../../../../../../opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp"
+#include "../../../../../../../../opt/ros/humble/include/rclcpp/rclcpp/subscription.hpp"
+
 using namespace rclcpp;
 
 using namespace std::chrono_literals;
@@ -36,16 +39,16 @@ namespace ArcLab
     public:
         const std::string xml_file_path() { return xml_file_path_; }
 
-        struct ActuatorCmds
-        {
-            double time = 0.0;
-            std::vector<std::string> actuators_name;
-            std::vector<float> kp;
-            std::vector<float> pos;
-            std::vector<float> kd;
-            std::vector<float> vel;
-            std::vector<float> torque;
-        };
+        // struct ActuatorCmds
+        // {
+        //     double time = 0.0;
+        //     std::vector<std::string> actuators_name;
+        //     std::vector<float> kp;
+        //     std::vector<float> pos;
+        //     std::vector<float> kd;
+        //     std::vector<float> vel;
+        //     std::vector<float> torque;
+        // };
 
         PiperMujocoMsgHandler(mj::Simulate *sim);
         ~PiperMujocoMsgHandler();
@@ -53,16 +56,18 @@ namespace ArcLab
     private:
         void publish_mujoco_callback();
         void joint_callback();
-        void actuator_cmd_callback(const custom_msgs::msg::ActuatorCmds::SharedPtr msg) const;
+        void joint_cmd_callback(const sensor_msgs::msg::JointState::SharedPtr msg) const;
+        // void actuator_cmd_callback(const custom_msgs::msg::ActuatorCmds::SharedPtr msg) const;
 
         mj::Simulate *sim_;
         std::vector<rclcpp::TimerBase::SharedPtr> timers_;
-        rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
+        // rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
-        rclcpp::Publisher<custom_msgs::msg::MujocoMsg>::SharedPtr mujoco_msg_publisher_;
-        rclcpp::Subscription<custom_msgs::msg::ActuatorCmds>::SharedPtr actuator_cmd_subscription_;
-        std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
-        std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
+        // rclcpp::Publisher<custom_msgs::msg::MujocoMsg>::SharedPtr mujoco_msg_publisher_;
+        rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_cmd_subscription_;
+        // rclcpp::Subscription<custom_msgs::msg::ActuatorCmds>::SharedPtr actuator_cmd_subscription_;
+        // std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
+        // std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
         std::string xml_file_path_;
     };
 } // Galileo

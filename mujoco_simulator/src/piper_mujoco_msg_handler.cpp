@@ -13,16 +13,17 @@ namespace ArcLab
         std::cout << "xml file path:" << xml_file_path_ << std::endl;
 
         auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
-        imu_publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("imu_data", qos);
-        joint_state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", qos);
-        mujoco_msg_publisher_ = this->create_publisher<custom_msgs::msg::MujocoMsg>("mujoco_msg", qos);
+        // imu_publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("imu_data", qos);
+        joint_state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states_single", qos);
+        // mujoco_msg_publisher_ = this->create_publisher<custom_msgs::msg::MujocoMsg>("mujoco_msg", qos);
 
         timers_.emplace_back(this->create_wall_timer(1ms, std::bind(&PiperMujocoMsgHandler::publish_mujoco_callback, this)));
 
-        actuator_cmd_subscription_ = this->create_subscription<custom_msgs::msg::ActuatorCmds>(
-            "actuators_cmds",
+
+        joint_cmd_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
+            "joint_ctrl_single",
             qos,
-            std::bind(&PiperMujocoMsgHandler::actuator_cmd_callback, this, std::placeholders::_1));
+            std::bind(&PiperMujocoMsgHandler::joint_cmd_callback, this, std::placeholders::_1));
 
         RCLCPP_INFO(this->get_logger(), "Start PiperMujocoMsgHandler ...");
         sim_->uiloadrequest.fetch_add(1);
@@ -64,17 +65,16 @@ namespace ArcLab
         }
     }
 
-    void PiperMujocoMsgHandler::actuator_cmd_callback(
-        const custom_msgs::msg::ActuatorCmds::SharedPtr msg) const
+    void PiperMujocoMsgHandler::joint_cmd_callback(const sensor_msgs::msg::JointState::SharedPtr msg) const
     {
         if (!sim_ || !sim_->d_ || !sim_->m_)
         {
             return;
         }
 
-        for (size_t k = 0; k < msg->actuators_name.size(); k++)
+        for (size_t k = 0; k < msg->name.size(); k++)
         {
-            const std::string &actuator_name = msg->actuators_name[k];
+            const std::string &actuator_name = msg->name[k];
             int actuator_id = mj_name2id(sim_->m_, mjOBJ_ACTUATOR, actuator_name.c_str());
             int joint_id = mj_name2id(sim_->m_, mjOBJ_JOINT, actuator_name.c_str());
 
@@ -96,7 +96,7 @@ namespace ArcLab
             // sim_->d_->ctrl[actuator_id] =
             //     msg->kp[k] * position_error + msg->kd[k] * velocity_error + msg->torque[k];
 
-            sim_->d_->ctrl[actuator_id] = msg->pos[k];
+            sim_->d_->ctrl[actuator_id] = msg->position[k];
 
             // // Apply torque limits dynamically from the message
             // double torque_limit = msg->torque_limit[k];
