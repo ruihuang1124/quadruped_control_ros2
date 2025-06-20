@@ -99,10 +99,10 @@ namespace piper_example_controllers
         }
         else {
             elapsed_time_ += trajectory_period_;
-            double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * elapsed_time_)) * 0.2;
 
             for (int i = 0; i < num_joints; ++i)
             {
+                double delta_angle = joint_position_amplify_value_[i] * std::sin(M_PI / 5.0 * elapsed_time_);
                 // std::cerr<<"desired joint angle for joint " << i<<" is: "<<initial_q_.at(i) + delta_angle<<std::endl;
                 ctrl_interfaces_.joint_position_command_interface_[i].get().set_value(initial_q_.at(i) + delta_angle);
             }

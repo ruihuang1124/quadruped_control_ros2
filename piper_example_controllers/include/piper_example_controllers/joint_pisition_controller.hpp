@@ -5,6 +5,7 @@
 #ifndef JOINTPOSITIONCONTROLLER_H
 #define JOINTPOSITIONCONTROLLER_H
 
+#include <math.h>
 #include <controller_interface/controller_interface.hpp>
 #include "controller_common/CtrlInterfaces.h"
 
@@ -61,6 +62,7 @@ namespace piper_example_controllers {
         std::vector<std::string> command_interface_types_;
         std::vector<std::string> state_interface_types_;
         double joint_position_norminal_[7] = {0.0, 1.5, -1.5, 0.0, 0.122, 0.0, 0.024};
+        double joint_position_amplify_value_[7] = {0.0, M_PI/16.0, M_PI/8.0, M_PI/4, M_PI/8, M_PI/8.0, 0.024};
 
         std::unordered_map<
             std::string, std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface> > *>
