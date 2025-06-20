@@ -21,7 +21,7 @@ namespace ArcLab
 
 
         joint_cmd_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
-            "joint_ctrl_single",
+            "/joint_ctrl_single",
             qos,
             std::bind(&PiperMujocoMsgHandler::joint_cmd_callback, this, std::placeholders::_1));
 

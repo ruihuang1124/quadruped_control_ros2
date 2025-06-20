@@ -38,7 +38,7 @@ protected:
     // state
     std::unordered_map<std::string, double> joint_position_states_;
     std::unordered_map<std::string, double> joint_velocity_states_;
-    // std::unordered_map<std::string, double> joint_effort_states_;
+    std::unordered_map<std::string, double> joint_effort_states_;
     // std::vector<double> imu_states_;
     // std::vector<double> foot_contact_states_;
 

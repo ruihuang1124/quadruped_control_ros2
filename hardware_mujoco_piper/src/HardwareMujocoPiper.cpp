@@ -22,7 +22,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     {
         joint_position_states_[info.joints[i].name] = 0.0;
         joint_velocity_states_[info.joints[i].name] = 0.0;
-        // joint_effort_states_[info.joints[i].name] = 0.0;
+        joint_effort_states_[info.joints[i].name] = 0.0;
         joint_position_commands_[info.joints[i].name] = 0.0;
         joint_velocity_commands_[info.joints[i].name] = 0.0;
         // joint_effort_commands_[info.joints[i].name] = 0.0;
@@ -35,7 +35,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     node_ = rclcpp::Node::make_shared("ros2_control_mujoco");
     // subscription
     joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        "joint_states", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoPiper::joint_state_callback, this, std::placeholders::_1));
+        "joint_states_single", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoPiper::joint_state_callback, this, std::placeholders::_1));
     // imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
     //     "imu_data", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoPiper::imu_callback, this, std::placeholders::_1));
     // foot_contact_state_subscriber_ = node_->create_subscription<custom_msgs::msg::MujocoMsg>(
@@ -62,8 +62,8 @@ std::vector<hardware_interface::StateInterface> HardwareMujocoPiper::export_stat
             info_.joints[i].name, "position", &joint_position_states_[info_.joints[i].name]));
         state_interfaces.emplace_back(hardware_interface::StateInterface(
             info_.joints[i].name, "velocity", &joint_velocity_states_[info_.joints[i].name]));
-        // state_interfaces.emplace_back(hardware_interface::StateInterface(
-        //     info_.joints[i].name, "effort", &joint_effort_states_[info_.joints[i].name]));
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            info_.joints[i].name, "effort", &joint_effort_states_[info_.joints[i].name]));
     }
 
     // imu sensor
@@ -155,7 +155,7 @@ void HardwareMujocoPiper::joint_state_callback(const sensor_msgs::msg::JointStat
     {
         joint_position_states_[joint_state.name[i]] = joint_state.position[i];
         joint_velocity_states_[joint_state.name[i]] = joint_state.velocity[i];
-        // joint_effort_states_[joint_state.name[i]] = joint_state.effort[i];
+        joint_effort_states_[joint_state.name[i]] = joint_state.effort[i];
     }
 }
 
