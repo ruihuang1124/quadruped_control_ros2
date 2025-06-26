@@ -12,7 +12,7 @@ model_settings
 
   verboseCppAd                  true
   recompileLibrariesCppAd       false
-  modelFolderCppAd              /tmp/ocs2_quadruped_controller/arcdog
+  modelFolderCppAd              /tmp/ocs2_quadruped_controller/sirius
 }
 
 swing_trajectory_config
@@ -167,11 +167,11 @@ initialState
    (16,0)  0.72   ; RL_thigh_joint
    (17,0) -1.44   ; RL_calf_joint
    (18,0)  0.20   ; FR_hip_joint
-   (19,0)  0.72   ; FR_thigh_joint
-   (20,0) -1.44   ; FR_calf_joint
+   (19,0)  -0.72   ; FR_thigh_joint
+   (20,0)  1.44   ; FR_calf_joint
    (21,0)  0.20   ; RR_hip_joint
-   (22,0)  0.72   ; RR_thigh_joint
-   (23,0) -1.44   ; RR_calf_joint
+   (22,0)  -0.72   ; RR_thigh_joint
+   (23,0)  1.44   ; RR_calf_joint
 }
 
 ; standard state weight matrix

@@ -127,7 +127,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     robot_pkg = DeclareLaunchArgument(
         "robot_pkg",
-        default_value="arcdog_description",
+        default_value="sirius_description",
         description="package for robot description",
     )
 
