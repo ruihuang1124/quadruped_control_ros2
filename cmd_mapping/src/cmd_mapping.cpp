@@ -149,7 +149,7 @@ private:
         user_cmd_.angular_y_input = 0.0;
         user_cmd_.angular_z_input = 0.0;
 
-        user_cmd_.height_ratio = 0.2;
+        user_cmd_.height_ratio = 1.0;
         user_cmd_.gait_name = "stance";
         user_cmd_.passive_enable = false;
     }

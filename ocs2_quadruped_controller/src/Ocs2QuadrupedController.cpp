@@ -126,7 +126,7 @@ namespace ocs2::legged_robot
         // ctrl_comp_.visualizer_->update(ctrl_comp_.observation_, mpc_mrt_interface_->getPolicy(),
         //                                mpc_mrt_interface_->getCommand());
 
-        // observation_publisher_->publish(ros_msg_conversions::createObservationMsg(ctrl_comp_.observation_));
+        observation_publisher_->publish(ros_msg_conversions::createObservationMsg(ctrl_comp_.observation_));
 
         // /******************************************位置环复位******************************************/
         // updateStateEstimation(modeNumber2StanceLeg(planned_mode), time, period);
@@ -134,13 +134,13 @@ namespace ocs2::legged_robot
         // for (int i = 0; i < joint_names_.size(); i++)
         // {
         //     target_position[i] = stand_controller_->calcTargetPosition(i, ctrl_comp_.observation_.time, 5.0);
-
+        //
         //     ctrl_comp_.joint_torque_command_interface_[i].get().set_value(0);
         //     ctrl_comp_.joint_position_command_interface_[i].get().set_value(target_position[i]);
         //     ctrl_comp_.joint_velocity_command_interface_[i].get().set_value(0);
         //     ctrl_comp_.joint_kp_command_interface_[i].get().set_value(250);
         //     ctrl_comp_.joint_kd_command_interface_[i].get().set_value(25);
-
+        //
         // }
         return controller_interface::return_type::OK;
     }
@@ -216,12 +216,12 @@ namespace ocs2::legged_robot
         // Stand Controller
         std::vector<double> middle_position = {0.0, 1.535, -2.486,
                                                0.0, 1.535, -2.486,
-                                               0.0, 1.535, -2.486,
-                                               0.0, 1.535, -2.486};
+                                               0.0, -1.535, 2.486,
+                                               0.0, -1.535, 2.486};
         std::vector<double> final_position = {0.0, 0.72, -1.44,
                                               0.0, 0.72, -1.44,
-                                              0.0, 0.72, -1.44,
-                                              0.0, 0.72, -1.44};
+                                              0.0, -0.72, 1.44,
+                                              0.0, -0.72, 1.44};
         stand_controller_ = std::make_shared<StandController>(middle_position, final_position);
 
         return CallbackReturn::SUCCESS;
