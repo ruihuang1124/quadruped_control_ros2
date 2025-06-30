@@ -27,7 +27,7 @@ option `-DCMAKE_POSITION_INDEPENDENT_CODE=ON` is necessary. If you already insta
 
 ### 2.1.3 mujoco
 
-mujoco should be installed by building from source with release version 3.7.0.
+mujoco should be installed by building from source with release version 3.2.7.
 
 1. Clone the mujoco repository: 
 ```
@@ -56,7 +56,7 @@ git clone https://github.com/ruihuang1124/quadruped_control_ros2.git
 2. Cd in ros workspace and build
 ```
 cd colcon_ws
-colcon build --packages-up-to cmd_mapping custom_msgs hardware_mujoco keyboard_input leg_pd_controller mujoco_simulator arcdog_description ocs2_quadruped_controller unitree_guide_controller piper_moveit piper_description sirius_description 
+colcon build --packages-up-to cmd_mapping custom_msgs hardware_mujoco hardware_arcdog hardware_mujoco_piper keyboard_input leg_pd_controller mujoco_simulator arcdog_description ocs2_quadruped_controller unitree_guide_controller piper_with_gripper_moveit piper_description sirius_description 
 ```
 
 ## 3 Run Example
