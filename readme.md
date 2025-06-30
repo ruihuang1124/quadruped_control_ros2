@@ -23,7 +23,7 @@ option `-DCMAKE_POSITION_INDEPENDENT_CODE=ON` is necessary. If you already insta
 
 ### 2.1.2 ros2_ocs2
 
-[Installation](https://github.com/Zionshang/ocs2_ros2)
+[Installation](https://github.com/ruihuang1124/ros2_ocs2)
 
 ### 2.1.3 mujoco
 
@@ -49,14 +49,14 @@ sudo make install
 
 1. Clone repository: 
 ```
-mkdir -p mujoco_ocs2_ros2_ws/src
+mkdir -p colcon_ws/src
 cd src
 git clone https://github.com/ruihuang1124/quadruped_control_ros2.git
 ```
 2. Cd in ros workspace and build
 ```
-cd mujoco_ocs2_ros2_ws
-colcon build --packages-up-to cmd_mapping custom_msgs hardware_mujoco keyboard_input leg_pd_controller mujoco_simulator arcdog_description ocs2_quadruped_controller
+cd colcon_ws
+colcon build --packages-up-to cmd_mapping custom_msgs hardware_mujoco keyboard_input leg_pd_controller mujoco_simulator arcdog_description ocs2_quadruped_controller unitree_guide_controller piper_moveit piper_description sirius_description 
 ```
 
 ## 3 Run Example
