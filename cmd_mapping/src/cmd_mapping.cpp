@@ -93,12 +93,12 @@ private:
             break;
         case '=':
         case '+':
-            control_input_cmd_.lx = 0.25;
+            control_input_cmd_.ly = 0.25;
             control_input_cmd_.command = 4;
             break;
         case '-':
         case '_':
-            control_input_cmd_.lx = -0.25;
+            control_input_cmd_.ly = -0.25;
             control_input_cmd_.command = 4;
             break;
         case '1':

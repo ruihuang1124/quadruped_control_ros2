@@ -8,6 +8,7 @@ from launch.event_handlers import OnProcessExit
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch.actions import ExecuteProcess
 
 
 def launch_setup(context, *args, **kwargs):
@@ -79,8 +80,14 @@ def launch_setup(context, *args, **kwargs):
         arguments=["rl_quadruped_controller", "--controller-manager", "/controller_manager"],
     )
 
+    cmd_mapping = Node(
+        package="cmd_mapping",
+        executable="cmd_mapping",
+    )
+
     return [
         rviz,
+        cmd_mapping,
         robot_state_publisher,
         controller_manager,
         joint_state_publisher,
@@ -102,11 +109,22 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     pkg_description = DeclareLaunchArgument(
         'pkg_description',
-        default_value='sirius_description',
+        default_value='go2_description',
         description='package for robot description'
     )
 
     return LaunchDescription([
         pkg_description,
         OpaqueFunction(function=launch_setup),
+        ExecuteProcess(
+            cmd=[
+                "gnome-terminal",
+                "--",
+                "ros2",
+                "run",
+                "keyboard_input",
+                "keyboard_publisher",
+            ],
+            output="screen",
+        ),
     ])
