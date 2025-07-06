@@ -1,11 +1,11 @@
-model_name: "flat_v1.pt"
+model_name: "actor_only.pt"
 framework: "isaacsim"
 rows: 4
 cols: 3
 decimation: 4
 num_observations: 45
 observations: ["commands", "ang_vel", "gravity_vec", "dof_pos", "dof_vel", "actions"]
-observations_history: [5, 4, 3, 2, 1, 0]
+observations_history: [0]
 clip_obs: 100.0
 clip_actions_lower: [-100, -100, -100,
                      -100, -100, -100,
