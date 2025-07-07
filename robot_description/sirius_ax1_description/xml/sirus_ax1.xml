@@ -1,0 +1,208 @@
+<mujoco model="sirius_ax1">
+  <compiler angle="radian" meshdir="../assets/"/>
+
+  <asset>
+    <mesh name="base_link" file="base_link.obj"/>
+    <mesh name="difference_fr" file="difference_fr.obj"/>
+    <mesh name="thigh_fr" file="thigh_fr.obj"/>
+    <mesh name="shank_fr" file="shank_fr.obj"/>
+    <mesh name="difference_br" file="difference_br.obj"/>
+    <mesh name="thigh_br" file="thigh_br.obj"/>
+    <mesh name="shank_br" file="shank_br.obj"/>
+    <mesh name="difference_fl" file="difference_fl.obj"/>
+    <mesh name="thigh_fl" file="thigh_fl.obj"/>
+    <mesh name="shank_fl" file="shank_fl.obj"/>
+    <mesh name="difference_bl" file="difference_bl.obj"/>
+    <mesh name="thigh_bl" file="thigh_bl.obj"/>
+    <mesh name="shank_bl" file="shank_bl.obj"/>
+    <mesh name="arm_link1" file="arm_link1.obj"/>
+    <mesh name="arm_link2" file="arm_link2.obj"/>
+    <mesh name="arm_link3" file="arm_link3.obj"/>
+    <mesh name="arm_link4" file="arm_link4.obj"/>
+    <mesh name="arm_link5" file="arm_link5.obj"/>
+    <mesh name="arm_link6" file="arm_link6.obj"/>
+    <mesh name="gripper_link" file="gripper_link.obj"/>
+    <mesh name="gripper_finger_link1" file="gripper_finger_link1.obj"/>
+    <mesh name="gripper_finger_link2" file="gripper_finger_link2.obj"/>
+  </asset>
+
+  <default>
+    <default class="robot">
+      <geom friction="0.6" margin="0.001" condim="1" group="3"/>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+      </default>
+      <default class="collision">
+        <geom type="capsule"/>
+        <default class="ffoot">
+          <geom type="sphere" size="0.03" pos="-0.07 0 -0.252" priority="1" solimp="0.015 1 0.02" condim="6"
+            friction="1.0 0.02 0.01"/>
+        </default>
+        <default class="hfoot">
+          <geom type="sphere" size="0.03" pos="0.07 0 -0.252" priority="1" solimp="0.015 1 0.02" condim="6"
+            friction="1.0 0.02 0.01"/>
+        </default>
+      </default>
+    </default>
+  </default>
+
+  <worldbody>
+  <body name="trunk" pos="0 0 0.52" childclass="robot">
+    <freejoint/>
+    <inertial pos="0.0446334 0.0002693 -0.0071156" mass="12.149" diaginertia="0.048576 0.75312 0.75287"/>
+    <geom size="0.241 0.106 0.056" type="box" rgba="0.69804 0.69804 0.69804 1" class='collision'/>
+    <geom pos="0 0 0.01" quat="1 0 0 0" rgba="0.807843 0.843137 0.905882 1" mesh="base_link" class="visual" />
+    <body name="difference_fr" pos="0.31 0.05 0">
+      <inertial pos="2.76256e-07 0.00678503 -7.2895e-05" quat="0.00507876 0.707089 0.00504962 0.707089" mass="1.83992" diaginertia="0.002488 0.00218033 0.00159669"/>
+      <joint name="LF_HAA" pos="0 0 0" axis="1 0 0" range="-0.785398 0.785398" actuatorfrcrange="-35 35"/>
+      <geom type="mesh"  density="0" rgba="0.698039 0.698039 0.698039 1" mesh="difference_fr" class = 'visual'/>
+      <body name="thigh_fr" pos="0 0.0415 0">
+        <inertial pos="7.8005e-06 0.0767249 -0.0853108" quat="0.997528 0.0688902 0.00138607 -0.0137933" mass="1.84492" diaginertia="0.0200734 0.019769 0.00221108"/>
+        <joint name="LF_HFE" pos="0 0 0" axis="0 1 0" range="-1.57 1.57" actuatorfrcrange="-35 35"/>
+        <geom type="mesh"  density="0" rgba="0.698039 0.698039 0.698039 1" mesh="thigh_fr" class = 'visual'/>
+        <geom size="0.025 0.02 0.14" pos="0 0.093 -0.135" type="box" rgba="0.698039 0.698039 0.698039 1" class='collision'/>
+        <body name="shank_fr" pos="0 0.0931 -0.270123">
+          <inertial pos="-0.041592 -8.92773e-06 -0.12216" quat="0.702889 0.0773604 0.0774288 0.702828" mass="0.523946" diaginertia="0.011804 0.0116286 0.00410657"/>
+          <joint name="LF_KFE" pos="0 0 0" axis="0 1 0" range="-3.15159 1.17453" actuatorfrcrange="-45 45"/>
+          <geom type="mesh"  density="0" rgba="0.698039 0.698039 0.698039 1" mesh="shank_fr" class = 'visual'/>
+          <geom size="0.016 0.125" pos="-0.055 0 -0.12" type="cylinder" rgba="0.698039 0.698039 0.698039 1" class='collision'/>
+          <geom class='ffoot'/>
+        </body>
+      </body>
+    </body>
+    <body name="difference_br" pos="-0.31 0.05 0">
+      <inertial pos="2.76256e-07 0.00678503 -7.2895e-05" quat="0.00507876 0.707089 0.00504962 0.707089" mass="1.83992" diaginertia="0.002488 0.00218033 0.00159669"/>
+      <joint name="LH_HAA" pos="0 0 0" axis="1 0 0" range="-0.785398 0.785398" actuatorfrcrange="-35 35"/>
+      <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="difference_br"/>
+      <body name="thigh_br" pos="0 0.0415 0">
+        <inertial pos="7.8005e-06 0.0767249 -0.0853108" quat="0.997528 0.0688902 0.00138607 -0.0137933" mass="1.84492" diaginertia="0.0200734 0.019769 0.00221108"/>
+        <joint name="LH_HFE" pos="0 0 0" axis="0 1 0" range="-1.57 1.57" actuatorfrcrange="-35 35"/>
+        <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="thigh_br"/>
+        <geom size="0.025 0.02 0.14" pos="0 0.093 -0.135" type="box" rgba="0.698039 0.698039 0.698039 1"/>
+        <body name="shank_br" pos="0 0.0931 -0.270123">
+          <inertial pos="0.041592 8.92773e-06 -0.12216" quat="0.702889 -0.0773604 -0.0774288 0.702828" mass="0.523946" diaginertia="0.011804 0.0116286 0.00410657"/>
+          <joint name="LH_KFE" pos="0 0 0" axis="0 1 0" range="-1.17453 3.15159" actuatorfrcrange="-45 45"/>
+          <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="shank_br"/>
+          <geom size="0.016 0.125" pos="0.055 0 -0.12" type="cylinder" rgba="0.698039 0.698039 0.698039 1" />
+          <geom class='hfoot'/>
+        </body>
+      </body>
+    </body>
+    <body name="difference_fl" pos="0.31 -0.05 0">
+      <inertial pos="-2.74871e-07 -0.00678503 -7.28955e-05" quat="-0.00504962 0.707089 -0.00507879 0.707089" mass="1.83992" diaginertia="0.002488 0.00218033 0.00159669"/>
+      <joint name="RF_HAA" pos="0 0 0" axis="1 0 0" range="-0.785398 0.785398" actuatorfrcrange="-35 35"/>
+      <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="difference_fl"/>
+      <body name="thigh_fl" pos="0 -0.0415 0">
+        <inertial pos="-7.79362e-06 -0.0767249 -0.0853108" quat="0.997528 -0.0688902 -0.001386 -0.0137925" mass="1.84492" diaginertia="0.0200734 0.019769 0.00221108"/>
+        <joint name="RF_HFE" pos="0 0 0" axis="0 1 0" range="-1.57 1.57" actuatorfrcrange="-35 35"/>
+        <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="thigh_fl"/>
+        <geom size="0.025 0.02 0.14" pos="0 -0.093 -0.135" type="box" rgba="0.698039 0.698039 0.698039 1"/>
+        <body name="shank_fl" pos="0 -0.0931 -0.270123">
+          <inertial pos="-0.041592 -8.92773e-06 -0.12216" quat="0.702889 0.0773604 0.0774288 0.702828" mass="0.523946" diaginertia="0.011804 0.0116286 0.00410657"/>
+          <joint name="RF_KFE" pos="0 0 0" axis="0 1 0" range="-3.15159 1.17453" actuatorfrcrange="-45 45"/>
+          <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="shank_fl"/>
+          <geom size="0.016 0.125" pos="-0.055 0 -0.12" type="cylinder" rgba="0.698039 0.698039 0.698039 1"/>
+          <geom class='ffoot'/>
+        </body>
+      </body>
+    </body>
+    <body name="difference_bl" pos="-0.31 -0.05 0">
+      <inertial pos="2.76256e-07 0.00678503 -7.2895e-05" quat="0.00507876 0.707089 0.00504962 0.707089" mass="1.83992" diaginertia="0.002488 0.00218033 0.00159669"/>
+      <joint name="RH_HAA" pos="0 0 0" axis="1 0 0" range="-0.785398 0.785398" actuatorfrcrange="-35 35"/>
+      <geom type="mesh" class='visual' density="0" rgba="1 1 1 1" mesh="difference_bl"/>
+      <body name="thigh_bl" pos="0 -0.0415 0">
+        <inertial pos="-7.79362e-06 -0.0767249 -0.0853108" quat="0.997528 -0.0688902 -0.001386 -0.0137925" mass="1.84492" diaginertia="0.0200734 0.019769 0.00221108"/>
+        <joint name="RH_HFE" pos="0 0 0" axis="0 1 0" range="-1.57 1.57" actuatorfrcrange="-35 35"/>
+        <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="thigh_bl"/>
+        <geom size="0.025 0.02 0.14" pos="0 -0.093 -0.135" type="box" rgba="0.698039 0.698039 0.698039 1"/>
+        <body name="shank_bl" pos="0 -0.0931 -0.270123">
+          <inertial pos="0.041592 8.92773e-06 -0.12216" quat="0.702889 -0.0773604 -0.0774288 0.702828" mass="0.523946" diaginertia="0.011804 0.0116286 0.00410657"/>
+          <joint name="RH_KFE" pos="0 0 0" axis="0 1 0" range="-1.17453 3.15159" actuatorfrcrange="-45 45"/>
+          <geom type="mesh" class='visual' density="0" rgba="0.698039 0.698039 0.698039 1" mesh="shank_bl"/>
+          <geom size="0.016 0.125" pos="0.055 0 -0.12" type="cylinder" rgba="0.698039 0.698039 0.698039 1"/>
+          <geom class='hfoot'/>
+        </body>
+      </body>
+    </body>
+    <body name="arm_link1" pos="0 0 0.09605">
+      <inertial pos="3.42079e-07 -0.00198629 0.0468866" quat="0.707103 -0.000485371 -0.000615255 0.70711" mass="0.839" diaginertia="0.000269809 0.000224145 0.000218727"/>
+      <joint name="arm_joint1" pos="0 0 0" axis="0 0 1" range="-2.8798 2.8798" actuatorfrcrange="-27 27"/>
+      <geom type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link1"/>
+      <geom type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link1"/>
+      <body name="arm_link2" pos="0 0.03075 0.04925">
+        <inertial pos="-0.122675 -0.0295384 0.0036503" quat="0.00844531 0.708266 0.0150147 0.705736" mass="1.09" diaginertia="0.00278019 0.00274654 0.000388008"/>
+        <joint name="arm_joint2" pos="0 0 0" axis="0 1 0" range="0 3.1416" actuatorfrcrange="-50 50"/>
+        <geom type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link2"/>
+        <geom type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link2"/>
+        <body name="arm_link3" pos="-0.3 0.00025004 0">
+          <inertial pos="0.0566625 -0.0291316 0.0568019" quat="0.6282 0.37327 0.426082 0.533375" mass="0.739" diaginertia="0.000673173 0.000598929 0.00020721"/>
+          <joint name="arm_joint3" pos="0 0 0" axis="0 1 0" range="-3.3161 0" actuatorfrcrange="-27 27"/>
+          <geom type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link3"/>
+          <geom type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link3"/>
+          <body name="arm_link4" pos="0.1747 0.00049739 0.075485">
+            <inertial pos="0.069984 -0.0287505 0.0541968" quat="0.359527 0.606925 0.362734 0.608938" mass="0.419" diaginertia="6.83544e-05 6.65029e-05 6.62006e-05"/>
+            <joint name="arm_joint4" pos="0 0 0" axis="0 1 0" range="-1.5708 1.5708" actuatorfrcrange="-14 14"/>
+            <geom type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link4"/>
+            <geom type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link4"/>
+            <body name="arm_link5" pos="0.08 -0.031498 0.0405">
+              <inertial pos="-0.000803199 -2.29029e-07 -0.0402656" quat="1 -2.27182e-05 0 0" mass="0.054" diaginertia="5.80421e-05 5.76398e-05 5.68558e-05"/>
+              <joint name="arm_joint5" pos="0 0 0" axis="0 0 1" range="-1.5708 1.5708" actuatorfrcrange="-14 14"/>
+              <geom type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link5"/>
+              <geom type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link5"/>
+              <body name="arm_link6" pos="0.022503 0 -0.0405">
+                <inertial pos="0.0514439 1.06538e-08 -1.6853e-06" quat="0.00218832 0.706975 0.00218622 0.707231" mass="0.675393" diaginertia="0.000332634 0.000265735 0.000185491"/>
+                <joint name="arm_joint6" pos="0 0 0" axis="1 0 0" range="-2.8798 2.8798" actuatorfrcrange="-14 14"/>
+                <geom type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link6"/>
+                <geom type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="arm_link6"/>
+                <geom pos="0.08165 0 0" quat="1 0 0 0" type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="gripper_link"/>
+                <geom pos="0.08165 0 0" quat="1 0 0 0" type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="gripper_link"/>
+                <geom pos="0.11854 0.013453 0.00012059" quat="1 0 0 0" type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="gripper_finger_link1"/>
+                <geom pos="0.11854 0.013453 0.00012059" quat="1 0 0 0" type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="gripper_finger_link1"/>
+                <geom pos="0.11854 -0.013453 -0.00012059" quat="1 0 0 0" type="mesh" class='visual' density="0" rgba="0.807843 0.843137 0.905882 1" mesh="gripper_finger_link2"/>
+                <geom pos="0.11854 -0.013453 -0.00012059" quat="1 0 0 0" type="mesh" rgba="0.807843 0.843137 0.905882 1" mesh="gripper_finger_link2"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </body>
+  </worldbody>
+
+  <actuator>
+    <position name="LF_HAA" joint="LF_HAA" kp="100" kv="1.0" ctrlrange="-0.785398 0.785398" forcerange="-350 350"/>
+    <position name="LF_HFE" joint="LF_HFE" kp="100" kv="1.0" ctrlrange="-1.57 1.57" forcerange="-350 350"/>
+    <position name="LF_KFE" joint="LF_KFE" kp="100" kv="1.0" ctrlrange="-3.15159 1.173503" forcerange="-350 350"/>
+    <position name="LH_HAA" joint="LH_HAA" kp="100" kv="1.0" ctrlrange="-0.785398 0.785398" forcerange="-350 350"/>
+    <position name="LH_HFE" joint="LH_HFE" kp="100" kv="1.0" ctrlrange="-1.57 1.57" forcerange="-350 350"/>
+    <position name="LH_KFE" joint="LH_KFE" kp="100" kv="1.0" ctrlrange="-1.173503 3.15159" forcerange="-350 350"/>
+    <position name="RF_HAA" joint="RF_HAA" kp="100" kv="1.0" ctrlrange="-0.785398 0.785398" forcerange="-350 350"/>
+    <position name="RF_HFE" joint="RF_HFE" kp="100" kv="1.0" ctrlrange="-1.57 1.57" forcerange="-350 350"/>
+    <position name="RF_KFE" joint="RF_KFE" kp="100" kv="1.0" ctrlrange="-3.15159 1.173503" forcerange="-350 350"/>
+    <position name="RH_HAA" joint="RH_HAA" kp="100" kv="1.0" ctrlrange="-0.785398 0.785398" forcerange="-350 350"/>
+    <position name="RH_HFE" joint="RH_HFE" kp="100" kv="1.0" ctrlrange="-1.57 1.57" forcerange="-350 350"/>
+    <position name="RH_KFE" joint="RH_KFE" kp="100" kv="1.0" ctrlrange="-1.173503 3.15159" forcerange="-350 350"/>
+    <position name="arm_joint1" joint="arm_joint1" kp="10" kv="0.1" ctrlrange="-2.8798 2.8798" forcerange="-27 27"/>
+    <position name="arm_joint2" joint="arm_joint2" kp="100" kv="1.0" ctrlrange="0 3.1416" forcerange="-50 50"/>
+    <position name="arm_joint3" joint="arm_joint3" kp="50" kv="0.5" ctrlrange="-3.3161 0" forcerange="-27 27"/>
+    <position name="arm_joint4" joint="arm_joint4" kp="50" kv="0.5" ctrlrange="-1.5708 1.5708" forcerange="-14 14"/>
+    <position name="arm_joint5" joint="arm_joint5" kp="10" kv="0.1" ctrlrange="-1.5708 1.5708" forcerange="-14 14"/>
+    <position name="arm_joint6" joint="arm_joint6" kp="10" kv="0.1" ctrlrange="-2.8798 2.8798" forcerange="-14 14"/>
+    <!-- <position name="gripper_finger1" joint="arm_joint6" kp="1000" ctrlrange="-0.5 0.5" forcerange="-14 14"/>
+    <position name="gripper_finger2" joint="arm_joint6" kp="1000" ctrlrange="-0.5 0.5" forcerange="-14 14"/> -->
+  </actuator>
+  <keyframe>
+    <key name="home" 
+    qpos="0.0 0.0 0.42 1.0 0.0 0.0 0.0 
+          0.1 0.8  -1.6  
+          0.1 -0.8  1.6  
+          0.1 0.8  -1.6  
+          0.1 -0.8  1.6  
+          0.00  0.59 -0.23 -0.36  0.00  0.00"     
+ ctrl="0.1 0.8  -1.6  
+          0.1 -0.8  1.6  
+          0.1 0.8  -1.6  
+          0.1 -0.8  1.6  
+          0.00  0.59 -0.23 -0.36  0.00  0.00"    />
+  </keyframe>
+</mujoco>
