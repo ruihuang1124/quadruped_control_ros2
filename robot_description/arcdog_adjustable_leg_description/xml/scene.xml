@@ -1,5 +1,5 @@
 <mujoco model="arcdog scene">
-  <include file="arcdog.xml"/>
+  <include file="arcdog_adjustable_leg.xml"/>
 
   <statistic center="0 0 0.1" extent="0.8"/>
 
