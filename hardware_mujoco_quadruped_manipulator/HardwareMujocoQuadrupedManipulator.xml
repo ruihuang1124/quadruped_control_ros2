@@ -1,0 +1,9 @@
+<library path="hardware_mujoco_quadruped_manipulator">
+  <class name="hardware_mujoco_quadruped_manipulator/HardwareMujocoQuadrupedManipulator"
+         type="HardwareMujocoQuadrupedManipulator"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for mujoco piper.
+    </description>
+  </class>
+</library>

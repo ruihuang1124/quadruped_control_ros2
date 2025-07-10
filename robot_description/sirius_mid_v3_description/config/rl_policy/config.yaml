@@ -1,4 +1,4 @@
-model_name: "actor_only.pt"
+model_name: "policy.pt"
 framework: "isaacsim"
 rows: 4
 cols: 3

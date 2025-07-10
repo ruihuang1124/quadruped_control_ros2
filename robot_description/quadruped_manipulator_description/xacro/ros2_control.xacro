@@ -4,7 +4,7 @@
 	<ros2_control name="ArcdogSystem" type="system">
 
 		<hardware>
-			<plugin>hardware_mujoco/HardwareMujoco</plugin>
+			<plugin>hardware_mujoco_quadruped_manipulator/HardwareMujocoQuadrupedManipulator</plugin>
 		</hardware>
 
 		<joint name="FR_hip_joint">
@@ -150,6 +150,102 @@
 			<state_interface name="velocity"/>
 			<state_interface name="effort"/>
 		</joint>
+
+        <joint name="joint1">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint2">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint3">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint4">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint5">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint6">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint7">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+        <joint name="joint8">
+			<command_interface name="position"/>
+			<command_interface name="velocity"/>
+			<command_interface name="effort"/>
+			<command_interface name="kp"/>
+			<command_interface name="kd"/>
+
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
 
 		<sensor name="imu_sensor">
 			<state_interface name="orientation.w"/>
