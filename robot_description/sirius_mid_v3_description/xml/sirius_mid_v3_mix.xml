@@ -1,4 +1,4 @@
-<mujoco model="sirius_ax1">
+<mujoco model="sirius_mid_v3_mix">
     <compiler angle="radian" meshdir="../assets/"/>
 
     <asset>

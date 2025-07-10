@@ -1,5 +1,5 @@
-<mujoco model="arcdog scene">
-  <include file="arcdog.xml"/>
+<mujoco model="sirius_piper scene">
+  <include file="sirius_piper.xml"/>
 
   <statistic center="0 0 0.1" extent="0.8"/>
 

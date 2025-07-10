@@ -53,20 +53,20 @@
     <!-- joint limits -->
     <xacro:property name="damping" value="0.05"/>
     <xacro:property name="friction" value="0.01"/>
-    <xacro:property name="hip_max" value="0.8028514559173915"/>
-    <xacro:property name="hip_min" value="-0.8028514559173915"/>
-    <xacro:property name="hip_velocity_max" value="21"/>
-    <xacro:property name="hip_torque_max" value="45.0"/>
-    <xacro:property name="thigh_max" value="4.1887902047863905"/>
-    <xacro:property name="thigh_min" value="-4.1887902047863905"/>
-    <xacro:property name="thigh_velocity_max" value="21"/>
-    <xacro:property name="thigh_torque_max" value="45.0"/>
-    <xacro:property name="calf_max_f" value="-0.9162978572970231"/>
-    <xacro:property name="calf_min_f" value="-2.6965336943312392"/>
-    <xacro:property name="calf_min_r" value="0.9162978572970231"/>
-    <xacro:property name="calf_max_r" value="2.6965336943312392"/>
-    <xacro:property name="calf_velocity_max" value="21"/>
-    <xacro:property name="calf_torque_max" value="80"/>
+    <xacro:property name="hip_max" value="0.7853981633974483"/>
+    <xacro:property name="hip_min" value="-0.7853981633974483"/>
+    <xacro:property name="hip_velocity_max" value="45"/>
+    <xacro:property name="hip_torque_max" value="35.0"/>
+    <xacro:property name="thigh_max" value="1.57"/>
+    <xacro:property name="thigh_min" value="-1.57"/>
+    <xacro:property name="thigh_velocity_max" value="45"/>
+    <xacro:property name="thigh_torque_max" value="35.0"/>
+    <xacro:property name="calf_max_f" value="1.17453292519943295"/>
+    <xacro:property name="calf_min_f" value="-3.141592653589793"/>
+    <xacro:property name="calf_min_r" value="-1.17453292519943295"/>
+    <xacro:property name="calf_max_r" value="3.141592653589793"/>
+    <xacro:property name="calf_velocity_max" value="45"/>
+    <xacro:property name="calf_torque_max" value="45"/>
 
     <!-- dynamics inertial value    total 22.0kg-->
     <!-- trunk -->

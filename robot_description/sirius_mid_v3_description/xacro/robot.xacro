@@ -61,7 +61,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="file://$(find sirius_mid_v3_description)/meshes/base_link.STL" scale="1 1 1"/>
+				<mesh filename="package://sirius_mid_v3_description/meshes/base_link.STL" scale="1 1 1"/>
 			</geometry>
 			<!-- <material name="orange"/> -->
 		</visual>

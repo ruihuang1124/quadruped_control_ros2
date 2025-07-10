@@ -1,32 +1,20 @@
 <?xml version="1.0"?>
-<robot name="arcdog_with_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
-
-    <!-- 1. 定义arcdog需要的参数（与arcdog文件中的参数一致） -->
+<robot name="sirius_piper" xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:arg name="DEBUG" default="false"/>
     <xacro:arg name="GAZEBO" default="false"/>
     <xacro:arg name="CLASSIC" default="false"/>
     <xacro:arg name="robot_type" default="arcdog"/>
     <xacro:arg name="simulator" default="test"/>
 
-    <!-- 2. 包含arcdog的xacro文件 -->
-    <!-- 注意：这里直接包含原始arcdog文件，它会使用上面定义的参数 -->
-    <xacro:include filename="$(find arcdog_description)/xacro/arcdog.xacro" />
+    <xacro:include filename="$(find sirius_mid_v3_description)/xacro/sirius_mid_v3.xacro" />
 
-    <!-- 3. 包含机械臂描述文件 -->
     <xacro:include filename="$(find piper_description)/urdf/piper_arm.xacro"/>
 
-<!--    &lt;!&ndash; 4. 实例化机械臂（添加前缀） &ndash;&gt;-->
-<!--    <xacro:piper_arm prefix="arm_"/>-->
-
-    <!-- 5. 创建连接关节（安装在躯干上） -->
     <joint name="arm_mount_joint" type="fixed">
         <parent link="trunk"/>
         <child link="base_link"/>
-        <!-- 安装位姿：躯干中心前方0.2m，高度0.15m -->
-        <origin xyz="0.10 0 0.05" rpy="0 0 0"/>
+        <origin xyz="0.10 0 0.065" rpy="0 0 0"/>
     </joint>
-
-    <!-- 6. Gazebo插件集成（如果GAZEBO参数为true） -->
     <xacro:if value="$(arg GAZEBO)">
         <gazebo>
             <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
@@ -35,4 +23,8 @@
             </plugin>
         </gazebo>
     </xacro:if>
+
+    <xacro:unless value="$(arg GAZEBO)">
+    	<xacro:include filename="$(find quadruped_manipulator_description)/xacro/ros2_control.xacro"/>
+    </xacro:unless>
 </robot>
