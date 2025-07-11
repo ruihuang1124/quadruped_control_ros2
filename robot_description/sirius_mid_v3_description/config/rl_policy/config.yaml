@@ -1,4 +1,4 @@
-model_name: "policy.pt"
+model_name: "policy_old.pt"
 framework: "isaacsim"
 rows: 4
 cols: 3
