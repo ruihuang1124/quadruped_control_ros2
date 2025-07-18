@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="arcdog" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sirius" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 	<xacro:arg name="DEBUG" default="false"/>
 	<xacro:arg name="GAZEBO" default="false"/>
@@ -10,20 +10,20 @@
 	<xacro:arg name="simulator" default="test"/>
     <xacro:property name="simulator" value="$(arg simulator)"/>
 
-	<xacro:include filename="$(find arcdog_description)/xacro/const.xacro"/>
-	<xacro:include filename="$(find arcdog_description)/xacro/materials.xacro"/>
-	<xacro:include filename="$(find arcdog_description)/xacro/leg.xacro"/>
+	<xacro:include filename="$(find sirius_description)/xacro/const.xacro"/>
+	<xacro:include filename="$(find sirius_description)/xacro/materials.xacro"/>
+	<xacro:include filename="$(find sirius_description)/xacro/leg.xacro"/>
 
 	<xacro:if value="$(arg GAZEBO)">
 		<xacro:if value="$(arg CLASSIC)">
-			<xacro:include filename="$(find arcdog_description)/xacro/gazebo_classic.xacro"/>
+			<xacro:include filename="$(find sirius_description)/xacro/gazebo_classic.xacro"/>
 		</xacro:if>
 		<xacro:unless value="$(arg CLASSIC)">
-			<xacro:include filename="$(find arcdog_description)/xacro/gazebo.xacro"/>
+			<xacro:include filename="$(find sirius_description)/xacro/gazebo.xacro"/>
 		</xacro:unless>
 	</xacro:if>
 	<xacro:unless value="$(arg GAZEBO)">
-		<xacro:include filename="$(find arcdog_description)/xacro/ros2_control_real_robot.xacro"/>
+		<xacro:include filename="$(find sirius_description)/xacro/ros2_control_real_robot.xacro"/>
 	</xacro:unless>
 
 
@@ -61,7 +61,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="file://$(find arcdog_description)/meshes/trunk.dae" scale="1 1 1"/>
+				<mesh filename="file://$(find sirius_description)/meshes/base_link.dae" scale="1 1 1"/>
 			</geometry>
 			<!-- <material name="orange"/> -->
 		</visual>

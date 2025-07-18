@@ -1,0 +1,9 @@
+<library path="hardware_sirius">
+  <class name="hardware_sirius/HardwareSirius"
+         type="HardwareSirius"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for sirius robot.
+    </description>
+  </class>
+</library>
