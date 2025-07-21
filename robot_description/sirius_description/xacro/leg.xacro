@@ -8,55 +8,27 @@
 
         <xacro:if value="${simulator == 'ocs2'}">
             <joint name="${prefix}_HAA" type="revolute">
-                <origin rpy="0 0 0" xyz="${hip_offset_x*front_hind} ${hip_offset_y*mirror} 0"/>
+                <!--            insert start block from parent file-->
+                <xacro:insert_block name="origin"/>
                 <parent link="trunk"/>
                 <child link="${prefix}_hip"/>
                 <axis xyz="1 0 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
-                <xacro:if value="${(mirror_dae == True)}">
-                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_min}"
-                        upper="${hip_max}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False)}">
-                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${-hip_max}"
-                        upper="${-hip_min}"/>
-                </xacro:if>
+                <limit effort="${abad_torque_max}" velocity="${abad_velocity_max}" lower="${abad_position_min}"
+                       upper="${abad_position_max}"/>
             </joint>
         </xacro:if>
 
-        <xacro:if value="${simulator == 'test'}">
+        <xacro:if value="${simulator == 'arclab_rl'}">
             <joint name="${prefix}_hip_joint" type="revolute">
-                <origin rpy="0 0 0" xyz="${hip_offset_x*front_hind} ${hip_offset_y*mirror} 0"/>
+                <!--            insert start block from parent file-->
+                <xacro:insert_block name="origin"/>
                 <parent link="trunk"/>
                 <child link="${prefix}_hip"/>
                 <axis xyz="1 0 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
-                <xacro:if value="${(mirror_dae == True)}">
-                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_min}"
-                        upper="${hip_max}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False)}">
-                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${-hip_max}"
-                        upper="${-hip_min}"/>
-                </xacro:if>
-            </joint>
-        </xacro:if>
-
-        <xacro:if value="${simulator == 'mujoco'}">
-            <joint name="${prefix}_hip_joint" type="revolute">
-                <origin rpy="0 0 0" xyz="${hip_offset_x*front_hind} ${hip_offset_y*mirror} 0"/>
-                <parent link="trunk"/>
-                <child link="${prefix}_hip"/>
-                <axis xyz="1 0 0"/>
-                <dynamics damping="${damping}" friction="${friction}"/>
-                <xacro:if value="${(mirror_dae == True)}">
-                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_min}"
-                        upper="${hip_max}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False)}">
-                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${-hip_max}"
-                        upper="${-hip_min}"/>
-                </xacro:if>
+                <limit effort="${abad_torque_max}" velocity="${abad_velocity_max}" lower="${abad_position_min}"
+                       upper="${abad_position_max}"/>
             </joint>
         </xacro:if>
 
@@ -93,55 +65,45 @@
                 <material name="orange"/>
             </visual>
             <collision>
-                <origin rpy="${pi/2.0} 0 0" xyz="0 0 0"/>
+                <origin rpy="${pi/2} 0 0" xyz="${abad_origin_x*front_hind} ${abad_origin_y*mirror} 0"/>
                 <geometry>
-                    <cylinder length="${hip_length}" radius="${hip_radius}"/>
+                    <cylinder length="${abad_length}" radius="${abad_radius}"/>
                 </geometry>
             </collision>
             <inertial>
-                <origin rpy="0 0 0" xyz="${hip_com_x*front_hind} ${hip_com_y*mirror} ${hip_com_z}"/>
-                <mass value="${hip_mass}"/>
+                <origin rpy="0 0 0"
+                        xyz="${abad_com_x*front_hind} ${abad_com_y*mirror} ${abad_com_z}"/>
+                <mass value="${abad_mass}"/>
                 <inertia
-                        ixx="${hip_ixx}" ixy="${hip_ixy*mirror*front_hind}" ixz="${hip_ixz*front_hind}"
-                        iyy="${hip_iyy}" iyz="${hip_iyz*mirror}"
-                        izz="${hip_izz}"/>
+                        ixx="${abad_ixx}" ixy="${abad_ixy*front_hind*mirror}"
+                        ixz="${abad_ixz*front_hind}"
+                        iyy="${abad_iyy}" iyz="${abad_iyz*mirror}"
+                        izz="${abad_izz}"/>
             </inertial>
         </link>
 
 
         <xacro:if value="${simulator == 'ocs2'}">
             <joint name="${prefix}_HFE" type="revolute">
-                <origin rpy="0 0 0" xyz="0 ${thigh_offset*mirror} 0"/>
+                <origin rpy="0 0 0" xyz="${hip_origin_x*front_hind} ${hip_origin_y*mirror} 0"/>
                 <parent link="${prefix}_hip"/>
                 <child link="${prefix}_thigh"/>
                 <axis xyz="0 1 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
-                <limit effort="${thigh_torque_max}" velocity="${thigh_velocity_max}" lower="${thigh_min}"
-                    upper="${thigh_max}"/>
+                <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_position_min}"
+                       upper="${hip_position_max}"/>
             </joint>
         </xacro:if>
 
-        <xacro:if value="${simulator == 'test'}">
+        <xacro:if value="${simulator == 'arclab_rl'}">
             <joint name="${prefix}_thigh_joint" type="revolute">
-                <origin rpy="0 0 0" xyz="0 ${thigh_offset*mirror} 0"/>
+                <origin rpy="0 0 0" xyz="${hip_origin_x*front_hind} ${hip_origin_y*mirror} 0"/>
                 <parent link="${prefix}_hip"/>
                 <child link="${prefix}_thigh"/>
                 <axis xyz="0 1 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
-                <limit effort="${thigh_torque_max}" velocity="${thigh_velocity_max}" lower="${thigh_min}"
-                    upper="${thigh_max}"/>
-            </joint>
-        </xacro:if>
-
-        <xacro:if value="${simulator == 'mujoco'}">
-            <joint name="${prefix}_thigh_joint" type="revolute">
-                <origin rpy="0 0 0" xyz="0 ${thigh_offset*mirror} 0"/>
-                <parent link="${prefix}_hip"/>
-                <child link="${prefix}_thigh"/>
-                <axis xyz="0 1 0"/>
-                <dynamics damping="${damping}" friction="${friction}"/>
-                <limit effort="${thigh_torque_max}" velocity="${thigh_velocity_max}" lower="${thigh_min}"
-                    upper="${thigh_max}"/>
+                <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_position_min}"
+                       upper="${hip_position_max}"/>
             </joint>
         </xacro:if>
 
@@ -178,89 +140,70 @@
                 <material name="orange"/>
             </visual>
             <collision>
-                <origin rpy="0 ${pi/2.0+0.1} 0" xyz="${thigh_x_offset} 0 ${-thigh_length/2.0}"/>
+                <origin rpy="${pi/2} 0 0"
+                        xyz="0 0 0"/>
                 <geometry>
-                    <box size="${thigh_length} ${thigh_width} ${thigh_height}"/>
+                    <cylinder length="${hip_shoulder_length}" radius="${hip_shoulder_radius}"/>
                 </geometry>
             </collision>
             <collision>
-                <origin rpy="${pi/2.0} 0 0" xyz="0 ${mirror*thigh_shoulder_y_offset} 0"/>
+                <origin rpy="${pi/2} 0 0"
+                        xyz="0 ${hip_shoulder2_y_offset*mirror} 0"/>
                 <geometry>
-                    <cylinder length="${thigh_shoulder_length}" radius="${thigh_shoulder_radius}"/>
+                    <cylinder length="${hip_shoulder2_length}" radius="${hip_shoulder2_radius}"/>
+                </geometry>
+            </collision>
+            <collision>
+                <origin rpy="0 ${(90)/180*pi} 0"
+                        xyz="${hip_x_offset} 0 ${hip_z_offset}"/>
+                <geometry>
+                    <box size="${hip_length} ${hip_width} ${hip_height}"/>
                 </geometry>
             </collision>
             <inertial>
-                <origin rpy="0 0 0" xyz="${thigh_com_x} ${thigh_com_y*mirror} ${thigh_com_z}"/>
-                <mass value="${thigh_mass}"/>
+                <origin rpy="0 0 0" xyz="${hip_com_x*front_hind} ${hip_com_y*mirror} ${hip_com_z}"/>
+                <mass value="${hip_mass}"/>
                 <inertia
-                        ixx="${thigh_ixx}" ixy="${thigh_ixy*mirror}" ixz="${thigh_ixz}"
-                        iyy="${thigh_iyy}" iyz="${thigh_iyz*mirror}"
-                        izz="${thigh_izz}"/>
+                        ixx="${hip_ixx}" ixy="${hip_ixy*mirror}" ixz="${hip_ixz}"
+                        iyy="${hip_iyy}" iyz="${hip_iyz*mirror}"
+                        izz="${hip_izz}"/>
             </inertial>
         </link>
 
         <xacro:if value="${simulator == 'ocs2'}">
             <joint name="${prefix}_KFE" type="revolute">
-                <origin rpy="0 0 0" xyz="0 0 ${-thigh_length}"/>
+                <origin rpy="0 0 0"
+                        xyz="${knee_origin_x*front_hind} ${knee_origin_y*mirror} ${knee_origin_z}"/>
                 <parent link="${prefix}_thigh"/>
                 <child link="${prefix}_calf"/>
                 <axis xyz="0 1 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
-                <xacro:if value="${(mirror_dae == True) and (front_hind_dae == True)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_f}" upper="${calf_max_f}"/>
+                <xacro:if value="${front_hind == 1}">
+                    <limit effort="${knee_torque_max}" velocity="${knee_velocity_max}" lower="${knee_position_min}"
+                           upper="${knee_position_max}"/>
                 </xacro:if>
-                <xacro:if value="${(mirror_dae == False) and (front_hind_dae == True)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_f}" upper="${calf_max_f}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == True) and (front_hind_dae == False)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_r}" upper="${calf_max_r}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False) and (front_hind_dae == False)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_r}" upper="${calf_max_r}"/>
+                <xacro:if value="${front_hind == -1}">
+                    <limit effort="${knee_torque_max}" velocity="${knee_velocity_max}" lower="${knee_position_max*front_hind}"
+                           upper="${knee_position_min*front_hind}"/>
                 </xacro:if>
             </joint>
         </xacro:if>
 
-        <xacro:if value="${simulator == 'test'}">
+        <xacro:if value="${simulator == 'arclab_rl'}">
             <joint name="${prefix}_calf_joint" type="revolute">
-                <origin rpy="0 0 0" xyz="0 0 ${-thigh_length}"/>
+                <origin rpy="0 0 0"
+                        xyz="${knee_origin_x*front_hind} ${knee_origin_y*mirror} ${knee_origin_z}"/>
                 <parent link="${prefix}_thigh"/>
                 <child link="${prefix}_calf"/>
                 <axis xyz="0 1 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
-                <xacro:if value="${(mirror_dae == True) and (front_hind_dae == True)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_f}" upper="${calf_max_f}"/>
+                <xacro:if value="${front_hind == 1}">
+                    <limit effort="${knee_torque_max}" velocity="${knee_velocity_max}" lower="${knee_position_min}"
+                           upper="${knee_position_max}"/>
                 </xacro:if>
-                <xacro:if value="${(mirror_dae == False) and (front_hind_dae == True)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_f}" upper="${calf_max_f}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == True) and (front_hind_dae == False)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_r}" upper="${calf_max_r}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False) and (front_hind_dae == False)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_r}" upper="${calf_max_r}"/>
-                </xacro:if>
-            </joint>
-        </xacro:if>
-
-        <xacro:if value="${simulator == 'mujoco'}">
-            <joint name="${prefix}_calf_joint" type="revolute">
-                <origin rpy="0 0 0" xyz="0 0 ${-thigh_length}"/>
-                <parent link="${prefix}_thigh"/>
-                <child link="${prefix}_calf"/>
-                <axis xyz="0 1 0"/>
-                <dynamics damping="${damping}" friction="${friction}"/>
-                <xacro:if value="${(mirror_dae == True) and (front_hind_dae == True)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_f}" upper="${calf_max_f}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False) and (front_hind_dae == True)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_f}" upper="${calf_max_f}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == True) and (front_hind_dae == False)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_r}" upper="${calf_max_r}"/>
-                </xacro:if>
-                <xacro:if value="${(mirror_dae == False) and (front_hind_dae == False)}">
-                    <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min_r}" upper="${calf_max_r}"/>
+                <xacro:if value="${front_hind == -1}">
+                    <limit effort="${knee_torque_max}" velocity="${knee_velocity_max}" lower="${knee_position_max*front_hind}"
+                           upper="${knee_position_min*front_hind}"/>
                 </xacro:if>
             </joint>
         </xacro:if>
@@ -328,17 +271,18 @@
                 </xacro:if>
             </collision>
             <inertial>
-                <origin rpy="0 0 0" xyz="${calf_com_x} ${calf_com_y} ${calf_com_z}"/>
-                <mass value="${calf_mass}"/>
+                <origin rpy="0 0 0" xyz="${knee_com_x} ${knee_com_y} ${knee_com_z}"/>
+                <mass value="${knee_mass}"/>
                 <inertia
-                        ixx="${calf_ixx}" ixy="${calf_ixy}" ixz="${calf_ixz}"
-                        iyy="${calf_iyy}" iyz="${calf_iyz}"
-                        izz="${calf_izz}"/>
+                        ixx="${knee_ixx}" ixy="${knee_ixy}" ixz="${knee_ixz}"
+                        iyy="${knee_iyy}" iyz="${knee_iyz}"
+                        izz="${knee_izz}"/>
             </inertial>
         </link>
 
-        <joint name="${prefix}_foot_fixed" type="fixed" dont_collapse="true">
-            <origin rpy="0 0 0" xyz="0 0 ${-(calf_length)}"/>
+        <joint name="${prefix}_foot_fixed" type="fixed">
+                <origin rpy="0 0 0" xyz="0 0 ${-(knee_length)}"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
             <parent link="${prefix}_calf"/>
             <child link="${prefix}_foot"/>
         </joint>
@@ -407,9 +351,9 @@
             <inertial>
                 <mass value="${foot_mass}"/>
                 <inertia
-                        ixx="9.600000000000001e-04" ixy="0.0" ixz="0.0"
-                        iyy="9.600000000000001e-04" iyz="0.0"
-                        izz="9.600000000000001e-04"/>
+                        ixx="${(2*foot_mass)/5.0*(foot_radius*foot_radius)}" ixy="0.0" ixz="0.0"
+                        iyy="${(2*foot_mass)/5.0*(foot_radius*foot_radius)}" iyz="0.0"
+                        izz="${(2*foot_mass)/5.0*(foot_radius*foot_radius)}"/>
             </inertial>
         </link>
 

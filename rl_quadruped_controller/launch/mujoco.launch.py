@@ -109,7 +109,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     pkg_description = DeclareLaunchArgument(
         'pkg_description',
-        default_value='sirius_mid_v3_description', # sirius_description, sirius_mid_v3_description
+        default_value='sirius_description', # sirius_description, sirius_mid_v3_description
         description='package for robot description'
     )
 
