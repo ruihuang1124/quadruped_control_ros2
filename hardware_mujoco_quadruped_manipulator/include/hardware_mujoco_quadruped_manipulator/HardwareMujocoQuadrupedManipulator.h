@@ -25,8 +25,12 @@ public:
     hardware_interface::return_type write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) override;
 
 protected:
+    int dof_manipulator_ = 8;
+    int dof_quadruped_legs = 12;
     void imu_callback(const sensor_msgs::msg::Imu imu_state);
-    void joint_state_callback(const sensor_msgs::msg::JointState joint_state);
+    void manipulator_joint_state_callback(const sensor_msgs::msg::JointState joint_state);
+
+    void quadruped_joint_state_callback(const sensor_msgs::msg::JointState joint_state);
 
     // cmd
     std::unordered_map<std::string, double> joint_position_commands_;
@@ -44,9 +48,10 @@ protected:
     /*node*/
     rclcpp::Node::SharedPtr node_;
     /*publisher*/
-    rclcpp::Publisher<custom_msgs::msg::ActuatorCmds>::SharedPtr actuator_cmd_publisher_;
-    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_cmd_publisher_;
+    rclcpp::Publisher<custom_msgs::msg::ActuatorCmds>::SharedPtr quadruped_actuator_cmd_publisher_;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr manipulator_joint_cmd_publisher_;
     /*subscriber*/
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber_;
-    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
+    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr manipulator_joint_state_subscriber_;
+    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr quadruped_joint_state_subscriber_;
 };

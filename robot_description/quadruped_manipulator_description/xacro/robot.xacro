@@ -3,28 +3,18 @@
     <xacro:arg name="DEBUG" default="false"/>
     <xacro:arg name="GAZEBO" default="false"/>
     <xacro:arg name="CLASSIC" default="false"/>
-    <xacro:arg name="robot_type" default="arcdog"/>
-    <xacro:arg name="simulator" default="test"/>
+    <xacro:arg name="robot_type" default="sirius_type"/>
+    <xacro:property name="robot_type" value="$(arg robot_type)"/>
+	<xacro:arg name="simulator" default="arclab_rl"/>
 
-    <xacro:include filename="$(find sirius_mid_v3_description)/xacro/sirius_mid_v3.xacro" />
+    <xacro:include filename="$(find sirius_description)/xacro/sirius.xacro" />
 
     <xacro:include filename="$(find piper_description)/urdf/piper_arm.xacro"/>
 
     <joint name="arm_mount_joint" type="fixed">
         <parent link="trunk"/>
         <child link="base_link"/>
-        <origin xyz="0.10 0 0.065" rpy="0 0 0"/>
+        <origin xyz="0.2 0 0.085" rpy="0 0 0"/>
     </joint>
-    <xacro:if value="$(arg GAZEBO)">
-        <gazebo>
-            <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-                <robotNamespace>/arcdog_with_arm</robotNamespace>
-                <parameters>$(find your_control_pkg)/config/combined_controllers.yaml</parameters>
-            </plugin>
-        </gazebo>
-    </xacro:if>
-
-    <xacro:unless value="$(arg GAZEBO)">
-    	<xacro:include filename="$(find quadruped_manipulator_description)/xacro/ros2_control.xacro"/>
-    </xacro:unless>
+    <xacro:include filename="$(find quadruped_manipulator_description)/xacro/ros2_control.xacro"/>
 </robot>

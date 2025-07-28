@@ -19,7 +19,10 @@ enum class FSMStateName
     BALANCETEST,
 
     OCS2,
-    RL
+    RL,
+    QMFIXEDDOWN,
+    QMFIXEDSTAND,
+    QMPASSIVE
 };
 
 enum class FSMMode

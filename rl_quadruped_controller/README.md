@@ -36,8 +36,7 @@ colcon build --packages-up-to rl_quadruped_controller
 ## 3. Launch
 
 ### 3.1 Mujoco Simulation
-> **Warm Reminder**: You need to launch [Unitree Mujoco C++ Simulation](https://github.com/legubiao/unitree_mujoco) before launch the controller.
 ```bash
 source ~/ros2_ws/install/setup.bash
-ros2 launch rl_quadruped_controller mujoco.launch.py pkg_description:=_description
+ros2 launch rl_quadruped_controller mujoco.launch.py pkg_description:=your_robot_description_pkg
 ```

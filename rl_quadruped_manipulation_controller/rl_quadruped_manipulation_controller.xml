@@ -1,0 +1,9 @@
+<library path="rl_quadruped_manipulation_controller">
+    <class name="rl_quadruped_manipulation_controller/LeggedManipulationRLController"
+           type="rl_quadruped_manipulation_controller::LeggedManipulationRLController"
+           base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Quadruped Manipulation Controller used RL-model trained in Isaac Lab.
+        </description>
+    </class>
+</library>

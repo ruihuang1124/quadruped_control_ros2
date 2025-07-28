@@ -598,7 +598,7 @@ int main(int argc, char *argv[])
   mjvPerturb pert;
   mjv_defaultPerturb(&pert);
 
-  int robot_type = 0; // 0 for quadruped; 1 for piper; 2 for quadruped with piper
+  int robot_type = 2; // 0 for quadruped; 1 for piper; 2 for quadruped with piper
   if (robot_type == 0){
     // simulate object encapsulates the UI
     auto sim = std::make_unique<mj::Simulate>(

@@ -33,15 +33,19 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
 
     node_ = rclcpp::Node::make_shared("ros2_control_mujoco");
     // subscription
-    joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        "joint_states_single", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoQuadrupedManipulator::joint_state_callback, this, std::placeholders::_1));
+    manipulator_joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+        "joint_states_single", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoQuadrupedManipulator::manipulator_joint_state_callback, this, std::placeholders::_1));
+
+    quadruped_joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+    "joint_states", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoQuadrupedManipulator::quadruped_joint_state_callback, this, std::placeholders::_1));
+
     imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
         "imu_data", rclcpp::SensorDataQoS(), std::bind(&HardwareMujocoQuadrupedManipulator::imu_callback, this, std::placeholders::_1));
 
     // publish
     auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
-    actuator_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::ActuatorCmds>("actuators_cmds", qos);
-    joint_cmd_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_ctrl_single", qos);
+    quadruped_actuator_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::ActuatorCmds>("actuators_cmds", qos);
+    manipulator_joint_cmd_publisher_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_ctrl_single", qos);
 
     return SystemInterface::on_init(info);
 }
@@ -109,20 +113,24 @@ return_type HardwareMujocoQuadrupedManipulator::write(const rclcpp::Time & /*tim
     // TODO: emplace_back or push_back
     custom_msgs::msg::ActuatorCmds actuator_cmds;
     sensor_msgs::msg::JointState joint_cmds;
-    for (size_t i = 0; i < info_.joints.size(); i++)
+
+    for (size_t i = 0; i < dof_quadruped_legs; i++)
     {
-        joint_cmds.name.push_back(info_.joints[i].name);
-        joint_cmds.position.push_back(joint_position_commands_[info_.joints[i].name]);
-        joint_cmds.velocity.push_back(joint_velocity_commands_[info_.joints[i].name]);
-        actuator_cmds.actuators_name.push_back(info_.joints[i].name);
         actuator_cmds.pos.push_back(joint_position_commands_[info_.joints[i].name]);
         actuator_cmds.vel.push_back(joint_velocity_commands_[info_.joints[i].name]);
         actuator_cmds.torque.push_back(joint_effort_commands_[info_.joints[i].name]);
         actuator_cmds.kp.push_back(joint_kp_commands_[info_.joints[i].name]);
         actuator_cmds.kd.push_back(joint_kd_commands_[info_.joints[i].name]);
     }
-    joint_cmd_publisher_->publish(joint_cmds);
-    actuator_cmd_publisher_->publish(actuator_cmds);
+
+    for (size_t i = 0; i < dof_manipulator_; i++)
+    {
+        joint_cmds.name.push_back(info_.joints[i + dof_quadruped_legs].name);
+        joint_cmds.position.push_back(joint_position_commands_[info_.joints[i + dof_quadruped_legs].name]);
+        joint_cmds.velocity.push_back(joint_velocity_commands_[info_.joints[i + dof_quadruped_legs].name]);
+    }
+    manipulator_joint_cmd_publisher_->publish(joint_cmds);
+    quadruped_actuator_cmd_publisher_->publish(actuator_cmds);
 
     return return_type::OK;
 }
@@ -141,7 +149,17 @@ void HardwareMujocoQuadrupedManipulator::imu_callback(const sensor_msgs::msg::Im
     imu_states_[9] = imu_state.linear_acceleration.z;
 }
 
-void HardwareMujocoQuadrupedManipulator::joint_state_callback(const sensor_msgs::msg::JointState joint_state)
+void HardwareMujocoQuadrupedManipulator::manipulator_joint_state_callback(const sensor_msgs::msg::JointState joint_state)
+{
+    for (size_t i = 0; i < joint_state.name.size(); i++)
+    {
+        joint_position_states_[joint_state.name[i]] = joint_state.position[i];
+        joint_velocity_states_[joint_state.name[i]] = joint_state.velocity[i];
+        joint_effort_states_[joint_state.name[i]] = joint_state.effort[i];
+    }
+}
+
+void HardwareMujocoQuadrupedManipulator::quadruped_joint_state_callback(const sensor_msgs::msg::JointState joint_state)
 {
     for (size_t i = 0; i < joint_state.name.size(); i++)
     {

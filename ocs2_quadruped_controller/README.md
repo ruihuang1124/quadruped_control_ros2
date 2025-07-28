@@ -5,14 +5,10 @@ and [ocs2_ros2](https://github.com/legubiao/ocs2_ros2).
 
 Tested environment:
 
-* Ubuntu 24.04
-    * ROS2 Jazzy
 * Ubuntu 22.04
     * ROS2 Humble
 
-[![](http://i0.hdslb.com/bfs/archive/e758ce019587032449a153cf897a543443b64bba.jpg)](https://www.bilibili.com/video/BV1UcxieuEmH/)
-
-## 1. Interfaces
+# 1. Interfaces
 
 Required hardware interfaces:
 
@@ -32,46 +28,86 @@ Required hardware interfaces:
         * orientation
     * feet force sensor
 
-## 2. Build
+# 2 Dependency
 
-### 2.1 Build Dependencies
+1. qpOASES
+2. ros2_ocs2
+3. mujoco
 
-* OCS2 ROS2 Libraries
-  ```bash
-  colcon build --packages-up-to ocs2_legged_robot_ros
-  colcon build --packages-up-to ocs2_self_collision
-  ```
+# 3 Installation
 
-### 2.2 Build OCS2 Quadruped Controller
+## 3.1 Install Dependency
 
-```bash
-cd ~/ros2_ws
-colcon build --packages-up-to ocs2_quadruped_controller
+### 3.1.1 qpOASES
+
+```
+git clone https://github.com/coin-or/qpOASES.git
+mkdir build
+cd build
+cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON ..
+make
+sudo make install
+```
+option `-DCMAKE_POSITION_INDEPENDENT_CODE=ON` is necessary. If you already installed qpOASES without this option, you need to reinstall it
+
+
+### 3.1.2 ros2_ocs2
+
+[Installation](https://github.com/ruihuang1124/ros2_ocs2)
+
+### 3.1.3 mujoco
+
+mujoco should be installed by building from source with release version 3.2.7.
+
+1. Clone the mujoco repository:
+```
+git clone https://github.com/deepmind/mujoco.git
+```
+2. cd in mujoco path, reate a new build directory and cd into it:
+```
+cd mujoco
+mkdir build && cd build
+```
+3. Configure the build, build and install
+```
+cmake ..
+make
+sudo make install
 ```
 
-## 3. Launch
+## 3.2 Install Project
 
-supported robot description:
+1. Clone repository:
+```
+mkdir -p colcon_ws/src
+cd src
+git clone https://github.com/ruihuang1124/quadruped_control_ros2.git
+```
+2. Cd in ros workspace and build
+```
+cd colcon_ws
+colcon build --packages-up-to cmd_mapping custom_msgs hardware_mujoco hardware_arcdog hardware_mujoco_piper keyboard_input leg_pd_controller mujoco_simulator arcdog_description ocs2_quadruped_controller unitree_guide_controller piper_with_gripper_moveit piper_description sirius_description 
+```
 
-* Unitree
-    * go2_description
-    * go1_description
-    * a1_description
-    * aliengo_description
-    * b2_description
-* Xiaomi
-    * cyberdog_description
-* DeepRobotics
-    * lite3_description
-    * x30_description
-* Anybotics
-    * anymal_c_description
-
-### 3.1 Mujoco Simulation
-> **Warm Reminder**: You need to launch [Unitree Mujoco C++ Simulation](https://github.com/legubiao/unitree_mujoco) before launch the controller.
-```bash
-source ~/ros2_ws/install/setup.bash
-ros2 launch ocs2_quadruped_controller mujoco.launch.py pkg_description:=go2_description
+# 4 Run Example
+1. Open a terminal to launch the mujoco emulator
+```
+ros2 launch mujoco_simulator mujoco.launch.py
+```
+2. Open a terminal to run controller
+```
+ros2 launch ocs2_quadruped_controller controller.launch.py
+```
+3. Enter the control command in the terminal that receives the keyboard command. You should input `9` first
+```
+r,f : control body height
+1   : stance gait
+2   : trot gait
+3   : walk trot gait
+4   : fly trot gait
+w,a,b,d : linear velocity control
+j,l : yaw velocity control
+9   : activate the controller
 ```
 
 At the first launch, controller may compile the OCS2 model and generate the shared library. The compilation process may take a few minutes. After the compilation, restart the controller and the robot should stand up. Then you can use the keyboard or joystick to control the robot (Keyboard 2 or Joystick LB+A to Trot mode).

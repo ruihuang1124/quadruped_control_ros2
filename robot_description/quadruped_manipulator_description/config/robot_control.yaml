@@ -11,46 +11,86 @@ controller_manager:
     imu_sensor_broadcaster:
       type: imu_sensor_broadcaster/IMUSensorBroadcaster
 
-    unitree_guide_controller:
-      type: unitree_guide_controller/UnitreeGuideController
-
-    ocs2_quadruped_controller:
-      type: ocs2_quadruped_controller/Ocs2QuadrupedController
+    rl_quadruped_manipulation_controller:
+      type: rl_quadruped_manipulation_controller/LeggedManipulationRLController
 
 imu_sensor_broadcaster:
   ros__parameters:
     sensor_name: "imu_sensor"
     frame_id: "imu_link"
 
-unitree_guide_controller:
+rl_quadruped_manipulation_controller:
   ros__parameters:
     update_rate: 200  # Hz
+    robot_pkg: "quadruped_manipulator_description"
+    use_rl_thread: false
+    model_folder: "rl_policy"
+
+    joints:
+      - FL_hip_joint
+      - FR_hip_joint
+      - RL_hip_joint
+      - RR_hip_joint
+      - FL_thigh_joint
+      - FR_thigh_joint
+      - RL_thigh_joint
+      - RR_thigh_joint
+      - FL_calf_joint
+      - FR_calf_joint
+      - RL_calf_joint
+      - RR_calf_joint
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+      - joint7
+      - joint8
+
     down_pos:
       - -0.01
-      - 1.27
-      - -2.8
       - 0.01
-      - 1.27
-      - -2.8
       - -0.3
-      - 1.31
-      - -2.8
       - 0.3
-      - 1.31
+      - 1.27
+      - 1.27
+      - -1.31
+      - -1.31
       - -2.8
-    joints:
-      - FR_hip_joint
-      - FR_thigh_joint
-      - FR_calf_joint
-      - FL_hip_joint
-      - FL_thigh_joint
-      - FL_calf_joint
-      - RR_hip_joint
-      - RR_thigh_joint
-      - RR_calf_joint
-      - RL_hip_joint
-      - RL_thigh_joint
-      - RL_calf_joint
+      - -2.8
+      - 2.8
+      - 2.8
+      - 0.0
+      - 0.59
+      - -0.23
+      - -0.36
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+
+    stand_pos:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.67
+      - 0.67
+      - -0.67
+      - -0.67
+      - -1.3
+      - -1.3
+      - 1.3
+      - 1.3
+      - 0.0
+      - 2.0
+      - -1.5
+      - 0.0
+      - -0.5
+      - 0.0
+      - 0.0
+      - 0.0
 
     command_interfaces:
       - effort
@@ -64,11 +104,18 @@ unitree_guide_controller:
       - position
       - velocity
 
-    feet:
-      - FR_foot
+    feet_names:
       - FL_foot
-      - RR_foot
+      - FR_foot
       - RL_foot
+      - RR_foot
+
+    foot_force_name: "foot_contact_sensor"
+    foot_force_interfaces:
+      - FL_foot
+      - RL_foot
+      - FR_foot
+      - RR_foot
 
     imu_name: "imu_sensor"
     base_name: "base"
@@ -84,60 +131,3 @@ unitree_guide_controller:
       - linear_acceleration.x
       - linear_acceleration.y
       - linear_acceleration.z
-
-ocs2_quadruped_controller:
-  ros__parameters:
-    update_rate: 1000  # Hz
-
-    joints:
-      - FL_hip_joint
-      - FL_thigh_joint
-      - FL_calf_joint
-      - FR_hip_joint
-      - FR_thigh_joint
-      - FR_calf_joint
-      - RL_hip_joint
-      - RL_thigh_joint
-      - RL_calf_joint
-      - RR_hip_joint
-      - RR_thigh_joint
-      - RR_calf_joint
-
-    command_interfaces:
-      - effort
-      - position
-      - velocity
-      - kp
-      - kd
-
-    state_interfaces:
-      - effort
-      - position
-      - velocity
-
-    feet:
-      - FL_foot
-      - FR_foot
-      - RL_foot
-      - RR_foot
-
-    imu_name: "imu_sensor"
-
-    imu_interfaces:
-      - orientation.w
-      - orientation.x
-      - orientation.y
-      - orientation.z
-      - angular_velocity.x
-      - angular_velocity.y
-      - angular_velocity.z
-      - linear_acceleration.x
-      - linear_acceleration.y
-      - linear_acceleration.z
-
-    foot_force_name: "foot_contact_sensor"
-    foot_force_interfaces:
-      - FL_foot
-      - RL_foot
-      - FR_foot
-      - RR_foot
