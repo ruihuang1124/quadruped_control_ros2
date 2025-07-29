@@ -26,8 +26,8 @@ public:
     FSMStateName checkChange() override;
 
 private:
-    double target_pos_[12] = {};
-    double start_pos_[12] = {};
+    double target_pos_[16] = {};
+    double start_pos_[16] = {};
     rclcpp::Time start_time_;
 
     double kp_, kd_;
