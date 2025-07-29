@@ -64,6 +64,8 @@ FSMStateName StateQMFixedStand::checkChange()
             return FSMStateName::QMPASSIVE;
         case 2:
             return FSMStateName::QMFIXEDDOWN;
+        case 3:
+            return FSMStateName::QMRL;
         default:
             return FSMStateName::QMFIXEDSTAND;
     }

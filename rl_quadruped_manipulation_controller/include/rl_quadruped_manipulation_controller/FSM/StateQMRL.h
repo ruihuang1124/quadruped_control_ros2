@@ -61,6 +61,7 @@ struct RobotCommand
     } motor_command;
 };
 
+
 template <typename T>
 struct RobotState
 {
@@ -83,9 +84,15 @@ struct RobotState
 
 struct Control
 {
-    double x = 0.0;
-    double y = 0.0;
-    double yaw = 0.0;
+    double vel_x = 0.0;
+    double vel_y = 0.0;
+    double vel_yaw = 0.0;
+    double pos_x = 0.0;
+    double pos_y = 0.0;
+    double pos_z = 0.0;
+    double pos_roll = 0.0;
+    double pos_pitch = 0.0;
+    double pos_yaw = 0.0;
 };
 
 struct ModelParams
@@ -99,6 +106,7 @@ struct ModelParams
     double damping;
     double stiffness;
     double action_scale;
+    torch::Tensor action_scales;
     double hip_scale_reduction;
     std::vector<int> hip_scale_reduction_indices;
     int num_of_dofs;
@@ -122,16 +130,18 @@ struct Observations
     torch::Tensor ang_vel;
     torch::Tensor gravity_vec;
     torch::Tensor commands;
+    torch::Tensor pose_commands;
     torch::Tensor base_quat;
     torch::Tensor dof_pos;
     torch::Tensor dof_vel;
     torch::Tensor actions;
 };
 
-class StateRL final : public FSMState
+
+class StateQMRL final : public FSMState
 {
 public:
-    explicit StateRL(CtrlInterfaces& ctrl_interfaces,
+    explicit StateQMRL(CtrlInterfaces& ctrl_interfaces,
                      CtrlComponent& ctrl_component,
                      const std::vector<double>& target_pos);
 
@@ -146,6 +156,8 @@ public:
 
 private:
     torch::Tensor computeObservation();
+
+    torch::Tensor EulartoQuat(torch::Tensor euler);
 
     void loadYaml(const std::string& config_path);
 
@@ -174,7 +186,7 @@ private:
     ModelParams params_;
     Observations obs_;
     Control control_;
-    double init_pos_[12] = {};
+    double init_pos_[18] = {};
 
     RobotState<double> robot_state_;
     RobotCommand<double> robot_command_;

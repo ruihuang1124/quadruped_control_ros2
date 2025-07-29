@@ -2,7 +2,7 @@
 // Created by ray on 2025-07-25.
 //
 
-#include "rl_quadruped_manipulation_controller/FSM/StateRL.h"
+#include "rl_quadruped_manipulation_controller/FSM/StateQMRL.h"
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/logging.hpp>
 #include <yaml-cpp/yaml.h>
@@ -47,10 +47,10 @@ std::vector<T> ReadVectorFromYaml(const YAML::Node& node, const std::string& fra
     throw std::invalid_argument("Unsupported framework: " + framework);
 }
 
-StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
+StateQMRL::StateQMRL(CtrlInterfaces& ctrl_interfaces,
                  CtrlComponent& ctrl_component,
                  const std::vector<double>& target_pos) :
-    FSMState(FSMStateName::RL, "rl", ctrl_interfaces),
+    FSMState(FSMStateName::QMRL, "qm rl", ctrl_interfaces),
     node_(ctrl_component.node_),
     enable_estimator_(ctrl_component.enable_estimator_),
     estimator_(ctrl_component.estimator_)
@@ -73,7 +73,7 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
     const std::string package_share_directory = ament_index_cpp::get_package_share_directory(robot_pkg_);
     const std::string model_path = package_share_directory + "/config/" + model_folder_;
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 18; i++)
     {
         init_pos_[i] = target_pos[i];
     }
@@ -124,13 +124,14 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
     }
 }
 
-void StateRL::enter()
+void StateQMRL::enter()
 {
     // Init observations
     obs_.lin_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.ang_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.gravity_vec = torch::tensor({{0.0, 0.0, -1.0}});
     obs_.commands = torch::tensor({{0.0, 0.0, 0.0}});
+    obs_.pose_commands = torch::tensor({{0.55, 0.0, 0.35, 1.0, 0.0, 0.0, 0.0}});
     obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0, 1.0}});
     obs_.dof_pos = params_.default_dof_pos;
     obs_.dof_vel = torch::zeros({1, params_.num_of_dofs});
@@ -141,9 +142,15 @@ void StateRL::enter()
     output_dof_pos_ = params_.default_dof_pos;
 
     // Init control
-    control_.x = 0.0;
-    control_.y = 0.0;
-    control_.yaw = 0.0;
+    control_.vel_x = 0.0;
+    control_.vel_y = 0.0;
+    control_.vel_yaw = 0.0;
+    control_.pos_x = 0.0;
+    control_.pos_y = 0.0;
+    control_.pos_z = 0.0;
+    control_.pos_yaw = 0.0;
+    control_.pos_roll = 0.0;
+    control_.pos_pitch = 0.0;
 
     // history
     if (!params_.observations_history.empty()) {
@@ -153,7 +160,7 @@ void StateRL::enter()
     running_ = true;
 }
 
-void StateRL::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
+void StateQMRL::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
 {
     getState();
     if (!use_rl_thread_)
@@ -163,29 +170,29 @@ void StateRL::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/
     setCommand();
 }
 
-void StateRL::exit()
+void StateQMRL::exit()
 {
     running_ = false;
 }
 
-FSMStateName StateRL::checkChange()
+FSMStateName StateQMRL::checkChange()
 {
     if (enable_estimator_ and !estimator_->safety())
     {
-        return FSMStateName::PASSIVE;
+        return FSMStateName::QMPASSIVE;
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
     case 1:
-        return FSMStateName::PASSIVE;
+        return FSMStateName::QMPASSIVE;
     case 2:
-        return FSMStateName::FIXEDDOWN;
+        return FSMStateName::QMFIXEDDOWN;
     default:
-        return FSMStateName::RL;
+        return FSMStateName::QMRL;
     }
 }
 
-torch::Tensor StateRL::computeObservation()
+torch::Tensor StateQMRL::computeObservation()
 {
     std::vector<torch::Tensor> obs_list;
 
@@ -204,9 +211,13 @@ torch::Tensor StateRL::computeObservation()
         {
             obs_list.push_back(quatRotateInverse(obs_.base_quat, obs_.gravity_vec, params_.framework));
         }
-        else if (observation == "commands")
+        else if (observation == "vel_commands")
         {
             obs_list.push_back(obs_.commands * params_.commands_scale);
+        }
+        else if (observation == "pose_commands")
+        {
+            obs_list.push_back(obs_.pose_commands); // scale TODO.
         }
         else if (observation == "dof_pos")
         {
@@ -229,7 +240,7 @@ torch::Tensor StateRL::computeObservation()
     return clamped_obs;
 }
 
-void StateRL::loadYaml(const std::string& config_path)
+void StateQMRL::loadYaml(const std::string& config_path)
 {
     YAML::Node config;
     try
@@ -273,6 +284,9 @@ void StateRL::loadYaml(const std::string& config_path)
             ReadVectorFromYaml<double>(config["clip_actions_lower"], params_.framework, rows, cols)).view({1, -1});
     }
     params_.action_scale = config["action_scale"].as<double>();
+    params_.action_scales = torch::tensor(ReadVectorFromYaml<double>(config["action_scales"], params_.framework, rows, cols)).view({
+        1, -1
+    });
     params_.hip_scale_reduction = config["hip_scale_reduction"].as<double>();
     params_.hip_scale_reduction_indices = ReadVectorFromYaml<int>(config["hip_scale_reduction_indices"]);
     params_.num_of_dofs = config["num_of_dofs"].as<int>();
@@ -291,13 +305,13 @@ void StateRL::loadYaml(const std::string& config_path)
     params_.torque_limits = torch::tensor(
         ReadVectorFromYaml<double>(config["torque_limits"], params_.framework, rows, cols)).view({1, -1});
 
-    params_.default_dof_pos = torch::from_blob(init_pos_, {12}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    params_.default_dof_pos = torch::from_blob(init_pos_, {18}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
 
     // params_.default_dof_pos = torch::tensor(
     //     ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1});
 }
 
-torch::Tensor StateRL::quatRotateInverse(const torch::Tensor& q, const torch::Tensor& v, const std::string& framework)
+torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor& q, const torch::Tensor& v, const std::string& framework)
 {
     torch::Tensor q_w;
     torch::Tensor q_vec;
@@ -319,7 +333,7 @@ torch::Tensor StateRL::quatRotateInverse(const torch::Tensor& q, const torch::Te
     return a - b + c;
 }
 
-torch::Tensor StateRL::forward()
+torch::Tensor StateQMRL::forward()
 {
     torch::autograd::GradMode::set_enabled(false);
     torch::Tensor clamped_obs = computeObservation();
@@ -343,7 +357,7 @@ torch::Tensor StateRL::forward()
     return actions;
 }
 
-void StateRL::getState()
+void StateQMRL::getState()
 {
     if (params_.framework == "isaacgym")
     {
@@ -375,14 +389,21 @@ void StateRL::getState()
         robot_state_.motor_state.tauEst[i] = ctrl_interfaces_.joint_effort_state_interface_[i].get().get_value();
     }
 
-    control_.x = ctrl_interfaces_.control_inputs_.ly;
-    control_.y = -ctrl_interfaces_.control_inputs_.lx;
-    control_.yaw = -ctrl_interfaces_.control_inputs_.rx;
+    control_.vel_x = ctrl_interfaces_.control_inputs_.ly;
+    control_.vel_y = -ctrl_interfaces_.control_inputs_.lx;
+    control_.vel_yaw = -ctrl_interfaces_.control_inputs_.rx;
+
+    control_.pos_x = ctrl_interfaces_.pose_cmd_inputs_.pos_x;
+    control_.pos_y = ctrl_interfaces_.pose_cmd_inputs_.pos_y;
+    control_.pos_z = ctrl_interfaces_.pose_cmd_inputs_.pos_z;
+    control_.pos_roll = ctrl_interfaces_.pose_cmd_inputs_.pos_roll;
+    control_.pos_pitch = ctrl_interfaces_.pose_cmd_inputs_.pos_pitch;
+    control_.pos_yaw = ctrl_interfaces_.pose_cmd_inputs_.pos_yaw;
 
     updated_ = true;
 }
 
-void StateRL::runModel()
+void StateQMRL::runModel()
 {
     if (enable_estimator_)
     {
@@ -390,7 +411,11 @@ void StateRL::runModel()
             to(torch::kFloat).unsqueeze(0);
     }
     obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
-    obs_.commands = torch::tensor({{control_.x, control_.y, control_.yaw}});
+    obs_.commands = torch::tensor({{control_.vel_x, control_.vel_y, control_.vel_yaw}});
+    torch::Tensor ee_pos = torch::tensor({control_.pos_x, control_.pos_y, control_.pos_z}).unsqueeze(0);
+    torch::Tensor ee_ori = EulartoQuat(torch::tensor({control_.pos_roll, control_.pos_pitch, control_.pos_yaw}));
+    obs_.pose_commands = torch::cat({ee_pos, ee_ori}, 1);
+    obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
     obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
@@ -404,7 +429,7 @@ void StateRL::runModel()
 
     obs_.actions = clamped_actions;
 
-    const torch::Tensor actions_scaled = clamped_actions * params_.action_scale;
+    const torch::Tensor actions_scaled = clamped_actions * params_.action_scales;
     // torch::Tensor output_torques = params_.rl_kp * (actions_scaled + params_.default_dof_pos - obs_.dof_pos) - params_.rl_kd * obs_.dof_vel;
     // output_torques = clamp(output_torques, -(params_.torque_limits), params_.torque_limits);
 
@@ -420,9 +445,9 @@ void StateRL::runModel()
     }
 }
 
-void StateRL::setCommand() const
+void StateQMRL::setCommand() const
 {
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < params_.num_of_dofs; i++)
     {
         ctrl_interfaces_.joint_position_command_interface_[i].get().
                                                                             set_value(
@@ -437,4 +462,27 @@ void StateRL::setCommand() const
                                                                           set_value(
                                                                               robot_command_.motor_command.tau[i]);
     }
+}
+
+
+torch::Tensor StateQMRL::EulartoQuat(torch::Tensor euler) {
+    // euler: [roll, pitch, yaw]
+    double roll = euler[0].item<double>();
+    double pitch = euler[1].item<double>();
+    double yaw = euler[2].item<double>();
+
+    double cy = cos(yaw * 0.5);
+    double sy = sin(yaw * 0.5);
+    double cp = cos(pitch * 0.5);
+    double sp = sin(pitch * 0.5);
+    double cr = cos(roll * 0.5);
+    double sr = sin(roll * 0.5);
+
+    torch::Tensor q = torch::zeros(4);
+    q[0] = cr * cp * cy + sr * sp * sy; // w
+    q[1] = sr * cp * cy - cr * sp * sy; // x
+    q[2] = cr * sp * cy + sr * cp * sy; // y
+    q[3] = cr * cp * sy - sr * sp * cy; // z
+
+    return q.unsqueeze(0);
 }

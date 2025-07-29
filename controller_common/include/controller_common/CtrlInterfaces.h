@@ -9,6 +9,7 @@
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
 #include <control_input_msgs/msg/inputs.hpp>
+#include <control_input_msgs/msg/pose_cmd_inputs.hpp>
 
 struct CtrlInterfaces
 {
@@ -42,6 +43,7 @@ struct CtrlInterfaces
 
 
     control_input_msgs::msg::Inputs control_inputs_;
+    control_input_msgs::msg::PoseCmdInputs pose_cmd_inputs_;
     int frequency_{};
 
     CtrlInterfaces() = default;

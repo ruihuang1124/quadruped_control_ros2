@@ -171,6 +171,22 @@ namespace rl_quadruped_manipulation_controller
                 ctrl_interfaces_.control_inputs_.ry = msg->ry;
             });
 
+        pose_control_input_subscription_ = get_node()->create_subscription<control_input_msgs::msg::PoseCmdInputs>(
+            "/pose_control_input", 10, [this](const control_input_msgs::msg::PoseCmdInputs::SharedPtr msg)
+            {
+                // Handle message
+                ctrl_interfaces_.pose_cmd_inputs_.pos_x = msg->pos_x;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_y = msg->pos_y;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_z = msg->pos_z;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_roll = msg->pos_roll;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_pitch = msg->pos_pitch;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_yaw = msg->pos_yaw;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_x = msg->pos_quat_x;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_y = msg->pos_quat_y;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_z = msg->pos_quat_z;
+                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_w = msg->pos_quat_w;
+            });
+
         return CallbackReturn::SUCCESS;
     }
 
@@ -215,7 +231,7 @@ namespace rl_quadruped_manipulation_controller
         state_list_.passive = std::make_shared<StateQMPassive>(ctrl_interfaces_);
         state_list_.fixedDown = std::make_shared<StateQMFixedDown>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
         state_list_.fixedStand = std::make_shared<StateQMFixedStand>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_);
-        state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_);
+        state_list_.rl = std::make_shared<StateQMRL>(ctrl_interfaces_, ctrl_component_, stand_pos_);
 
         // Initialize FSM
         current_state_ = state_list_.passive;
@@ -263,7 +279,7 @@ namespace rl_quadruped_manipulation_controller
             return state_list_.fixedDown;
         case FSMStateName::QMFIXEDSTAND:
             return state_list_.fixedStand;
-        case FSMStateName::RL:
+        case FSMStateName::QMRL:
             return state_list_.rl;
         default:
             return state_list_.invalid;

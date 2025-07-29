@@ -5,7 +5,7 @@
 #ifndef LEGGEDMANIPULATIONRLCONTROLLER_H
 #define LEGGEDMANIPULATIONRLCONTROLLER_H
 #include <controller_interface/controller_interface.hpp>
-#include <rl_quadruped_manipulation_controller/FSM/StateRL.h>
+#include <rl_quadruped_manipulation_controller/FSM/StateQMRL.h>
 #include <std_msgs/msg/string.hpp>
 
 #include "rl_quadruped_manipulation_controller/control/CtrlComponent.h"
@@ -23,7 +23,7 @@ namespace rl_quadruped_manipulation_controller
         std::shared_ptr<StateQMPassive> passive;
         std::shared_ptr<StateQMFixedDown> fixedDown;
         std::shared_ptr<StateQMFixedStand> fixedStand;
-        std::shared_ptr<StateRL> rl;
+        std::shared_ptr<StateQMRL> rl;
     };
 
     class LeggedManipulationRLController final : public controller_interface::ControllerInterface
@@ -116,6 +116,7 @@ namespace rl_quadruped_manipulation_controller
         };
 
         rclcpp::Subscription<control_input_msgs::msg::Inputs>::SharedPtr control_input_subscription_;
+        rclcpp::Subscription<control_input_msgs::msg::PoseCmdInputs>::SharedPtr pose_control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
 
         FSMMode mode_ = FSMMode::NORMAL;

@@ -43,7 +43,7 @@ add_library(${PROJECT_NAME} SHARED
         src/FSM/StateQMFixedStand.cpp
         src/FSM/StateQMFixedDown.cpp
         src/FSM/StateQMPassive.cpp
-        src/FSM/StateRL.cpp
+        src/FSM/StateQMRL.cpp
 
         src/control/LowPassFilter.cpp
         src/control/Estimator.cpp
