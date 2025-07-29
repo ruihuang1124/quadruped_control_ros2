@@ -24,8 +24,9 @@
         <motor ctrlrange="-45.43 45.43"/>
       </default>
       <default class="prismatic">
-        <joint type="slide" axis="0 0 1" range="0 0.13" damping="0.05"/>
-        <motor ctrlrange="-200 200"/>
+        <joint type="slide" axis="0 0 1" range="0 0.193" damping="0.05"/>
+        <!-- 定义 prismatic joint 的滑动轴和范围 -->
+        <geom type="box" size="0.01 0.01 0.0965" pos="0 0 0.0965"/>
       </default>
       <default class="visual">
         <geom type="mesh" contype="0" conaffinity="0" group="2"/>
@@ -33,7 +34,7 @@
       <default class="collision">
         <geom group="3"/>
         <default class="foot">
-          <geom size="0.001" pos="-0.001 0 -0" priority="1" condim="6"
+          <geom size="0.022" pos="-0.002 0 -0.213" priority="1" condim="6"
             friction="0.4 0.02 0.01"/>
         </default>
       </default>
@@ -82,13 +83,13 @@
             <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="0.00228702 0.00228252 3.62187e-05" />
             <joint name="FL_calf_joint" class="knee" />
             <geom mesh="calf_mirror" material="gray" class="visual" />
-            <geom size="0.01 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="FL_box" pos="0 0 -0.183">
+            <geom size="0.11852 0.01 0.025" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
+            <body name="FL_box" pos="0 0 -0.193">
               <inertial pos="-0 0 0" quat="0.494941 0.495107 0.504986 0.504868" mass="0.132" diaginertia="0.00228050753 0.00225891907 5.160443e-05" />
               <joint name="FL_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
-              <geom size="0.001 0.001 0.001" pos="0 0 -0.183" quat="0 0 0 1" type="box" class="collision" />
-              <geom pos="0 0 -0.1591" mesh="foot" class="visual" material="black" />
+              <geom size="0.1691 0.02 0.05" pos="0 0 -0.193" quat="0 0 0 1" type="box" class="collision" />
+              <geom pos="0 0 -0.1691" mesh="foot" class="visual" material="black" />
               <geom name="FL_foot" class="foot" />
               <body name="FL_foot" pos="0 0 -0.1691" />
             </body>
@@ -112,13 +113,13 @@
             <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="0.00228702 0.00228252 3.62187e-05" />
             <joint name="FR_calf_joint" class="knee" />
             <geom mesh="calf" material="gray" class="visual" />
-            <geom size="0.01 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="FR_box" pos="0 0 -0.183">
+            <geom size="0.11852 0.01 0.025" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
+            <body name="FR_box" pos="0 0 -0.193">
               <inertial pos="-0 0 0" quat="0.494941 0.495107 0.504986 0.504868" mass="0.132" diaginertia="0.00228050753 0.00225891907 5.160443e-05" />
               <joint name="FR_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
-              <geom size="0.001 0.001 0.001" pos="0 0 -0.183" quat="0 0 0 1" type="box" class="collision" />
-              <geom pos="0 0 -0.1651" mesh="foot" class="visual" material="black" />
+              <geom size="0.1691 0.02 0.05" pos="0 0 -0.193" quat="0 0 0 1" type="box" class="collision" />
+              <geom pos="0 0 -0.1691" mesh="foot" class="visual" material="black" />
               <geom name="FR_foot" class="foot" />
               <body name="FR_foot" pos="0 0 -0.1691" />
             </body>
@@ -142,13 +143,13 @@
             <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="0.00228702 0.00228252 3.62187e-05" />
             <joint name="RL_calf_joint" class="knee" />
             <geom mesh="calf_mirror" material="gray" class="visual" />
-            <geom size="0.01 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="RL_box" pos="0 0 -0.183">
+            <geom size="0.11852 0.01 0.025" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
+            <body name="RL_box" pos="0 0 -0.193">
               <inertial pos="-0 0 0" quat="0.494941 0.495107 0.504986 0.504868" mass="0.132" diaginertia="0.00228050753 0.00225891907 5.160443e-05" />
               <joint name="RL_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
-              <geom size="0.001 0.001 0.010" pos="0 0 -0.183" quat="0 0 0 1" type="box" class="collision" />
-              <geom pos="0 0 -0.1651" mesh="foot" class="visual" material="black" />
+              <geom size="0.1691 0.02 0.05" pos="0 0 -0.193" quat="0 0 0 1" type="box" class="collision" />
+              <geom pos="0 0 -0.1691" mesh="foot" class="visual" material="black" />
               <geom name="RL_foot" class="foot" />
               <body name="RL_foot" pos="0 0 -0.1691" />
             </body>
@@ -173,13 +174,13 @@
             <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="0.00228702 0.00228252 3.62187e-05" />
             <joint name="RR_calf_joint" class="knee" />
             <geom mesh="calf" material="gray" class="visual" />
-            <geom size="0.01 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="RR_box" pos="0 0 -0.183">
+            <geom size="0.11852 0.01 0.025" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
+            <body name="RR_box" pos="0 0 -0.193">
               <inertial pos="-0 0 0" quat="0.494941 0.495107 0.504986 0.504868" mass="0.132" diaginertia="0.00228050753 0.00225891907 5.160443e-05" />
               <joint name="RR_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
-              <geom size="0.001 0.001 0.001" pos="0 0 -0.183" quat="0 0 0 1" type="box" class="collision" />
-              <geom pos="0 0 -0.1651" mesh="foot" class="visual" material="black" />
+              <geom size="0.1691 0.02 0.05" pos="0 0 -0.193" quat="0 0 0 1" type="box" class="collision" />
+              <geom pos="0 0 -0.1691" mesh="foot" class="visual" material="black" />
               <geom name="RR_foot" class="foot" />
               <body name="RR_foot" pos="0 0 -0.1691" />
             </body>

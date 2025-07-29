@@ -7,7 +7,7 @@ from launch_ros.actions import Node
 
 import xacro
 
-package_description = "arcdog_description"
+package_description = "arcdog_adjustable_leg_description"
 
 def process_xacro():
     pkg_path = os.path.join(get_package_share_directory(package_description))

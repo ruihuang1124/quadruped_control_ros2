@@ -144,9 +144,17 @@ namespace Galileo
             sensor_msgs::msg::JointState jointState;
             jointState.header.frame_id = &sim_->m_->names[0];
             jointState.header.stamp = rclcpp::Clock().now();
+
+            // std::cout << "Number of joints (njnt): " << sim_->m_->njnt << std::endl;
+            // std::cout << "Number of joints (njnt): " << sim_->m_->njnt << std::endl;
+            // std::cout << "Number of joints (njnt): " << sim_->m_->njnt << std::endl;
+            // std::cout << "Number of joints (njnt): " << sim_->m_->njnt << std::endl;
+
+
             for (int i = 0; i < sim_->m_->njnt; i++)
             {
-                if (sim_->m_->jnt_type[i] == mjtJoint::mjJNT_HINGE)
+                // if (sim_->m_->jnt_type[i] == mjtJoint::mjJNT_HINGE)
+                if (sim_->m_->jnt_type[i] == mjtJoint::mjJNT_HINGE || sim_->m_->jnt_type[i] == mjtJoint::mjJNT_SLIDE)
                 {
                     std::string jnt_name(mj_id2name(sim_->m_, mjtObj::mjOBJ_JOINT, i));
                     jointState.name.emplace_back(jnt_name);
