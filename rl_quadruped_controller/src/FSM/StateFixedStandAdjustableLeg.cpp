@@ -78,7 +78,7 @@ FSMStateName StateFixedStandAdjustableLeg::checkChange() {
         case 1:
             return FSMStateName::PASSIVE;
         case 2:
-            return FSMStateName::FIXEDDOWN;
+            return FSMStateName::FIXEDDOWNADJUSTABLELEG;
         case 3:
             return FSMStateName::RL;
         default:
