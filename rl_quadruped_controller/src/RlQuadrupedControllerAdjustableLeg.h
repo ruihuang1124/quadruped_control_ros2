@@ -10,9 +10,11 @@
 
 #include "rl_quadruped_controller/control/CtrlComponent.h"
 #include "controller_common/FSM/StateFixedDown.h"
+#include "rl_quadruped_controller/FSM/StateFixedDownAdjustableLeg.h"
 // #include "rl_quadruped_controller/FSM/StateFixedStand.h"
 #include "rl_quadruped_controller/FSM/StateFixedStandAdjustableLeg.h"
 #include "controller_common//FSM/StatePassive.h"
+#include "rl_quadruped_controller/FSM/StatePassiveAdjustableLeg.h"
 
 namespace rl_quadruped_controller_adjustable_leg
 {
@@ -20,7 +22,9 @@ namespace rl_quadruped_controller_adjustable_leg
     {
         std::shared_ptr<FSMState> invalid;
         std::shared_ptr<StatePassive> passive;
-        std::shared_ptr<StateFixedDown> fixedDown;
+        std::shared_ptr<StatePassiveAdjustableLeg> passiveAdjustableLeg;
+        // std::shared_ptr<StateFixedDown> fixedDown;
+        std::shared_ptr<StateFixedDownAdjustableLeg> fixedDownAdjustableLeg;
         // std::shared_ptr<StateFixedStand> fixedStand;
         std::shared_ptr<StateFixedStandAdjustableLeg> fixedStandAdjustableLeg;
         std::shared_ptr<StateRL> rl;

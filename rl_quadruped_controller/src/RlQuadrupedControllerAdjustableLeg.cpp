@@ -215,14 +215,16 @@ namespace rl_quadruped_controller_adjustable_leg
         }
 
         // Create FSM List
-        state_list_.passive = std::make_shared<StatePassive>(ctrl_interfaces_);
-        state_list_.fixedDown = std::make_shared<StateFixedDown>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
+        // state_list_.passive = std::make_shared<StatePassive>(ctrl_interfaces_);
+        state_list_.passiveAdjustableLeg = std::make_shared<StatePassiveAdjustableLeg>(ctrl_interfaces_);
+        // state_list_.fixedDown = std::make_shared<StateFixedDown>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
+        state_list_.fixedDownAdjustableLeg = std::make_shared<StateFixedDownAdjustableLeg>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
         // state_list_.fixedStand = std::make_shared<StateFixedStand>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_);
         state_list_.fixedStandAdjustableLeg = std::make_shared<StateFixedStandAdjustableLeg>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_, stand_pos_adjustable_leg_);
         state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_);
 
         // Initialize FSM
-        current_state_ = state_list_.passive;
+        current_state_ = state_list_.passiveAdjustableLeg;
         current_state_->enter();
         next_state_ = current_state_;
         next_state_name_ = current_state_->state_name;
@@ -261,10 +263,14 @@ namespace rl_quadruped_controller_adjustable_leg
         {
         case FSMStateName::INVALID:
             return state_list_.invalid;
-        case FSMStateName::PASSIVE:
-            return state_list_.passive;
-        case FSMStateName::FIXEDDOWN:
-            return state_list_.fixedDown;
+        // case FSMStateName::PASSIVE:
+        //     return state_list_.passive;
+        case FSMStateName::PASSIVEADJUSTABLELEG:
+            return state_list_.passiveAdjustableLeg;
+        // case FSMStateName::FIXEDDOWN:
+        //     return state_list_.fixedDown;
+        case FSMStateName::FIXEDDOWNADJUSTABLELEG:
+            return state_list_.fixedDownAdjustableLeg;
         // case FSMStateName::FIXEDSTAND:
         //     return state_list_.fixedStand;
         case FSMStateName::FIXEDSTANDADJUSTABLELEG:

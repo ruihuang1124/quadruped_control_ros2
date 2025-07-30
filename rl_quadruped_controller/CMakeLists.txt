@@ -45,6 +45,7 @@ add_library(${PROJECT_NAME} SHARED
         src/FSM/StateRL.cpp
         src/FSM/StateFixedStandAdjustableLeg.cpp
         src/FSM/StateFixedDownAdjustableLeg.cpp
+        src/FSM/StatePassiveAdjustableLeg.cpp
 
         src/control/LowPassFilter.cpp
         src/control/Estimator.cpp
