@@ -6,4 +6,11 @@
             Quadruped Controller used RL-model trained in Legged Gym.
         </description>
     </class>
+    <class name="rl_quadruped_controller_adjustable_leg/LeggedGymController"
+           type="rl_quadruped_controller_adjustable_leg::LeggedGymController"
+           base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Quadruped Controller used RL-model trained in Legged Gym.
+        </description>
+    </class>   
 </library>
