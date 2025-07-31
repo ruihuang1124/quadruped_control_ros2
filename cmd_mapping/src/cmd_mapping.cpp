@@ -23,6 +23,7 @@ public:
 
         initUserCmd();
         initControlInputCmd();
+        initPoseControlInputCmd();
 
         RCLCPP_INFO(this->get_logger(), "Command mapping node started in 50ms.");
     }
@@ -42,6 +43,7 @@ private:
 
     void cmdMappingCallback(const std_msgs::msg::String keyboard_input) {
         initControlInputCmd();
+        initPoseControlInputCmd();
         switch (keyboard_input.data[0]) {
             case 'w':
             case 'W':
@@ -131,11 +133,11 @@ private:
     }
 
     void initPoseControlInputCmd() {
-        pose_control_input_cmd_.pos_x = 0.55;
+        pose_control_input_cmd_.pos_x = 0.65;
         pose_control_input_cmd_.pos_y = 0.0;
-        pose_control_input_cmd_.pos_z = 0.3;
+        pose_control_input_cmd_.pos_z = 0.48;
         pose_control_input_cmd_.pos_roll = 0.0;
-        pose_control_input_cmd_.pos_pitch = 0.0;
+        pose_control_input_cmd_.pos_pitch = 3.14;
         pose_control_input_cmd_.pos_yaw = 0.0;
     }
 

@@ -149,7 +149,7 @@ void StateQMRL::enter()
     control_.pos_y = 0.0;
     control_.pos_z = 0.0;
     control_.pos_yaw = 0.0;
-    control_.pos_roll = 0.0;
+    control_.pos_roll = 3.14;
     control_.pos_pitch = 0.0;
 
     // history
@@ -204,8 +204,7 @@ torch::Tensor StateQMRL::computeObservation()
         }
         else if (observation == "ang_vel")
         {
-            obs_list.push_back(
-                quatRotateInverse(obs_.base_quat, obs_.ang_vel, params_.framework) * params_.ang_vel_scale);
+            obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
         }
         else if (observation == "gravity_vec")
         {
@@ -213,7 +212,7 @@ torch::Tensor StateQMRL::computeObservation()
         }
         else if (observation == "vel_commands")
         {
-            obs_list.push_back(obs_.commands * params_.commands_scale);
+            obs_list.push_back(obs_.commands);
         }
         else if (observation == "pose_commands")
         {
@@ -382,7 +381,7 @@ void StateQMRL::getState()
     robot_state_.imu.accelerometer[1] = ctrl_interfaces_.imu_state_interface_[8].get().get_value();
     robot_state_.imu.accelerometer[2] = ctrl_interfaces_.imu_state_interface_[9].get().get_value();
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 18; i++)
     {
         robot_state_.motor_state.q[i] = ctrl_interfaces_.joint_position_state_interface_[i].get().get_value();
         robot_state_.motor_state.dq[i] = ctrl_interfaces_.joint_velocity_state_interface_[i].get().get_value();
@@ -414,6 +413,9 @@ void StateQMRL::runModel()
     obs_.commands = torch::tensor({{control_.vel_x, control_.vel_y, control_.vel_yaw}});
     torch::Tensor ee_pos = torch::tensor({control_.pos_x, control_.pos_y, control_.pos_z}).unsqueeze(0);
     torch::Tensor ee_ori = EulartoQuat(torch::tensor({control_.pos_roll, control_.pos_pitch, control_.pos_yaw}));
+    // RCLCPP_INFO(node_->get_logger(), "command ee pose are, x: %.3f, y: %.3f, z: %.3f, r: %.3f, p: %.3f, y: %.3f",
+    //             control_.pos_x, control_.pos_y, control_.pos_z, control_.pos_roll, control_.pos_pitch,
+    //             control_.pos_yaw);
     obs_.pose_commands = torch::cat({ee_pos, ee_ori}, 1);
     obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
@@ -430,11 +432,27 @@ void StateQMRL::runModel()
     obs_.actions = clamped_actions;
 
     const torch::Tensor actions_scaled = clamped_actions * params_.action_scales;
+    // RCLCPP_INFO(node_->get_logger(),
+    //             "action_scaled: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
+    //             actions_scaled[0][0], actions_scaled[0][1], actions_scaled[0][2], actions_scaled[0][3],
+    //             actions_scaled[0][4], actions_scaled[0][5], actions_scaled[0][6], actions_scaled[0][7],
+    //             actions_scaled[0][8], actions_scaled[0][9], actions_scaled[0][10], actions_scaled[0][11]);
+    std::cout << "obs_base_ang_vel: " << obs_.ang_vel << std::endl;
+    std::cout << "obs_joint_pose: " << obs_.dof_pos << std::endl;
+    std::cout << "obs_joint_vel: " << obs_.dof_vel << std::endl;
+    std::cout << "obs_actions: " << obs_.actions << std::endl;
+    std::cout << "obs_velocity_commands: " << obs_.commands << std::endl;
+    std::cout << "obs_pose_command: " << obs_.pose_commands << std::endl;
+    std::cout << "obs_projected_gravity: " << obs_.gravity_vec << std::endl;
+    // std::cout << "obs_actions: " << obs_.actions << std::endl;
+
     // torch::Tensor output_torques = params_.rl_kp * (actions_scaled + params_.default_dof_pos - obs_.dof_pos) - params_.rl_kd * obs_.dof_vel;
     // output_torques = clamp(output_torques, -(params_.torque_limits), params_.torque_limits);
 
     output_dof_pos_ = actions_scaled + params_.default_dof_pos;
-
+    std::cout << "default_dof_pos: " << params_.default_dof_pos << std::endl;
+    std::cout << "output_dof_pos_: " << output_dof_pos_ << std::endl;
+    // output_dof_pos_ =  params_.default_dof_pos;
     for (int i = 0; i < params_.num_of_dofs; ++i)
     {
         robot_command_.motor_command.q[i] = output_dof_pos_[0][i].item<double>();
@@ -442,25 +460,42 @@ void StateQMRL::runModel()
         robot_command_.motor_command.kp[i] = params_.rl_kp[0][i].item<double>();
         robot_command_.motor_command.kd[i] = params_.rl_kd[0][i].item<double>();
         robot_command_.motor_command.tau[i] = 0;
+        // if (i>=12) {
+        //     robot_command_.motor_command.q[i] = params_.default_dof_pos[0][i].item<double>();
+        //     robot_command_.motor_command.dq[i] = 0;
+        //     robot_command_.motor_command.kp[i] = params_.rl_kp[0][i].item<double>();
+        //     robot_command_.motor_command.kd[i] = params_.rl_kd[0][i].item<double>();
+        //     robot_command_.motor_command.tau[i] = 0;
+        // }else {
+        //     robot_command_.motor_command.q[i] = output_dof_pos_[0][i].item<double>();
+        //     robot_command_.motor_command.dq[i] = 0;
+        //     robot_command_.motor_command.kp[i] = params_.rl_kp[0][i].item<double>();
+        //     robot_command_.motor_command.kd[i] = params_.rl_kd[0][i].item<double>();
+        //     robot_command_.motor_command.tau[i] = 0;
+        // }
+
     }
+    robot_command_.motor_command.q[18] = 0.0;
+    robot_command_.motor_command.q[19] = 0.0;
+    robot_command_.motor_command.dq[18] = 0.0;
+    robot_command_.motor_command.dq[19] = 0.0;
+    robot_command_.motor_command.kp[18] = 10.0;
+    robot_command_.motor_command.kp[19] = 10.0;
+    robot_command_.motor_command.kd[18] = 1.0;
+    robot_command_.motor_command.kd[19] = 1.0;
+    robot_command_.motor_command.tau[18] = 0.0;
+    robot_command_.motor_command.tau[19] = 0.0;
 }
 
 void StateQMRL::setCommand() const
 {
-    for (int i = 0; i < params_.num_of_dofs; i++)
+    for (int i = 0; i < params_.num_of_dofs + 2; i++)
     {
-        ctrl_interfaces_.joint_position_command_interface_[i].get().
-                                                                            set_value(
-                                                                                robot_command_.motor_command.q[i]);
-        ctrl_interfaces_.joint_velocity_command_interface_[i].get().set_value(
-            robot_command_.motor_command.dq[i]);
-        ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(
-            robot_command_.motor_command.kp[i]);
-        ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(
-            robot_command_.motor_command.kd[i]);
-        ctrl_interfaces_.joint_torque_command_interface_[i].get().
-                                                                          set_value(
-                                                                              robot_command_.motor_command.tau[i]);
+        ctrl_interfaces_.joint_position_command_interface_[i].get().set_value(robot_command_.motor_command.q[i]);
+        ctrl_interfaces_.joint_velocity_command_interface_[i].get().set_value(robot_command_.motor_command.dq[i]);
+        ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(robot_command_.motor_command.kp[i]);
+        ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(robot_command_.motor_command.kd[i]);
+        ctrl_interfaces_.joint_torque_command_interface_[i].get().set_value(robot_command_.motor_command.tau[i]);
     }
 }
 
