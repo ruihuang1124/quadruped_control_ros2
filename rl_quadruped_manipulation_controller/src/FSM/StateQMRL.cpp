@@ -73,11 +73,11 @@ StateQMRL::StateQMRL(CtrlInterfaces& ctrl_interfaces,
     const std::string package_share_directory = ament_index_cpp::get_package_share_directory(robot_pkg_);
     const std::string model_path = package_share_directory + "/config/" + model_folder_;
 
-    for (int i = 0; i < 18; i++)
+    for (int i = 0; i < 20; i++)
     {
         init_pos_[i] = target_pos[i];
     }
-
+    // RCLCPP_ERROR(node_->get_logger(), "Here init pose set!!!!!!!!");
     // read params from yaml
     loadYaml(model_path);
 
@@ -244,7 +244,7 @@ void StateQMRL::loadYaml(const std::string& config_path)
     YAML::Node config;
     try
     {
-        config = YAML::LoadFile(config_path + "/config.yaml");
+        config = YAML::LoadFile(config_path + "/config_qm.yaml");
     }
     catch ([[maybe_unused]] YAML::BadFile& e)
     {
@@ -283,9 +283,9 @@ void StateQMRL::loadYaml(const std::string& config_path)
             ReadVectorFromYaml<double>(config["clip_actions_lower"], params_.framework, rows, cols)).view({1, -1});
     }
     params_.action_scale = config["action_scale"].as<double>();
-    params_.action_scales = torch::tensor(ReadVectorFromYaml<double>(config["action_scales"], params_.framework, rows, cols)).view({
-        1, -1
-    });
+    // params_.action_scales = torch::tensor(ReadVectorFromYaml<double>(config["action_scales"], params_.framework, rows, cols)).view({
+    //     1, -1
+    // });
     params_.hip_scale_reduction = config["hip_scale_reduction"].as<double>();
     params_.hip_scale_reduction_indices = ReadVectorFromYaml<int>(config["hip_scale_reduction_indices"]);
     params_.num_of_dofs = config["num_of_dofs"].as<int>();
@@ -304,8 +304,21 @@ void StateQMRL::loadYaml(const std::string& config_path)
     params_.torque_limits = torch::tensor(
         ReadVectorFromYaml<double>(config["torque_limits"], params_.framework, rows, cols)).view({1, -1});
 
-    params_.default_dof_pos = torch::from_blob(init_pos_, {18}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    params_.default_dof_pos = torch::from_blob(init_pos_, {params_.num_of_dofs}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
 
+    // 18 policy
+    for (int i = 0; i < params_.num_of_dofs; i++) {
+        params_.default_dof_pos[0][i] = init_pos_[i];
+    }
+
+    // 17 policy
+    // for (int i = 0; i < params_.num_of_dofs; i++) {
+    //     params_.default_dof_pos[0][i] = init_pos_[i];
+    // }
+    // for (int i = 0; i < 5; i++) {
+    //     params_.default_dof_pos[0][i+12] = init_pos_[i+13];
+    // }
+    std::cout << "params_.default_dof_pos: " << params_.default_dof_pos << std::endl;
     // params_.default_dof_pos = torch::tensor(
     //     ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1});
 }
@@ -334,6 +347,7 @@ torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor& q, const torch::
 
 torch::Tensor StateQMRL::forward()
 {
+    // std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
     torch::autograd::GradMode::set_enabled(false);
     torch::Tensor clamped_obs = computeObservation();
     torch::Tensor actions;
@@ -381,7 +395,7 @@ void StateQMRL::getState()
     robot_state_.imu.accelerometer[1] = ctrl_interfaces_.imu_state_interface_[8].get().get_value();
     robot_state_.imu.accelerometer[2] = ctrl_interfaces_.imu_state_interface_[9].get().get_value();
 
-    for (int i = 0; i < 18; i++)
+    for (int i = 0; i < 20; i++)
     {
         robot_state_.motor_state.q[i] = ctrl_interfaces_.joint_position_state_interface_[i].get().get_value();
         robot_state_.motor_state.dq[i] = ctrl_interfaces_.joint_velocity_state_interface_[i].get().get_value();
@@ -419,10 +433,30 @@ void StateQMRL::runModel()
     obs_.pose_commands = torch::cat({ee_pos, ee_ori}, 1);
     obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
+
+    // 18 policy
     obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
 
+
+
+    // 17 policy
+    // obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
+    // for (int i = 0; i < 5; i++) {
+    //     obs_.dof_pos[0][i+12] = robot_state_.motor_state.q[i+13];
+    // }
+    // obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
+    // for (int i = 0; i < 5; i++) {
+    //     obs_.dof_vel[0][i+12] = robot_state_.motor_state.dq[i+13];
+    // }
     const torch::Tensor clamped_actions = forward();
+
+    // const torch::Tensor clamped_actions_output = forward();
+    // torch::Tensor clamped_actions = clamped_actions_output.clone();
+    // for (int i = 0; i < 4; i++) {
+    //     clamped_actions[0][8+i] = clamped_actions_output[0][9+i];
+    // }
+    // clamped_actions[0][12] = clamped_actions_output[0][8];
 
     for (const int i : params_.hip_scale_reduction_indices)
     {
@@ -430,29 +464,38 @@ void StateQMRL::runModel()
     }
 
     obs_.actions = clamped_actions;
+    // obs_.actions = clamped_actions_output;
 
-    const torch::Tensor actions_scaled = clamped_actions * params_.action_scales;
+    // const torch::Tensor actions_scaled = clamped_actions * params_.action_scales;
+    const torch::Tensor actions_scaled = clamped_actions * params_.action_scale;
     // RCLCPP_INFO(node_->get_logger(),
     //             "action_scaled: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
     //             actions_scaled[0][0], actions_scaled[0][1], actions_scaled[0][2], actions_scaled[0][3],
     //             actions_scaled[0][4], actions_scaled[0][5], actions_scaled[0][6], actions_scaled[0][7],
     //             actions_scaled[0][8], actions_scaled[0][9], actions_scaled[0][10], actions_scaled[0][11]);
-    std::cout << "obs_base_ang_vel: " << obs_.ang_vel << std::endl;
-    std::cout << "obs_joint_pose: " << obs_.dof_pos << std::endl;
-    std::cout << "obs_joint_vel: " << obs_.dof_vel << std::endl;
-    std::cout << "obs_actions: " << obs_.actions << std::endl;
-    std::cout << "obs_velocity_commands: " << obs_.commands << std::endl;
-    std::cout << "obs_pose_command: " << obs_.pose_commands << std::endl;
-    std::cout << "obs_projected_gravity: " << obs_.gravity_vec << std::endl;
+    // std::cout << "obs_base_ang_vel: " << obs_.ang_vel << std::endl;
+    // std::cout << "obs_joint_pose: " << obs_.dof_pos << std::endl;
+    // std::cout << "obs_joint_vel: " << obs_.dof_vel << std::endl;
+    // std::cout << "obs_actions: " << obs_.actions << std::endl;
+    // std::cout << "obs_velocity_commands: " << obs_.commands << std::endl;
+    // std::cout << "obs_pose_command: " << obs_.pose_commands << std::endl;
+    // std::cout << "obs_projected_gravity: " << obs_.gravity_vec << std::endl;
     // std::cout << "obs_actions: " << obs_.actions << std::endl;
 
     // torch::Tensor output_torques = params_.rl_kp * (actions_scaled + params_.default_dof_pos - obs_.dof_pos) - params_.rl_kd * obs_.dof_vel;
     // output_torques = clamp(output_torques, -(params_.torque_limits), params_.torque_limits);
 
     output_dof_pos_ = actions_scaled + params_.default_dof_pos;
-    std::cout << "default_dof_pos: " << params_.default_dof_pos << std::endl;
-    std::cout << "output_dof_pos_: " << output_dof_pos_ << std::endl;
+    // std::cout << "default_dof_pos: " << params_.default_dof_pos << std::endl;
+    // std::cout << "output_dof_pos_: " << output_dof_pos_ << std::endl;
     // output_dof_pos_ =  params_.default_dof_pos;
+    for (int i = 0; i < 7; ++i) {
+        robot_command_.motor_command.q[i+13] = init_pos_[i+13];
+        robot_command_.motor_command.dq[i+13] = 0;
+        robot_command_.motor_command.kp[i+13] = 30.0;
+        robot_command_.motor_command.kd[i+13] = 3.0;
+        robot_command_.motor_command.tau[i+13] = 0;
+    }
     for (int i = 0; i < params_.num_of_dofs; ++i)
     {
         robot_command_.motor_command.q[i] = output_dof_pos_[0][i].item<double>();
@@ -475,16 +518,32 @@ void StateQMRL::runModel()
         // }
 
     }
-    robot_command_.motor_command.q[18] = 0.0;
-    robot_command_.motor_command.q[19] = 0.0;
-    robot_command_.motor_command.dq[18] = 0.0;
-    robot_command_.motor_command.dq[19] = 0.0;
-    robot_command_.motor_command.kp[18] = 10.0;
-    robot_command_.motor_command.kp[19] = 10.0;
-    robot_command_.motor_command.kd[18] = 1.0;
-    robot_command_.motor_command.kd[19] = 1.0;
-    robot_command_.motor_command.tau[18] = 0.0;
-    robot_command_.motor_command.tau[19] = 0.0;
+    // for (int i = 0; i < 8; ++i) {
+    //     robot_command_.motor_command.q[i+12] = init_pos_[i+12];
+    //     robot_command_.motor_command.dq[i+12] = 0;
+    //     robot_command_.motor_command.kp[i+12] = 30.0;
+    //     robot_command_.motor_command.kd[i+12] = 3.0;
+    //     robot_command_.motor_command.tau[i+12] = 0;
+    // }
+    // for (int i = 0; i < 5; ++i) {
+    //     robot_command_.motor_command.q[i+13] = output_dof_pos_[0][i+12].item<double>();
+    //     robot_command_.motor_command.dq[i+13] = 0;
+    //     robot_command_.motor_command.kp[i+13] = params_.rl_kp[0][i+12].item<double>();
+    //     robot_command_.motor_command.kd[i+13] = params_.rl_kp[0][i+12].item<double>();
+    //     robot_command_.motor_command.tau[i+13] = 0;
+    // }
+    // robot_command_.motor_command.q[18] = 0.0;
+    // robot_command_.motor_command.q[19] = 0.0;
+    // robot_command_.motor_command.dq[18] = 0.0;
+    // robot_command_.motor_command.dq[19] = 0.0;
+    // robot_command_.motor_command.kp[18] = 10.0;
+    // robot_command_.motor_command.kp[19] = 10.0;
+    // robot_command_.motor_command.kd[18] = 1.0;
+    // robot_command_.motor_command.kd[19] = 1.0;
+    // robot_command_.motor_command.tau[18] = 0.0;
+    // robot_command_.motor_command.tau[19] = 0.0;
+
+    // std::cout << "command q are: " << robot_command_.motor_command.q << std::endl;
 }
 
 void StateQMRL::setCommand() const

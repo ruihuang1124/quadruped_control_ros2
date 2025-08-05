@@ -38,6 +38,11 @@ void StateQMPassive::enter()
 
 void StateQMPassive::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
 {
+    // for (auto i : ctrl_interfaces_.joint_position_state_interface_)
+    // {
+    //     std::cout<< i.get().get_prefix_name()<<std::endl;
+    //     std::cout<< i.get().get_value()<<std::endl;
+    // }
 }
 
 void StateQMPassive::exit()

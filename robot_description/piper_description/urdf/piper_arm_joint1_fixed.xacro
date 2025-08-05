@@ -10,7 +10,7 @@
 <!--  </joint>-->
 <!-- arm -->
 <link
-    name="base_link">
+    name="arm_base_link">
     <inertial>
             <origin xyz="-0.00473641164191482 2.56829134630247E-05 0.041451518036016" rpy="0 0 0" />
             <mass value="1.02" />
@@ -73,12 +73,12 @@
   </link>
   <joint
     name="joint1"
-    type="revolute">
+    type="fixed">
     <origin
       xyz="0 0 0.123"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="arm_base_link" />
     <child
       link="link1" />
     <axis
@@ -375,7 +375,7 @@
           filename="package://piper_description/meshes/gripper_base.STL" />
       </geometry>
     </collision>
-  </link> 
+  </link>
   <joint
     name="joint6_to_gripper_base"
     type="fixed">
@@ -505,7 +505,24 @@
   </joint>
 
 <!-- controller -->
+  <xacro:macro name="transmission_block" params="tran_name joint_name motor_name">
+    <transmission name="${tran_name}">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="${joint_name}">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="$motor_name">
+            <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+  </xacro:macro>
 
+  <xacro:transmission_block tran_name="tran2" joint_name="joint2" motor_name="motor2"/>
+  <xacro:transmission_block tran_name="tran3" joint_name="joint3" motor_name="motor3"/>
+  <xacro:transmission_block tran_name="tran4" joint_name="joint4" motor_name="motor4"/>
+  <xacro:transmission_block tran_name="tran5" joint_name="joint5" motor_name="motor5"/>
+  <xacro:transmission_block tran_name="tran6" joint_name="joint6" motor_name="motor6"/>
 <!-- gazebo -->
 <!--  <gazebo>-->
 <!--    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">-->

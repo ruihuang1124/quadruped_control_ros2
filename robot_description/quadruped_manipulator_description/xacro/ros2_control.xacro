@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-	<ros2_control name="ArcdogSystem" type="system">
+	<ros2_control name="QuadrupedManipulatorSystem" type="system">
 
 		<hardware>
 			<plugin>hardware_mujoco_quadruped_manipulator/HardwareMujocoQuadrupedManipulator</plugin>

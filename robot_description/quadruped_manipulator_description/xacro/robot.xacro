@@ -8,13 +8,12 @@
 	<xacro:arg name="simulator" default="arclab_rl"/>
 
     <xacro:include filename="$(find sirius_description)/xacro/sirius.xacro" />
-
-    <xacro:include filename="$(find piper_description)/urdf/piper_arm.xacro"/>
-
     <joint name="arm_mount_joint" type="fixed">
         <parent link="trunk"/>
         <child link="base_link"/>
         <origin xyz="0.2 0 0.085" rpy="0 0 0"/>
     </joint>
+    <xacro:include filename="$(find piper_description)/urdf/piper_arm.xacro"/>
+
     <xacro:include filename="$(find quadruped_manipulator_description)/xacro/ros2_control.xacro"/>
 </robot>

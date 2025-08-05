@@ -116,6 +116,7 @@ return_type HardwareMujocoQuadrupedManipulator::write(const rclcpp::Time & /*tim
 
     for (size_t i = 0; i < dof_quadruped_legs; i++)
     {
+        actuator_cmds.actuators_name.push_back(info_.joints[i].name);
         actuator_cmds.pos.push_back(joint_position_commands_[info_.joints[i].name]);
         actuator_cmds.vel.push_back(joint_velocity_commands_[info_.joints[i].name]);
         actuator_cmds.torque.push_back(joint_effort_commands_[info_.joints[i].name]);

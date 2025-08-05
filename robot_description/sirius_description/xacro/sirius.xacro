@@ -11,7 +11,6 @@
 	<xacro:include filename="$(find sirius_description)/xacro/const.xacro"/>
 	<xacro:include filename="$(find sirius_description)/xacro/materials.xacro"/>
 	<xacro:include filename="$(find sirius_description)/xacro/leg.xacro"/>
-	<xacro:include filename="$(find sirius_description)/xacro/ros2_control.xacro"/>
 
 
 	<!-- <xacro:stairs stairs="15" xpos="0" ypos="0" zpos="0" /> -->

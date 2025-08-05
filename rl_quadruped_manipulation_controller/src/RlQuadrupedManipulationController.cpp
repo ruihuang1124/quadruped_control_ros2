@@ -13,8 +13,10 @@ namespace rl_quadruped_manipulation_controller
         controller_interface::InterfaceConfiguration conf = {config_type::INDIVIDUAL, {}};
 
         conf.names.reserve(joint_names_.size() * command_interface_types_.size());
+        // std::cout<<"command interface order in controller"<<std::endl;
         for (const auto& joint_name : joint_names_)
         {
+            // std::cout<<joint_name<<std::endl;
             for (const auto& interface_type : command_interface_types_)
             {
                 if (!command_prefix_.empty())
@@ -203,9 +205,12 @@ namespace rl_quadruped_manipulation_controller
         ctrl_interfaces_.clear();
 
         // assign command interfaces
+        // std::cout<<"command interface order in controller!"<<std::endl;
         for (auto& interface : command_interfaces_)
         {
+            // std::string interface_prefix_name = interface.get_prefix_name();
             std::string interface_name = interface.get_interface_name();
+            // std::cout<<interface_prefix_name<<std::endl;
             if (const size_t pos = interface_name.find('/'); pos != std::string::npos)
             {
                 command_interface_map_[interface_name.substr(pos + 1)]->push_back(interface);
@@ -217,8 +222,11 @@ namespace rl_quadruped_manipulation_controller
         }
 
         // assign state interfaces
+        // std::cout<<"state interface order in controller!"<<std::endl;
         for (auto& interface : state_interfaces_)
         {
+            // std::string interface_prefix_name = interface.get_prefix_name();
+            // std::cout<<interface_prefix_name<<std::endl;
             if (interface.get_prefix_name() == imu_name_)
             {
                 ctrl_interfaces_.imu_state_interface_.emplace_back(interface);

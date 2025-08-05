@@ -186,7 +186,7 @@ private:
     ModelParams params_;
     Observations obs_;
     Control control_;
-    double init_pos_[18] = {};
+    double init_pos_[20] = {};
 
     RobotState<double> robot_state_;
     RobotCommand<double> robot_command_;
