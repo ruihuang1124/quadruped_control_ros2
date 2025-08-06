@@ -42,8 +42,6 @@ private:
     rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_client;
 
     void cmdMappingCallback(const std_msgs::msg::String keyboard_input) {
-        initControlInputCmd();
-        initPoseControlInputCmd();
         switch (keyboard_input.data[0]) {
             case 'w':
             case 'W':
@@ -55,20 +53,20 @@ private:
                 break;
             case 'a':
             case 'A':
-                pose_control_input_cmd_.pos_y += 0.1;
+                pose_control_input_cmd_.pos_z += 0.1;
                 break;
             case 'd':
             case 'D':
-                pose_control_input_cmd_.pos_y -= 0.1;
+                pose_control_input_cmd_.pos_z -= 0.1;
                 break;
             case '=':
             case '+':
-                control_input_cmd_.ly = 0.25;
+                control_input_cmd_.ly += 0.25;
                 control_input_cmd_.command = 4;
                 break;
             case '-':
             case '_':
-                control_input_cmd_.ly = -0.25;
+                control_input_cmd_.ly -= 0.25;
                 control_input_cmd_.command = 4;
                 break;
             case '1':
