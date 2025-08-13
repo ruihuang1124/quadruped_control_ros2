@@ -4,7 +4,7 @@ project(quadruped_manipulator_description)
 find_package(ament_cmake REQUIRED)
 
 install(
-		DIRECTORY meshes xacro launch config urdf xml assets
+		DIRECTORY xacro launch config urdf xml assets
 		DESTINATION share/${PROJECT_NAME}/
 )
 
