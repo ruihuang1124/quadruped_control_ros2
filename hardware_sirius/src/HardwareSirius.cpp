@@ -38,8 +38,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
         std::bind(&HardwareSirius::robot_state_callback, this, std::placeholders::_1));
 
     // publish
-    auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
-    robot_cmd_publisher_ = node_->create_publisher<robot_interface::msg::RobotCMD>("RobotCMD", qos);
+    // auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
+    robot_cmd_publisher_ = node_->create_publisher<robot_interface::msg::RobotCMD>("RobotCMD",10);
 
     return SystemInterface::on_init(info);
 }

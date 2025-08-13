@@ -61,7 +61,7 @@ FSMStateName StateFixedDown::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-    case 1:
+    case 0:
         return FSMStateName::PASSIVE;
     case 2:
         return FSMStateName::FIXEDSTAND;

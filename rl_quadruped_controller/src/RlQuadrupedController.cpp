@@ -171,6 +171,32 @@ namespace rl_quadruped_controller
                 ctrl_interfaces_.control_inputs_.ry = msg->ry;
             });
 
+        sub_joy_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
+            {
+                // Handle message
+                ctrl_interfaces_.control_inputs_.lx = msg->axes[1];
+                ctrl_interfaces_.control_inputs_.ly = msg->axes[0];
+                ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
+                if (msg->buttons[10]) // RB
+                {
+                    if (msg->buttons[3]) // Y
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 2;
+                    }
+                    else if (msg->buttons[0]) // A
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 1;
+                    } else if (msg->buttons[1]) // B
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 0;
+                    } else if (msg->buttons[2]) // X
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 3;
+                    }
+                }
+            });
+
         return CallbackReturn::SUCCESS;
     }
 

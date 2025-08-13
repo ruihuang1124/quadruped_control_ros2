@@ -176,10 +176,12 @@ FSMStateName StateRL::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-    case 1:
+    case 0:
         return FSMStateName::PASSIVE;
-    case 2:
+    case 1:
         return FSMStateName::FIXEDDOWN;
+    case 2:
+        return FSMStateName::FIXEDSTAND;
     default:
         return FSMStateName::RL;
     }
@@ -375,9 +377,9 @@ void StateRL::getState()
         robot_state_.motor_state.tauEst[i] = ctrl_interfaces_.joint_effort_state_interface_[i].get().get_value();
     }
 
-    control_.x = ctrl_interfaces_.control_inputs_.ly;
-    control_.y = -ctrl_interfaces_.control_inputs_.lx;
-    control_.yaw = -ctrl_interfaces_.control_inputs_.rx;
+    control_.x = ctrl_interfaces_.control_inputs_.lx;
+    control_.y = ctrl_interfaces_.control_inputs_.ly;
+    control_.yaw = ctrl_interfaces_.control_inputs_.rx;
 
     updated_ = true;
 }

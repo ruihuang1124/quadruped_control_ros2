@@ -28,6 +28,7 @@ set(dependencies
         kdl_parser
         ament_index_cpp
         controller_common
+        sensor_msgs
 )
 
 # find dependencies
