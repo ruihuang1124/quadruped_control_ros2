@@ -33,13 +33,13 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
 
     node_ = rclcpp::Node::make_shared("ros2_control_hardware_sirius");
     // subscription
-   robot_state_subscriber_ = node_->create_subscription<custom_msgs::msg::RobotState>(
+   robot_state_subscriber_ = node_->create_subscription<robot_interface::msg::RobotState>(
         "ROS2_Robot_State", rclcpp::SensorDataQoS(),
         std::bind(&HardwareSirius::robot_state_callback, this, std::placeholders::_1));
 
     // publish
     auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
-    robot_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::RobotCMD>("RobotCMD", qos);
+    robot_cmd_publisher_ = node_->create_publisher<robot_interface::msg::RobotCMD>("RobotCMD", qos);
 
     return SystemInterface::on_init(info);
 }
@@ -105,7 +105,7 @@ return_type HardwareSirius::read(const rclcpp::Time & /*time*/, const rclcpp::Du
 return_type HardwareSirius::write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
     // TODO: emplace_back or push_back
-    custom_msgs::msg::RobotCMD robot_cmds;
+    robot_interface::msg::RobotCMD robot_cmds;
     for (size_t i = 0; i < info_.joints.size(); i++)
     {
         robot_cmds.q[i] = joint_position_commands_[info_.joints[i].name]; // check the order TODO.
@@ -119,7 +119,7 @@ return_type HardwareSirius::write(const rclcpp::Time & /*time*/, const rclcpp::D
 }
 
 
-void HardwareSirius::robot_state_callback(const custom_msgs::msg::RobotState robot_state) {
+void HardwareSirius::robot_state_callback(const robot_interface::msg::RobotState robot_state) {
     for (size_t i = 0; i < info_.joints.size(); i++) {
         joint_position_states_[info_.joints[i].name] = robot_state.q[i]; // check the order TODO.
         joint_velocity_states_[info_.joints[i].name] = robot_state.qd[i];

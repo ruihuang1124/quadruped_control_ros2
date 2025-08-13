@@ -7,8 +7,11 @@
 #include "hardware_interface/system_interface.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
-#include "custom_msgs/msg/robot_state.hpp"
-#include "custom_msgs/msg/robot_cmd.hpp"
+// #include "custom_msgs/msg/robot_state.hpp"
+// #include "custom_msgs/msg/robot_cmd.hpp"
+#include "robot_interface/msg/robot_cmd.hpp"
+#include "robot_interface/msg/robot_state.hpp"
+
 
 class HardwareSirius final : public hardware_interface::SystemInterface
 {
@@ -24,7 +27,7 @@ public:
     hardware_interface::return_type write(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/) override;
 
 protected:
-    void robot_state_callback(const custom_msgs::msg::RobotState robot_state);
+    void robot_state_callback(const robot_interface::msg::RobotState robot_state);
 
     // cmd
     std::unordered_map<std::string, double> joint_position_commands_;
@@ -42,7 +45,7 @@ protected:
     /*node*/
     rclcpp::Node::SharedPtr node_;
     /*publisher*/
-    rclcpp::Publisher<custom_msgs::msg::RobotCMD>::SharedPtr robot_cmd_publisher_;
+    rclcpp::Publisher<robot_interface::msg::RobotCMD>::SharedPtr robot_cmd_publisher_;
     /*subscriber*/
-    rclcpp::Subscription<custom_msgs::msg::RobotState>::SharedPtr robot_state_subscriber_;
+    rclcpp::Subscription<robot_interface::msg::RobotState>::SharedPtr robot_state_subscriber_;
 };
