@@ -85,7 +85,15 @@ def launch_setup(context, *args, **kwargs):
         executable="cmd_mapping",
     )
 
+    joy_node = Node(
+        package='joy',
+        namespace='',
+        executable='game_controller_node',
+        name='joy_package'
+    )
+
     return [
+        joy_node,
         rviz,
         cmd_mapping,
         robot_state_publisher,
@@ -116,15 +124,15 @@ def generate_launch_description():
     return LaunchDescription([
         pkg_description,
         OpaqueFunction(function=launch_setup),
-        ExecuteProcess(
-            cmd=[
-                "gnome-terminal",
-                "--",
-                "ros2",
-                "run",
-                "keyboard_input",
-                "keyboard_publisher",
-            ],
-            output="screen",
-        ),
+        # ExecuteProcess(
+        #     cmd=[
+        #         "gnome-terminal",
+        #         "--",
+        #         "ros2",
+        #         "run",
+        #         "keyboard_input",
+        #         "keyboard_publisher",
+        #     ],
+        #     output="screen",
+        # ),
     ])
