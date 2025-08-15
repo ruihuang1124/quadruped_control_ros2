@@ -238,11 +238,11 @@ torch::Tensor StateQWRL::computeObservation()
             obs_list.push_back(obs_.actions);
         }
     }
-    for (int i = 0; i <obs_list.size(); i++)
-    {
-        std::cout << obs_list[i].sizes() << std::endl;
-        // obs_list[i].sizes;
-    }
+    // for (int i = 0; i <obs_list.size(); i++)
+    // {
+    //     std::cout << obs_list[i].sizes() << std::endl;
+    //     // obs_list[i].sizes;
+    // }
 
     const torch::Tensor obs = cat(obs_list, 1);
 
@@ -363,10 +363,10 @@ torch::Tensor StateQWRL::quatRotateInverse(const torch::Tensor& q, const torch::
 
 torch::Tensor StateQWRL::forward()
 {
-    std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
+    // std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
     torch::autograd::GradMode::set_enabled(false);
     torch::Tensor clamped_obs = computeObservation();
-    std::cout << "the dimension of obs is"<< clamped_obs.sizes() << std::endl;
+    // std::cout << "the dimension of obs is"<< clamped_obs.sizes() << std::endl;
     torch::Tensor actions;
 
     if (!params_.observations_history.empty())
@@ -419,9 +419,9 @@ void StateQWRL::getState()
         robot_state_.motor_state.tauEst[i] = ctrl_interfaces_.joint_effort_state_interface_[i].get().get_value();
     }
 
-    control_.vel_x = ctrl_interfaces_.control_inputs_.ly;
-    control_.vel_y = -ctrl_interfaces_.control_inputs_.lx;
-    control_.vel_yaw = -ctrl_interfaces_.control_inputs_.rx;
+    control_.vel_x = ctrl_interfaces_.control_inputs_.lx;
+    control_.vel_y = ctrl_interfaces_.control_inputs_.ly;
+    control_.vel_yaw = ctrl_interfaces_.control_inputs_.rx;
 
     control_.pos_x = ctrl_interfaces_.pose_cmd_inputs_.pos_x;
     control_.pos_y = ctrl_interfaces_.pose_cmd_inputs_.pos_y;
