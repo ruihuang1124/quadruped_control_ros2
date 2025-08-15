@@ -23,7 +23,12 @@ enum class FSMStateName
     QMFIXEDDOWN,
     QMFIXEDSTAND,
     QMPASSIVE,
-    QMRL
+    QMRL,
+
+    QWFIXEDDOWN,
+    QWFIXEDSTAND,
+    QWPASSIVE,
+    QWRL
 };
 
 enum class FSMMode

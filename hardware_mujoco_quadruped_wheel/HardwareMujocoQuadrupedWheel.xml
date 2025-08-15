@@ -1,0 +1,9 @@
+<library path="hardware_mujoco_quadruped_wheel">
+  <class name="hardware_mujoco_quadruped_wheel/HardwareMujocoQuadrupedWheel"
+         type="HardwareMujocoQuadrupedWheel"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for mujoco quadruped wheel robot.
+    </description>
+  </class>
+</library>

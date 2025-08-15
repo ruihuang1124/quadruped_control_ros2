@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/transmission.xacro"/>
+
+    <!--    left for true, front for true-->
+    <xacro:macro name="leg"
+                 params="prefix left_right_bool front_hind_bool left_right_mirror front_hind_mirror *origin">
+
+        <!--       *********************************** abad description *************8-->
+        <joint name="${prefix}_HAA" type="revolute">
+            <!--            insert start block from parent file-->
+            <xacro:insert_block name="origin"/>
+            <parent link="trunk"/>
+            <child link="${prefix}_hip"/>
+            <axis xyz="1 0 0"/>
+            <dynamics damping="${damping}" friction="${friction}"/>
+            <limit effort="${abad_torque_max}" velocity="${abad_velocity_max}" lower="${abad_position_min}"
+                   upper="${abad_position_max}"/>
+        </joint>
+
+        <link name="${prefix}_hip">
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_abad_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_abad_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_abad_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_abad_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                </geometry>
+                <material name="orange"/>
+            </visual>
+                    <collision>
+                        <origin rpy="${pi/2} 0 0"
+                                   xyz="${abad_origin_x*front_hind_mirror} ${abad_origin_y*left_right_mirror} 0"/>
+                        <geometry>
+                            <cylinder length="${abad_length}" radius="${abad_radius}"/>
+                        </geometry>
+                    </collision>
+
+            <!--            tochange here-->
+            <!--            <collision>-->
+            <!--                <origin rpy="${pi/2} 0 0"-->
+            <!--                        xyz="${abad_origin_x*front_hind_mirror} ${abad_origin_y*left_right_mirror} 0"/>-->
+            <!--                <geometry>-->
+            <!--                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_abad_link.dae"-->
+            <!--                              scale="1 1 1"/>-->
+            <!--                    </xacro:if>-->
+            <!--                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_abad_link.dae"-->
+            <!--                              scale="1 1 1"/>-->
+            <!--                    </xacro:if>-->
+            <!--                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_abad_link.dae"-->
+            <!--                              scale="1 1 1"/>-->
+            <!--                    </xacro:if>-->
+            <!--                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_abad_link.dae"-->
+            <!--                              scale="1 1 1"/>-->
+            <!--                    </xacro:if>-->
+            <!--                </geometry>-->
+            <!--            </collision>-->
+            <inertial>
+                <origin rpy="0 0 0"
+                        xyz="${abad_com_x*front_hind_mirror} ${abad_com_y*left_right_mirror} ${abad_com_z}"/>
+                <mass value="${abad_mass}"/>
+                <inertia
+                        ixx="${abad_ixx}" ixy="${abad_ixy*front_hind_mirror*left_right_mirror}"
+                        ixz="${abad_ixz*front_hind_mirror}"
+                        iyy="${abad_iyy}" iyz="${abad_iyz*left_right_mirror}"
+                        izz="${abad_izz}"/>
+            </inertial>
+        </link>
+
+
+        <!--        *************************************** hip description ******************************************************-->
+
+        <joint name="${prefix}_HFE" type="revolute">
+            <origin rpy="0 0 0" xyz="${hip_origin_x*front_hind_mirror} ${hip_origin_y*left_right_mirror} 0"/>
+            <parent link="${prefix}_hip"/>
+            <child link="${prefix}_thigh"/>
+            <axis xyz="0 1 0"/>
+            <dynamics damping="${damping}" friction="${friction}"/>
+            <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_position_min}"
+                   upper="${hip_position_max}"/>
+        </joint>
+
+
+        <link name="${prefix}_thigh">
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_hip_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_hip_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_hip_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_hip_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                </geometry>
+                <material name="orange"/>
+            </visual>
+
+            <collision>
+                <origin rpy="${pi/2} 0 0"
+                        xyz="0 0 0"/>
+                <geometry>
+                    <cylinder length="${hip_shoulder_length}" radius="${hip_shoulder_radius}"/>
+                </geometry>
+            </collision>
+            <collision>
+                <origin rpy="${pi/2} 0 0"
+                        xyz="0 ${hip_shoulder2_y_offset*left_right_mirror} 0"/>
+                <geometry>
+                    <cylinder length="${hip_shoulder2_length}" radius="${hip_shoulder2_radius}"/>
+                </geometry>
+            </collision>
+            <collision>
+                <origin rpy="0 ${(90)/180*pi} 0"
+                        xyz="${hip_x_offset} 0 ${hip_z_offset}"/>
+                <geometry>
+                    <box size="${hip_length} ${hip_width} ${hip_height}"/>
+                </geometry>
+            </collision>
+
+            <inertial>
+                <origin rpy="0 0 0" xyz="${hip_com_x*front_hind_mirror} ${hip_com_y*left_right_mirror} ${hip_com_z}"/>
+                <mass value="${hip_mass}"/>
+                <inertia
+                        ixx="${hip_ixx}" ixy="${hip_ixy*left_right_mirror}" ixz="${hip_ixz}"
+                        iyy="${hip_iyy}" iyz="${hip_iyz*left_right_mirror}"
+                        izz="${hip_izz}"/>
+            </inertial>
+        </link>
+
+        <!--************************************************ knee description ***********************************************************8-->
+        <joint name="${prefix}_KFE" type="revolute">
+            <origin rpy="0 0 0"
+                    xyz="${knee_origin_x*front_hind_mirror} ${knee_origin_y*left_right_mirror} ${knee_origin_z}"/>
+            <parent link="${prefix}_thigh"/>
+            <child link="${prefix}_calf"/>
+            <axis xyz="0 1 0"/>
+            <dynamics damping="${damping}" friction="${friction}"/>
+            <limit effort="${knee_torque_max}" velocity="${knee_velocity_max}" lower="${knee_position_min}"
+                   upper="${knee_position_max}"/>
+        </joint>
+
+        <link name="${prefix}_calf">
+            <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                </geometry>
+                <material name="orange"/>
+            </visual>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_knee_link.dae"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                </geometry>
+            </collision>
+
+            <inertial>
+                <origin rpy="0 0 0" xyz="${knee_com_x} ${knee_com_y} ${knee_com_z}"/>
+                <mass value="${knee_mass}"/>
+                <inertia
+                        ixx="${knee_ixx}" ixy="${knee_ixy}" ixz="${knee_ixz}"
+                        iyy="${knee_iyy}" iyz="${knee_iyz}"
+                        izz="${knee_izz}"/>
+            </inertial>
+        </link>
+
+        <!--       ******************************* foot description ********************************8-->
+        <joint name="${prefix}_foot_fixed" type="fixed">
+            <origin rpy="-1.57 0 ${-1.57+left_right_mirror*1.57}" xyz="${-0.01*front_hind_mirror} ${0.07825*left_right_mirror} -0.29973"/>
+            <parent link="${prefix}_calf"/>
+            <child link="${prefix}_WHEEL_LINK"/>
+        </joint>
+
+        <link name="${prefix}_WHEEL_LINK">
+            <visual>
+                    <origin rpy="0.0 0 0" xyz="0 0 0"/>
+                <geometry>
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/wheel_motor.STL"
+                              scale="1 1 1"/>
+                </geometry>
+                <material name="orange"/>
+            </visual>
+            <inertial>
+                <origin rpy="0 0 0" xyz="${wheel_motor_com_x} ${wheel_motor_com_y} ${wheel_motor_com_z}"/>
+                <mass value="${wheel_motor_mass}"/>
+                <inertia
+                        ixx="${wheel_motor_ixx}" ixy="${wheel_motor_ixy}" ixz="${wheel_motor_ixz}"
+                        iyy="${wheel_motor_iyy}" iyz="${wheel_motor_iyz}"
+                        izz="${wheel_motor_izz}"/>
+            </inertial>
+        </link>
+        <!--        ************************** wheel description ***********************************************8-->
+        <joint name="${prefix}_WHEEL" type="revolute">
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <parent link="${prefix}_WHEEL_LINK"/>
+            <child link="${prefix}_FOOT"/>
+            <axis xyz="0 0 ${1*left_right_mirror}"/>
+            <dynamics damping="${damping}" friction="${friction}"/>
+            <limit effort="${wheel_torque_max}" velocity="${wheel_velocity_max}" lower="${wheel_position_min}"
+                   upper="${wheel_position_max}"/>
+        </joint>
+
+        <link name="${prefix}_FOOT">
+            <visual>
+                    <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/wheel_link.STL"
+                              scale="1 1 1"/>
+                </geometry>
+                <material name="orange"/>
+            </visual>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 ${wheel_origin_z}"/>
+                <geometry>
+                    <cylinder length="${wheel_length}" radius="${wheel_radius}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin rpy="0 0 0" xyz="${wheel_com_x} ${wheel_com_y} ${wheel_com_z}"/>
+                <mass value="${wheel_mass}"/>
+                <inertia
+                        ixx="${wheel_ixx}" ixy="${wheel_ixy}" ixz="${wheel_ixz}"
+                        iyy="${wheel_iyy}" iyz="${wheel_iyz}"
+                        izz="${wheel_izz}"/>
+            </inertial>
+        </link>
+
+        <!--        ************************** gazebo setting ***********************************************8-->
+        <gazebo reference="${prefix}_foot_fixed">
+            <disableFixedJointLumping>true</disableFixedJointLumping>
+        </gazebo>
+
+        <gazebo reference="${prefix}_hip">
+            <!--            <mu1>0.5</mu1>-->
+            <!--            <mu2>0.5</mu2>-->
+            <!--            <self_collide>1</self_collide>-->
+            <!--            <material>Gazebo/DarkGrey</material>-->
+        </gazebo>
+        <gazebo reference="${prefix}_thigh">
+            <mu1>0.6</mu1>
+            <mu2>0.6</mu2>
+            <self_collide>0</self_collide>
+            <material>Gazebo/DarkGrey</material>
+            <kp value="100000.0"/>
+            <kd value="1.0"/>
+        </gazebo>
+        <gazebo reference="${prefix}_calf">
+            <mu1>0.6</mu1>
+            <mu2>0.6</mu2>
+            <self_collide>1</self_collide>
+            <material>Gazebo/DarkGrey</material>
+            <kp value="100000.0"/>
+            <kd value="1.0"/>
+            <maxVel>10.0</maxVel>
+            <minDepth>0.001</minDepth>
+        </gazebo>
+        <gazebo reference="${prefix}_FOOT">
+            <mu1>0.6</mu1>
+            <mu2>0.6</mu2>
+            <self_collide>1</self_collide>
+            <material>Gazebo/DarkGrey</material>
+            <kp value="100000.0"/>
+            <kd value="1.0"/>
+        </gazebo>
+        <xacro:leg_transmission name="${prefix}"/>
+    </xacro:macro>
+</robot>
