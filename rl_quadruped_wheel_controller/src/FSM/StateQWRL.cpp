@@ -516,7 +516,7 @@ void StateQWRL::runModel()
         robot_command_.motor_command.q[i + params_.num_of_dofs - 4] = 0;
         robot_command_.motor_command.dq[i + params_.num_of_dofs - 4] = output_dof_pos_[0][i + params_.num_of_dofs - 4].item<double>();
         robot_command_.motor_command.kp[i + params_.num_of_dofs - 4] = 0.0;
-        robot_command_.motor_command.kd[i + params_.num_of_dofs - 4] = 0.5;
+        robot_command_.motor_command.kd[i + params_.num_of_dofs - 4] = 3.0;
         robot_command_.motor_command.tau[i + params_.num_of_dofs - 4] = 0;
     }
 
