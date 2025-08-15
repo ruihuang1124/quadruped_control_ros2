@@ -34,6 +34,10 @@ void StateQWFixedStand::enter()
         ctrl_interfaces_.joint_torque_command_interface_[i].get().set_value(0);
         ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_);
         ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(kd_);
+        if (i>=12)
+        {
+            ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(0.0);
+        }
     }
     ctrl_interfaces_.control_inputs_.command = 0;
     std::cout <<"finish entering fixed stand fsm!!! "<< std::endl;

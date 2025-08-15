@@ -36,6 +36,10 @@ void StateQWFixedDown::enter()
         ctrl_interfaces_.joint_torque_command_interface_[i].get().set_value(0);
         ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_);
         ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(kd_);
+        if (i>=12)
+        {
+            ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(0.0);
+        }
     }
     std::cout <<"after enter fixed down fsm!!! "<< std::endl;
 }
