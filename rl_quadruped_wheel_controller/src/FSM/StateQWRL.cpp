@@ -481,8 +481,14 @@ void StateQWRL::runModel()
     // obs_.actions = clamped_actions_output;
 
     const torch::Tensor actions_scaled = clamped_actions * params_.action_scale;
-    actions_scaled.slice(/*dim=*/0, /*start=*/0, /*end=*/12) = clamped_actions.slice(/*dim=*/0, /*start=*/0, /*end=*/12) * params_.action_scale;
-    actions_scaled.slice(/*dim=*/0, /*start=*/12, /*end=*/16) = clamped_actions.slice(/*dim=*/0, /*start=*/12, /*end=*/16) * params_.action_scale_wheel;
+    // std::cout<<"actions_scaled before: "<<actions_scaled<<std::endl;
+    actions_scaled.slice(/*dim=*/1, /*start=*/0, /*end=*/12) = clamped_actions.slice(/*dim=*/1, /*start=*/0, /*end=*/12) * params_.action_scale;
+    actions_scaled.slice(/*dim=*/1, /*start=*/12, /*end=*/16) = clamped_actions.slice(/*dim=*/1, /*start=*/12, /*end=*/16) * params_.action_scale_wheel;
+    // torch::Tensor joint_scale = torch::full({1, 12}, 0.25);
+    // torch::Tensor wheel_scale = torch::full({1, 4}, 5.0);
+    // actions_scaled.slice(/*dim=*/1, /*start=*/0, /*end=*/12) = clamped_actions.slice(/*dim=*/1, /*start=*/0, /*end=*/12) * joint_scale;
+    // actions_scaled.slice(/*dim=*/1, /*start=*/12, /*end=*/16) = clamped_actions.slice(/*dim=*/1, /*start=*/12, /*end=*/16) * wheel_scale;
+    // std::cout<<"actions_scaled after: "<<actions_scaled<<std::endl;
     // RCLCPP_INFO(node_->get_logger(),
     //             "action_scaled: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
     //             actions_scaled[0][0], actions_scaled[0][1], actions_scaled[0][2], actions_scaled[0][3],
