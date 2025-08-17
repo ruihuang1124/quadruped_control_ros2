@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:include filename="$(find Sirius_Wheel_description)/xacro/transmission.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/transmission.xacro"/>
 
     <!--    left for true, front for true-->
     <xacro:macro name="leg"
@@ -24,19 +24,19 @@
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fl_abad_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_abad_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fr_abad_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_abad_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rl_abad_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_abad_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rr_abad_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_abad_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
@@ -56,19 +56,19 @@
             <!--                        xyz="${abad_origin_x*front_hind_mirror} ${abad_origin_y*left_right_mirror} 0"/>-->
             <!--                <geometry>-->
             <!--                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">-->
-            <!--                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fl_abad_link.dae"-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_abad_link.dae"-->
             <!--                              scale="1 1 1"/>-->
             <!--                    </xacro:if>-->
             <!--                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">-->
-            <!--                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fr_abad_link.dae"-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_abad_link.dae"-->
             <!--                              scale="1 1 1"/>-->
             <!--                    </xacro:if>-->
             <!--                    <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">-->
-            <!--                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rl_abad_link.dae"-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_abad_link.dae"-->
             <!--                              scale="1 1 1"/>-->
             <!--                    </xacro:if>-->
             <!--                    <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">-->
-            <!--                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rr_abad_link.dae"-->
+            <!--                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_abad_link.dae"-->
             <!--                              scale="1 1 1"/>-->
             <!--                    </xacro:if>-->
             <!--                </geometry>-->
@@ -104,19 +104,19 @@
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fl_hip_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_hip_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fr_hip_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_hip_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rl_hip_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_hip_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rr_hip_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_hip_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
@@ -172,19 +172,19 @@
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fl_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fr_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rl_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rr_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
@@ -194,19 +194,19 @@
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fl_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fl_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == True)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/fr_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/fr_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == True) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rl_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rl_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${(left_right_bool == False) and (front_hind_bool == False)}">
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/rr_knee_link.dae"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/rr_knee_link.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
@@ -233,7 +233,7 @@
             <visual>
                     <origin rpy="0.0 0 0" xyz="0 0 0"/>
                 <geometry>
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/wheel_motor.STL"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/wheel_motor.STL"
                               scale="1 1 1"/>
                 </geometry>
                 <material name="orange"/>
@@ -262,7 +262,7 @@
             <visual>
                     <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                        <mesh filename="package://Sirius_Wheel_description/simplified_meshes/wheel_link.STL"
+                        <mesh filename="package://sirius_wheel_description/simplified_meshes/wheel_link.STL"
                               scale="1 1 1"/>
                 </geometry>
                 <material name="orange"/>

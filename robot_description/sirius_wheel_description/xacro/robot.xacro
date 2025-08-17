@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="Sirius_Wheel_description">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_wheel_description">
 
     <xacro:arg name="DEBUG" default="false"/>
     <xacro:include filename="$(find sirius_wheel_description)/xacro/materials.xacro"/>

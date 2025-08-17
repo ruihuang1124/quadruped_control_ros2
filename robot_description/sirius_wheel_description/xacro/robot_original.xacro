@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="Sirius_Wheel_description">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_wheel_description">
 
     <xacro:arg name="DEBUG" default="false"/>
-    <xacro:include filename="$(find Sirius_Wheel_description)/xacro/materials.xacro"/>
-    <xacro:include filename="$(find Sirius_Wheel_description)/xacro/leg.xacro"/>
-    <xacro:include filename="$(find Sirius_Wheel_description)/xacro/gazebo.xacro"/>
-    <xacro:include filename="$(find Sirius_Wheel_description)/xacro/const.xacro"/>
-    <!--   <xacro:include filename="$(find Sirius_Wheel_description)/xacro/ros2_control_real_robot.xacro"/>-->
-    <xacro:include filename="$(find Sirius_Wheel_description)/xacro/ros2_control.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/materials.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/leg.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/gazebo.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/const.xacro"/>
+    <!--   <xacro:include filename="$(find sirius_wheel_description)/xacro/ros2_control_real_robot.xacro"/>-->
+    <xacro:include filename="$(find sirius_wheel_description)/xacro/ros2_control.xacro"/>
 
     <xacro:if value="$(arg DEBUG)">
         <link name="world"/>
@@ -39,13 +39,13 @@
         <visual>
             <origin rpy="0 0 0" xyz="-0 0 0"/>
             <geometry>
-                <mesh filename="package://Sirius_Wheel_description/simplified_meshes/base_link.dae" scale="1 1 1"/>
+                <mesh filename="package://sirius_wheel_description/simplified_meshes/base_link.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-<!--                <mesh filename="package://Sirius_Wheel_description/simplified_meshes/base_link.dae" scale="1 1 1"/>-->
+<!--                <mesh filename="package://sirius_wheel_description/simplified_meshes/base_link.dae" scale="1 1 1"/>-->
                 <box size="${base_length} ${base_width} ${base_height}"/>
             </geometry>
         </collision>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="Sirius_Wheel_description">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_wheel_description">
 
     <!-- Constants for robot dimensions -->
     <xacro:property name="stick_mass" value="0.00001"/>
