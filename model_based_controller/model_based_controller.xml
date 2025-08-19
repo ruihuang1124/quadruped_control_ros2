@@ -1,0 +1,9 @@
+<library path="model_based_controller">
+    <class name="model_based_controller/ModelBasedController"
+           type="model_based_controller::ModelBasedController"
+           base_class_type="controller_interface::ControllerInterface">
+        <description>
+            Quadruped Controller based on Unitree Guide.
+        </description>
+    </class>
+</library>
