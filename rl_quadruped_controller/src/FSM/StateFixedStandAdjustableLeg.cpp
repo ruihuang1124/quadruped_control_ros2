@@ -48,21 +48,21 @@ void StateFixedStandAdjustableLeg::run(const rclcpp::Time&/*time*/, const rclcpp
             phase * target_pos_adjustable_leg_[i] + (1 - phase) * start_pos_adjustable_leg_[i]);
     }
 
-    // 更新时间计数器（假设100Hz控制频率）
-    tick_count_++;
-    double t = tick_count_ / ctrl_interfaces_.frequency_;
-    // std::cout << sin_amp_ * sin(t) << std::endl;
+    // // 更新时间计数器（假设100Hz控制频率）
+    // tick_count_++;
+    // double t = tick_count_ / ctrl_interfaces_.frequency_;
+    // // std::cout << sin_amp_ * sin(t) << std::endl;
 
     
-    // 更新特定关节的正弦变化值
-    target_pos_adjustable_leg_[8] += sin_amp_ * sin(t);
-    target_pos_adjustable_leg_[9] += sin_amp_ * sin(t);
-    target_pos_adjustable_leg_[10] += sin_amp_ * sin(t+1);
-    target_pos_adjustable_leg_[11] += sin_amp_ * sin(t+1);
-    target_pos_adjustable_leg_[12] += 100*sin_amp_ * sin(t);
-    target_pos_adjustable_leg_[13] += 100*sin_amp_ * sin(t);
-    target_pos_adjustable_leg_[14] += 100*sin_amp_ * sin(t+1);
-    target_pos_adjustable_leg_[15] += 100*sin_amp_ * sin(t+1);
+    // // 更新特定关节的正弦变化值
+    // target_pos_adjustable_leg_[8] += sin_amp_ * sin(t);
+    // target_pos_adjustable_leg_[9] += sin_amp_ * sin(t);
+    // target_pos_adjustable_leg_[10] += sin_amp_ * sin(t+1);
+    // target_pos_adjustable_leg_[11] += sin_amp_ * sin(t+1);
+    // target_pos_adjustable_leg_[12] += 100*sin_amp_ * sin(t);
+    // target_pos_adjustable_leg_[13] += 100*sin_amp_ * sin(t);
+    // target_pos_adjustable_leg_[14] += 100*sin_amp_ * sin(t+1);
+    // target_pos_adjustable_leg_[15] += 100*sin_amp_ * sin(t+1);
 }
 
 void StateFixedStandAdjustableLeg::exit()

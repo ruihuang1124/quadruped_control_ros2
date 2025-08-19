@@ -73,7 +73,7 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
     const std::string package_share_directory = ament_index_cpp::get_package_share_directory(robot_pkg_);
     const std::string model_path = package_share_directory + "/config/" + model_folder_;
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 16; i++)
     {
         init_pos_[i] = target_pos[i];
     }
@@ -131,6 +131,7 @@ void StateRL::enter()
     obs_.ang_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.gravity_vec = torch::tensor({{0.0, 0.0, -1.0}});
     obs_.commands = torch::tensor({{0.0, 0.0, 0.0}});
+    // obs_.pose_commands = torch::tensor({{0.55, 0.0, 0.35, 1.0, 0.0, 0.0, 0.0}});
     obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0, 1.0}});
     obs_.dof_pos = params_.default_dof_pos;
     obs_.dof_vel = torch::zeros({1, params_.num_of_dofs});
@@ -144,6 +145,15 @@ void StateRL::enter()
     control_.x = 0.0;
     control_.y = 0.0;
     control_.yaw = 0.0;
+    // control_.vel_x = 0.0;
+    // control_.vel_y = 0.0;
+    // control_.vel_yaw = 0.0;
+    // control_.pos_x = 0.0;
+    // control_.pos_y = 0.0;
+    // control_.pos_z = 0.0;
+    // control_.pos_yaw = 0.0;
+    // control_.pos_roll = 3.14;
+    // control_.pos_pitch = 0.0;
 
     // history
     if (!params_.observations_history.empty()) {
@@ -172,14 +182,14 @@ FSMStateName StateRL::checkChange()
 {
     if (enable_estimator_ and !estimator_->safety())
     {
-        return FSMStateName::PASSIVE;
+        return FSMStateName::PASSIVEADJUSTABLELEG;
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
     case 1:
-        return FSMStateName::PASSIVE;
+        return FSMStateName::PASSIVEADJUSTABLELEG;
     case 2:
-        return FSMStateName::FIXEDDOWN;
+        return FSMStateName::FIXEDDOWNADJUSTABLELEG;
     default:
         return FSMStateName::RL;
     }
@@ -199,6 +209,7 @@ torch::Tensor StateRL::computeObservation()
         {
             obs_list.push_back(
                 quatRotateInverse(obs_.base_quat, obs_.ang_vel, params_.framework) * params_.ang_vel_scale);
+            // obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
         }
         else if (observation == "gravity_vec")
         {
@@ -207,6 +218,13 @@ torch::Tensor StateRL::computeObservation()
         else if (observation == "commands")
         {
             obs_list.push_back(obs_.commands * params_.commands_scale);
+        // else if (observation == "vel_commands")
+        // {
+        //     obs_list.push_back(obs_.commands);
+        // }
+        // else if (observation == "pose_commands")
+        // {
+        //     obs_list.push_back(obs_.pose_commands); // scale TODO.
         }
         else if (observation == "dof_pos")
         {
@@ -280,8 +298,8 @@ void StateRL::loadYaml(const std::string& config_path)
     params_.ang_vel_scale = config["ang_vel_scale"].as<double>();
     params_.dof_pos_scale = config["dof_pos_scale"].as<double>();
     params_.dof_vel_scale = config["dof_vel_scale"].as<double>();
-    // params_.commands_scale = torch::tensor(ReadVectorFromYaml<double>(config["commands_scale"])).view({1, -1});
-    params_.commands_scale = torch::tensor({params_.lin_vel_scale, params_.lin_vel_scale, params_.ang_vel_scale});
+    params_.commands_scale = torch::tensor(ReadVectorFromYaml<double>(config["commands_scale"])).view({1, -1});
+    // params_.commands_scale = torch::tensor({params_.lin_vel_scale, params_.lin_vel_scale, params_.ang_vel_scale});
     params_.rl_kp = torch::tensor(ReadVectorFromYaml<double>(config["rl_kp"], params_.framework, rows, cols)).view({
         1, -1
     });
@@ -291,7 +309,7 @@ void StateRL::loadYaml(const std::string& config_path)
     params_.torque_limits = torch::tensor(
         ReadVectorFromYaml<double>(config["torque_limits"], params_.framework, rows, cols)).view({1, -1});
 
-    params_.default_dof_pos = torch::from_blob(init_pos_, {12}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    params_.default_dof_pos = torch::from_blob(init_pos_, {16}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
 
     // params_.default_dof_pos = torch::tensor(
     //     ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1});
@@ -368,16 +386,26 @@ void StateRL::getState()
     robot_state_.imu.accelerometer[1] = ctrl_interfaces_.imu_state_interface_[8].get().get_value();
     robot_state_.imu.accelerometer[2] = ctrl_interfaces_.imu_state_interface_[9].get().get_value();
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 16; i++)
     {
         robot_state_.motor_state.q[i] = ctrl_interfaces_.joint_position_state_interface_[i].get().get_value();
         robot_state_.motor_state.dq[i] = ctrl_interfaces_.joint_velocity_state_interface_[i].get().get_value();
         robot_state_.motor_state.tauEst[i] = ctrl_interfaces_.joint_effort_state_interface_[i].get().get_value();
     }
 
-    control_.x = ctrl_interfaces_.control_inputs_.ly;
-    control_.y = -ctrl_interfaces_.control_inputs_.lx;
+    control_.x = ctrl_interfaces_.control_inputs_.lx;
+    control_.y = ctrl_interfaces_.control_inputs_.ly;
     control_.yaw = -ctrl_interfaces_.control_inputs_.rx;
+    // control_.vel_x = ctrl_interfaces_.control_inputs_.lx;
+    // control_.vel_y = ctrl_interfaces_.control_inputs_.ly;
+    // control_.vel_yaw = ctrl_interfaces_.control_inputs_.rx;
+
+    // control_.pos_x = ctrl_interfaces_.pose_cmd_inputs_.pos_x;
+    // control_.pos_y = ctrl_interfaces_.pose_cmd_inputs_.pos_y;
+    // control_.pos_z = ctrl_interfaces_.pose_cmd_inputs_.pos_z;
+    // control_.pos_roll = ctrl_interfaces_.pose_cmd_inputs_.pos_roll;
+    // control_.pos_pitch = ctrl_interfaces_.pose_cmd_inputs_.pos_pitch;
+    // control_.pos_yaw = ctrl_interfaces_.pose_cmd_inputs_.pos_yaw;
 
     updated_ = true;
 }
@@ -391,6 +419,11 @@ void StateRL::runModel()
     }
     obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
     obs_.commands = torch::tensor({{control_.x, control_.y, control_.yaw}});
+    // obs_.commands = torch::tensor({{control_.vel_x, control_.vel_y, control_.vel_yaw}});
+    // torch::Tensor ee_pos = torch::tensor({control_.pos_x, control_.pos_y, control_.pos_z}).unsqueeze(0);
+    // torch::Tensor ee_ori = EulartoQuat(torch::tensor({control_.pos_roll, control_.pos_pitch, control_.pos_yaw}));
+    // obs_.pose_commands = torch::cat({ee_pos, ee_ori}, 1);
+    // obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
     obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
@@ -422,7 +455,7 @@ void StateRL::runModel()
 
 void StateRL::setCommand() const
 {
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 16; i++)
     {
         ctrl_interfaces_.joint_position_command_interface_[i].get().
                                                                             set_value(
@@ -438,3 +471,26 @@ void StateRL::setCommand() const
                                                                               robot_command_.motor_command.tau[i]);
     }
 }
+
+
+// torch::Tensor StateRL::EulartoQuat(torch::Tensor euler) {
+//     // euler: [roll, pitch, yaw]
+//     double roll = euler[0].item<double>();
+//     double pitch = euler[1].item<double>();
+//     double yaw = euler[2].item<double>();
+
+//     double cy = cos(yaw * 0.5);
+//     double sy = sin(yaw * 0.5);
+//     double cp = cos(pitch * 0.5);
+//     double sp = sin(pitch * 0.5);
+//     double cr = cos(roll * 0.5);
+//     double sr = sin(roll * 0.5);
+
+//     torch::Tensor q = torch::zeros(4);
+//     q[0] = cr * cp * cy + sr * sp * sy; // w
+//     q[1] = sr * cp * cy - cr * sp * sy; // x
+//     q[2] = cr * sp * cy + sr * cp * sy; // y
+//     q[3] = cr * cp * sy - sr * sp * cy; // z
+
+//     return q.unsqueeze(0);
+// }

@@ -138,6 +138,12 @@ namespace rl_quadruped_controller_adjustable_leg
                 ctrl_component_.estimator_ = std::make_shared<Estimator>(ctrl_interfaces_, ctrl_component_);
             }
             ctrl_component_.node_ = get_node();
+            // ctrl_interfaces_.pose_cmd_inputs_.pos_x = 0.55;
+            // ctrl_interfaces_.pose_cmd_inputs_.pos_y = 0.0;
+            // ctrl_interfaces_.pose_cmd_inputs_.pos_z = 0.30;
+            // ctrl_interfaces_.pose_cmd_inputs_.pos_roll = 0.0;
+            // ctrl_interfaces_.pose_cmd_inputs_.pos_pitch = 3.14;
+            // ctrl_interfaces_.pose_cmd_inputs_.pos_yaw = 0.0;
         }
         catch (const std::exception& e)
         {
@@ -173,6 +179,22 @@ namespace rl_quadruped_controller_adjustable_leg
                 ctrl_interfaces_.control_inputs_.rx = msg->rx;
                 ctrl_interfaces_.control_inputs_.ry = msg->ry;
             });
+
+        // pose_control_input_subscription_ = get_node()->create_subscription<control_input_msgs::msg::PoseCmdInputs>(
+        //     "/pose_control_input", 10, [this](const control_input_msgs::msg::PoseCmdInputs::SharedPtr msg)
+        //     {
+        //         // Handle message
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_x = msg->pos_x;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_y = msg->pos_y;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_z = msg->pos_z;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_roll = msg->pos_roll;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_pitch = msg->pos_pitch;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_yaw = msg->pos_yaw;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_quat_x = msg->pos_quat_x;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_quat_y = msg->pos_quat_y;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_quat_z = msg->pos_quat_z;
+        //         ctrl_interfaces_.pose_cmd_inputs_.pos_quat_w = msg->pos_quat_w;
+        //     });
 
         return CallbackReturn::SUCCESS;
     }
@@ -221,7 +243,7 @@ namespace rl_quadruped_controller_adjustable_leg
         state_list_.fixedDownAdjustableLeg = std::make_shared<StateFixedDownAdjustableLeg>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
         // state_list_.fixedStand = std::make_shared<StateFixedStand>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_);
         state_list_.fixedStandAdjustableLeg = std::make_shared<StateFixedStandAdjustableLeg>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_, stand_pos_adjustable_leg_);
-        state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_);
+        state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_adjustable_leg_);
 
         // Initialize FSM
         current_state_ = state_list_.passiveAdjustableLeg;

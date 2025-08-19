@@ -86,6 +86,15 @@ struct Control
     double x = 0.0;
     double y = 0.0;
     double yaw = 0.0;
+    // double vel_x = 0.0;
+    // double vel_y = 0.0;
+    // double vel_yaw = 0.0;
+    // double pos_x = 0.0;
+    // double pos_y = 0.0;
+    // double pos_z = 0.0;
+    // double pos_roll = 0.0;
+    // double pos_pitch = 0.0;
+    // double pos_yaw = 0.0;
 };
 
 struct ModelParams
@@ -122,6 +131,7 @@ struct Observations
     torch::Tensor ang_vel;
     torch::Tensor gravity_vec;
     torch::Tensor commands;
+    // torch::Tensor pose_commands;
     torch::Tensor base_quat;
     torch::Tensor dof_pos;
     torch::Tensor dof_vel;
@@ -147,6 +157,8 @@ public:
 private:
     torch::Tensor computeObservation();
 
+    // torch::Tensor EulartoQuat(torch::Tensor euler);
+
     void loadYaml(const std::string& config_path);
 
     static torch::Tensor quatRotateInverse(const torch::Tensor& q, const torch::Tensor& v,
@@ -164,7 +176,7 @@ private:
     void setCommand() const;
 
     std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node_;
-    std::string robot_pkg_ = "go2_description";
+    std::string robot_pkg_ = "arcdog_adjustable_leg_description";
     std::string model_folder_ = "legged_gym";
 
     bool enable_estimator_;
@@ -174,7 +186,7 @@ private:
     ModelParams params_;
     Observations obs_;
     Control control_;
-    double init_pos_[12] = {};
+    double init_pos_[16] = {};
 
     RobotState<double> robot_state_;
     RobotCommand<double> robot_command_;

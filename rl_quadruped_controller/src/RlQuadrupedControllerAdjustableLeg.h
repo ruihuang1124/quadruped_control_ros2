@@ -127,6 +127,7 @@ namespace rl_quadruped_controller_adjustable_leg
         };
 
         rclcpp::Subscription<control_input_msgs::msg::Inputs>::SharedPtr control_input_subscription_;
+        // rclcpp::Subscription<control_input_msgs::msg::PoseCmdInputs>::SharedPtr pose_control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
 
         FSMMode mode_ = FSMMode::NORMAL;

@@ -3,6 +3,7 @@
 //
 
 #include "RlQuadrupedController.h"
+#include <iostream>
 
 namespace rl_quadruped_controller
 {
@@ -12,6 +13,7 @@ namespace rl_quadruped_controller
     {
         controller_interface::InterfaceConfiguration conf = {config_type::INDIVIDUAL, {}};
 
+        std::cout << "1111111111111111111" << std::endl;
         conf.names.reserve(joint_names_.size() * command_interface_types_.size());
         for (const auto& joint_name : joint_names_)
         {
@@ -33,6 +35,7 @@ namespace rl_quadruped_controller
 
     controller_interface::InterfaceConfiguration LeggedGymController::state_interface_configuration() const
     {
+        // std::cout << "555555555555" << std::endl;
         controller_interface::InterfaceConfiguration conf = {config_type::INDIVIDUAL, {}};
 
         conf.names.reserve(joint_names_.size() * state_interface_types_.size());
@@ -60,6 +63,7 @@ namespace rl_quadruped_controller
     controller_interface::return_type LeggedGymController::
     update(const rclcpp::Time& time, const rclcpp::Duration& period)
     {
+        // std::cout << "444444444444444444444" << std::endl;
         if (ctrl_component_.enable_estimator_)
         {
             if (ctrl_component_.robot_model_ == nullptr)
