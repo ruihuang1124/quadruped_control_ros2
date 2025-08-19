@@ -1,5 +1,5 @@
 //
-// Created by biao on 24-9-10.
+// Created by ray on 25-8-19.
 //
 
 #include "model_based_controller/FSM/StateFixedStand.h"
@@ -15,18 +15,12 @@ FSMStateName StateFixedStand::checkChange() {
         return FSMStateName::FIXEDSTAND;
     }
     switch (ctrl_interfaces_.control_inputs_.command) {
-        case 1:
+        case 0:
             return FSMStateName::PASSIVE;
-        case 2:
+        case 1:
             return FSMStateName::FIXEDDOWN;
         case 3:
             return FSMStateName::FREESTAND;
-        case 4:
-            return FSMStateName::TROTTING;
-        case 5:
-            return FSMStateName::SWINGTEST;
-        case 6:
-            return FSMStateName::BALANCETEST;
         default:
             return FSMStateName::FIXEDSTAND;
     }

@@ -33,7 +33,7 @@ void BaseFixedStand::enter()
         ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_);
         ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(kd_);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
 }
 
 void BaseFixedStand::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)

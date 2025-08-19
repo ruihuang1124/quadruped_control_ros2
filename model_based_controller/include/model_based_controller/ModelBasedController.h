@@ -1,9 +1,9 @@
 //
-// Created by tlab-uav on 24-9-6.
+// Created by ray on 25-8-19.
 //
 
-#ifndef QUADRUPEDCONTROLLER_H
-#define QUADRUPEDCONTROLLER_H
+#ifndef MODELBASEDCONTROLLER_H
+#define MODELBASEDCONTROLLER_H
 
 #include <controller_interface/controller_interface.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -11,6 +11,7 @@
 #include <controller_common/FSM/StatePassive.h>
 #include <controller_common/FSM/StateFixedDown.h>
 #include <controller_common/common/enumClass.h>
+#include <sensor_msgs/msg/joy.hpp>
 
 #include "control/CtrlComponent.h"
 #include "FSM/StateBalanceTest.h"
@@ -97,6 +98,8 @@ namespace model_based_controller {
 
         rclcpp::Subscription<control_input_msgs::msg::Inputs>::SharedPtr control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
+
 
         std::unordered_map<
             std::string, std::vector<std::reference_wrapper<hardware_interface::LoanedCommandInterface> > *>
@@ -131,4 +134,4 @@ namespace model_based_controller {
 }
 
 
-#endif //QUADRUPEDCONTROLLER_H
+#endif //MODELBASEDCONTROLLER_H

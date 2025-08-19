@@ -26,7 +26,7 @@ void StateQMFixedDown::enter()
     {
         start_pos_[i] = ctrl_interfaces_.joint_position_state_interface_[i].get().get_value();
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
     for (int i = 0; i < num_joints_; i++)
     {
         ctrl_interfaces_.joint_position_command_interface_[i].get().set_value(start_pos_[i]);

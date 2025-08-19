@@ -1,5 +1,5 @@
 //
-// Created by tlab-uav on 24-9-13.
+// Created by ray on 25-8-19.
 //
 
 #include "model_based_controller/FSM/StateFreeStand.h"
@@ -39,7 +39,7 @@ void StateFreeStand::enter() {
         foot_pos.p -= fr_init_pos_.p;
         foot_pos.M = KDL::Rotation::RPY(0, 0, 0);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
 }
 
 void StateFreeStand::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
@@ -54,8 +54,10 @@ void StateFreeStand::exit() {
 
 FSMStateName StateFreeStand::checkChange() {
     switch (ctrl_interfaces_.control_inputs_.command) {
-        case 1:
+        case 0:
             return FSMStateName::PASSIVE;
+        case 1:
+            return FSMStateName::FIXEDDOWN;
         case 2:
             return FSMStateName::FIXEDSTAND;
         default:

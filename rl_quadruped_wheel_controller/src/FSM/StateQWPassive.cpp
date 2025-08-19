@@ -33,7 +33,7 @@ void StateQWPassive::enter()
     {
         i.get().set_value(1);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
 }
 
 void StateQWPassive::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)

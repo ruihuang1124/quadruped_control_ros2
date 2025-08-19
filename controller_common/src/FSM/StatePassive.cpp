@@ -33,7 +33,7 @@ void StatePassive::enter()
     {
         i.get().set_value(6);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
 }
 
 void StatePassive::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)

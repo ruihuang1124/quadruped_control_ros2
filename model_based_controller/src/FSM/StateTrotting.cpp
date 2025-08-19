@@ -1,5 +1,5 @@
 //
-// Created by tlab-uav on 24-9-18.
+// Created by ray on 25-8-19.
 //
 
 #include "model_based_controller/FSM/StateTrotting.h"
@@ -39,7 +39,7 @@ void StateTrotting::enter() {
     Rd = rotz(yaw_cmd_);
     w_cmd_global_.setZero();
 
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
     gait_generator_.restart();
 }
 

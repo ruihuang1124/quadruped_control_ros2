@@ -1,5 +1,5 @@
 //
-// Created by tlab-uav on 24-9-6.
+// Created by ray on 25-8-19.
 //
 
 #include "model_based_controller/ModelBasedController.h"
@@ -146,6 +146,32 @@ namespace model_based_controller
         std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
         std::cerr << "\n### Start subscribers!!!!!!!!!"<<std::endl;
 
+        sub_joy_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
+            {
+                // Handle message
+                ctrl_interfaces_.control_inputs_.lx = msg->axes[1];
+                ctrl_interfaces_.control_inputs_.ly = msg->axes[0];
+                ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
+                if (msg->buttons[10]) // RB
+                {
+                    if (msg->buttons[3]) // Y
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 2;
+                    }
+                    else if (msg->buttons[0]) // A
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 1;
+                    } else if (msg->buttons[1]) // B
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 0;
+                    } else if (msg->buttons[2]) // X
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 3;
+                    }
+                }
+            });
+
         robot_description_subscription_ = get_node()->create_subscription<std_msgs::msg::String>(
             "/robot_description", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local(),
             [this](const std_msgs::msg::String::SharedPtr msg)
@@ -161,11 +187,11 @@ namespace model_based_controller
             {
                 // Handle message
                 std::cerr << "\n### Start subscribers input!!!!!!!!!"<<std::endl;
-                ctrl_interfaces_.control_inputs_.command = msg->command;
-                ctrl_interfaces_.control_inputs_.lx = msg->lx;
-                ctrl_interfaces_.control_inputs_.ly = msg->ly;
-                ctrl_interfaces_.control_inputs_.rx = msg->rx;
-                ctrl_interfaces_.control_inputs_.ry = msg->ry;
+                // ctrl_interfaces_.control_inputs_.command = msg->command;
+                // ctrl_interfaces_.control_inputs_.lx = msg->lx;
+                // ctrl_interfaces_.control_inputs_.ly = msg->ly;
+                // ctrl_interfaces_.control_inputs_.rx = msg->rx;
+                // ctrl_interfaces_.control_inputs_.ry = msg->ry;
             });
 
         ctrl_component_.wave_generator_ = std::make_shared<WaveGenerator>(0.45, 0.5, Vec4(0, 0.5, 0.5, 0));
