@@ -109,9 +109,17 @@ def launch_setup(context, *args, **kwargs):
         executable="cmd_mapping",
     )
 
+    joy_node = Node(
+        package='joy',
+        namespace='',
+        executable='game_controller_node',
+        name='joy_package'
+    )
+
     nodes = [
         node
         for node in [
+            joy_node,
             cmd_mapping,
             rviz,
             robot_state_publisher,
@@ -127,7 +135,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     robot_pkg = DeclareLaunchArgument(
         "robot_pkg",
-        default_value="sirius_description",
+        default_value="arcdog_description", # arcdog_description sirius_description
         description="package for robot description",
     )
 

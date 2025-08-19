@@ -17,6 +17,7 @@
 #include "ocs2_quadruped_controller/control/CtrlComponent.h"
 #include "ocs2_quadruped_controller/estimator/TerrainEstimator.h"
 #include "ocs2_quadruped_controller/control/StandController.h"
+#include <sensor_msgs/msg/joy.hpp>
 
 namespace ocs2::legged_robot
 {
@@ -108,6 +109,7 @@ namespace ocs2::legged_robot
         double default_kp_ = 0;
         double default_kd_ = 6;
 
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
         rclcpp::Subscription<custom_msgs::msg::UserCmds>::SharedPtr control_input_subscription_;
         rclcpp::Publisher<ocs2_msgs::msg::MpcObservation>::SharedPtr observation_publisher_;
 

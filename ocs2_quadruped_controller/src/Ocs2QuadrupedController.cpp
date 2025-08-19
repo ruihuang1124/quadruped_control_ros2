@@ -267,6 +267,32 @@ namespace ocs2::legged_robot
                 ctrl_comp_.user_cmds_.height_ratio = msg->height_ratio;
                 ctrl_comp_.user_cmds_.passive_enable = msg->passive_enable; });
 
+        sub_joy_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
+                // Handle message
+                ctrl_comp_.user_cmds_.height_ratio = 1.0;
+                ctrl_comp_.user_cmds_.passive_enable = false;
+                ctrl_comp_.user_cmds_.linear_x_input = msg->axes[1];
+                ctrl_comp_.user_cmds_.linear_y_input = msg->axes[0];
+                ctrl_comp_.user_cmds_.angular_z_input = msg->axes[2];
+                if (msg->buttons[10]) // RB
+                {
+                    if (msg->buttons[3]) // Y
+                    {
+                        ctrl_comp_.user_cmds_.gait_name = "stance";
+                    } else if (msg->buttons[0]) // A
+                    {
+                        ctrl_comp_.user_cmds_.gait_name = "bound";
+                    } else if (msg->buttons[1]) // B
+                    {
+                        ctrl_comp_.user_cmds_.gait_name = "stance";
+                    } else if (msg->buttons[2]) // X
+                    {
+                        ctrl_comp_.user_cmds_.gait_name = "trot";
+                    }
+                }
+            });
+
         observation_publisher_ = get_node()->create_publisher<ocs2_msgs::msg::MpcObservation>(
             "legged_robot_mpc_observation", 10);
 
