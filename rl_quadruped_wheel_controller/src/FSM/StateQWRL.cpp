@@ -361,12 +361,35 @@ torch::Tensor StateQWRL::quatRotateInverse(const torch::Tensor& q, const torch::
     return a - b + c;
 }
 
+// torch::Tensor StateQWRL::forward()
+// {
+//     // std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
+//     torch::autograd::GradMode::set_enabled(false);
+//     torch::Tensor clamped_obs = computeObservation();
+//     // std::cout << "the dimension of obs is"<< clamped_obs.sizes() << std::endl;
+//     torch::Tensor actions;
+
+//     if (!params_.observations_history.empty())
+//     {
+//         history_obs_buf_->insert(clamped_obs);
+//         history_obs_ = history_obs_buf_->getObsVec(params_.observations_history);
+//         actions = model_.forward({history_obs_}).toTensor();
+//     }
+//     else
+//     {
+//         actions = model_.forward({clamped_obs}).toTensor();
+//     }
+
+//     if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
+//     {
+//         return clamp(actions, params_.clip_actions_lower, params_.clip_actions_upper);
+//     }
+//     return actions;
+// }
 torch::Tensor StateQWRL::forward()
 {
-    // std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
     torch::autograd::GradMode::set_enabled(false);
     torch::Tensor clamped_obs = computeObservation();
-    // std::cout << "the dimension of obs is"<< clamped_obs.sizes() << std::endl;
     torch::Tensor actions;
 
     if (!params_.observations_history.empty())
@@ -380,12 +403,10 @@ torch::Tensor StateQWRL::forward()
         actions = model_.forward({clamped_obs}).toTensor();
     }
 
-    if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
-    {
-        return clamp(actions, params_.clip_actions_lower, params_.clip_actions_upper);
-    }
+
     return actions;
 }
+
 
 void StateQWRL::getState()
 {
@@ -468,22 +489,22 @@ void StateQWRL::runModel()
     // for (int i = 0; i < 5; i++) {
     //     obs_.dof_vel[0][i+12] = robot_state_.motor_state.dq[i+13];
     // }
-    const torch::Tensor clamped_actions = forward();
+    // const torch::Tensor clamped_actions = forward();
 
-    // const torch::Tensor clamped_actions_output = forward();
-    // torch::Tensor clamped_actions = clamped_actions_output.clone();
-    // for (int i = 0; i < 4; i++) {
-    //     clamped_actions[0][8+i] = clamped_actions_output[0][9+i];
-    // }
-    // clamped_actions[0][12] = clamped_actions_output[0][8];
+    // // const torch::Tensor clamped_actions_output = forward();
+    // // torch::Tensor clamped_actions = clamped_actions_output.clone();
+    // // for (int i = 0; i < 4; i++) {
+    // //     clamped_actions[0][8+i] = clamped_actions_output[0][9+i];
+    // // }
+    // // clamped_actions[0][12] = clamped_actions_output[0][8];
 
-    obs_.actions = clamped_actions;
-    // obs_.actions = clamped_actions_output;
+    // obs_.actions = clamped_actions;
+    // // obs_.actions = clamped_actions_output;
 
-    const torch::Tensor actions_scaled = clamped_actions * params_.action_scale;
-    // std::cout<<"actions_scaled before: "<<actions_scaled<<std::endl;
-    actions_scaled.slice(/*dim=*/1, /*start=*/0, /*end=*/12) = clamped_actions.slice(/*dim=*/1, /*start=*/0, /*end=*/12) * params_.action_scale;
-    actions_scaled.slice(/*dim=*/1, /*start=*/12, /*end=*/16) = clamped_actions.slice(/*dim=*/1, /*start=*/12, /*end=*/16) * params_.action_scale_wheel;
+    // const torch::Tensor actions_scaled = clamped_actions * params_.action_scale;
+    // // std::cout<<"actions_scaled before: "<<actions_scaled<<std::endl;
+    // actions_scaled.slice(/*dim=*/1, /*start=*/0, /*end=*/12) = clamped_actions.slice(/*dim=*/1, /*start=*/0, /*end=*/12) * params_.action_scale;
+    // actions_scaled.slice(/*dim=*/1, /*start=*/12, /*end=*/16) = clamped_actions.slice(/*dim=*/1, /*start=*/12, /*end=*/16) * params_.action_scale_wheel;
     // torch::Tensor joint_scale = torch::full({1, 12}, 0.25);
     // torch::Tensor wheel_scale = torch::full({1, 4}, 5.0);
     // actions_scaled.slice(/*dim=*/1, /*start=*/0, /*end=*/12) = clamped_actions.slice(/*dim=*/1, /*start=*/0, /*end=*/12) * joint_scale;
@@ -504,7 +525,24 @@ void StateQWRL::runModel()
     // std::cout << "obs_actions: " << obs_.actions << std::endl;
 
     // torch::Tensor output_torques = params_.rl_kp * (actions_scaled + params_.default_dof_pos - obs_.dof_pos) - params_.rl_kd * obs_.dof_vel;
+    torch::Tensor raw_actions = forward();
 
+    // step1: scale
+    torch::Tensor actions_scaled = raw_actions.clone();
+    actions_scaled.slice(/*dim=*/1, /*start=*/0, /*end=*/12) = raw_actions.slice(/*dim=*/1, /*start=*/0, /*end=*/12) * params_.action_scale;
+    actions_scaled.slice(/*dim=*/1, /*start=*/12, /*end=*/16) = raw_actions.slice(/*dim=*/1, /*start=*/12, /*end=*/16) * params_.action_scale_wheel;
+
+    // step2: clip
+    if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
+    {
+        actions_scaled = clamp(actions_scaled, params_.clip_actions_lower, params_.clip_actions_upper);
+    }
+    torch::Tensor actions_raw_scaled = raw_actions.clone();
+    if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
+    {
+        actions_raw_scaled = clamp(actions_raw_scaled, params_.clip_actions_lower, params_.clip_actions_upper);
+    }
+    obs_.actions = actions_raw_scaled;
     output_dof_pos_ = actions_scaled + params_.default_dof_pos;
 
 

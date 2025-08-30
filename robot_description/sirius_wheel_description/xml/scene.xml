@@ -15,6 +15,12 @@
     <worldbody>
 <!--        <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>-->
         <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+        <geom name="box_obs"
+            type="box"
+            size="2.0 2.0 0.11"
+            pos="3 0 0.1"
+            rgba="0.8 0.2 0.2 1"
+            contype="1" conaffinity="1"/>
 
         <body mocap="true" name="esti_indicator" pos="0.0 0.0 0.1">
             <site pos="0 0 0.075" size="0.003 0.003 0.1" type="box" name="mocap_left_site1" rgba="0 0 1 1"/>

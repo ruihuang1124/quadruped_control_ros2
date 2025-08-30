@@ -171,9 +171,9 @@ namespace rl_quadruped_wheel_controller
             {
                 // RCLCPP_INFO(get_node()->get_logger(), "received joy msg!!!");
                 // Handle message
-                ctrl_interfaces_.control_inputs_.lx = msg->axes[1];
-                ctrl_interfaces_.control_inputs_.ly = msg->axes[0];
-                ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
+                ctrl_interfaces_.control_inputs_.lx = 0.6*msg->axes[1];
+                ctrl_interfaces_.control_inputs_.ly = 0.6*msg->axes[0];
+                ctrl_interfaces_.control_inputs_.rx = 0.6*msg->axes[2];
                 if (msg->buttons[10]) // RB
                 {
                     if (msg->buttons[3]) // Y
