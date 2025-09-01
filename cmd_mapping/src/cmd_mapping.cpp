@@ -119,27 +119,27 @@ private:
             break;
         case 'w':
         case 'W':
-            control_input_cmd_.ly += 0.25;
+            control_input_cmd_.lx += 0.25;
             break;
         case 's':
         case 'S':
-            control_input_cmd_.ly -= 0.25;
+            control_input_cmd_.lx -= 0.25;
             break;
         case 'a':
         case 'A':
-            control_input_cmd_.lx += 0.25;
+            control_input_cmd_.ly += 0.25;
             break;
         case 'd':
         case 'D':
-            control_input_cmd_.lx -= 0.25;
+            control_input_cmd_.ly -= 0.25;
             break;
         case '-':
         case '_':
-            control_input_cmd_.rx += 0.25;
+            control_input_cmd_.rx -= 0.25;
             break;
         case '=':
         case '+':
-            control_input_cmd_.rx -= 0.25;
+            control_input_cmd_.rx += 0.25;
             break;
         case '1':
             user_cmd_.gait_name = "stance";

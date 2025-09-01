@@ -186,10 +186,12 @@ FSMStateName StateRL::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-    case 1:
+    case 0:
         return FSMStateName::PASSIVEADJUSTABLELEG;
-    case 2:
+    case 1:
         return FSMStateName::FIXEDDOWNADJUSTABLELEG;
+    case 2:
+        return FSMStateName::FIXEDSTANDADJUSTABLELEG;
     default:
         return FSMStateName::RL;
     }
@@ -207,9 +209,9 @@ torch::Tensor StateRL::computeObservation()
         }
         else if (observation == "ang_vel")
         {
-            obs_list.push_back(
-                quatRotateInverse(obs_.base_quat, obs_.ang_vel, params_.framework) * params_.ang_vel_scale);
-            // obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
+            // obs_list.push_back(
+            //     quatRotateInverse(obs_.base_quat, obs_.ang_vel, params_.framework) * params_.ang_vel_scale);
+            obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
         }
         else if (observation == "gravity_vec")
         {

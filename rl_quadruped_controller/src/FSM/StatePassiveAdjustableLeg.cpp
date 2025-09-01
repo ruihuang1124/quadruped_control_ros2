@@ -46,7 +46,7 @@ void StatePassiveAdjustableLeg::exit()
 
 FSMStateName StatePassiveAdjustableLeg::checkChange()
 {
-    if (ctrl_interfaces_.control_inputs_.command == 2)
+    if (ctrl_interfaces_.control_inputs_.command == 1)
     {
         return FSMStateName::FIXEDDOWNADJUSTABLELEG;
         // return FSMStateName::FIXEDDOWN;

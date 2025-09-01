@@ -61,7 +61,7 @@ FSMStateName StateFixedDownAdjustableLeg::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-    case 1:
+    case 0:
         return FSMStateName::PASSIVEADJUSTABLELEG;
     case 2:
         return FSMStateName::FIXEDSTANDADJUSTABLELEG;
