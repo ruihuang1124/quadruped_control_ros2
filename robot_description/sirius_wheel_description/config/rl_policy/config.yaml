@@ -4,18 +4,18 @@ framework: "isaacsim"
 rows: 4
 cols: 4
 decimation: 4
-num_observations: 41
-observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
+num_observations: 42
+observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions","height"]
 observations_history: [0]
 clip_obs: 100.0
-clip_actions_lower: [-25, -25, -25, -25,
-                     -25, -25, -25, -25,
-                     -25, -25, -25, -25,
-                     -25, -25, -25, -25]
-clip_actions_upper: [25, 25, 25, 25,
-                     25, 25, 25, 25,
-                     25, 25, 25, 25,
-                     25, 25, 25, 25]
+clip_actions_lower: [-100, -100, -100, -100,
+                     -100, -100, -100, -100,
+                     -100, -100, -100, -100,
+                     -100, -100, -100, -100]
+clip_actions_upper: [100, 100, 100, 100,
+                     100, 100, 100, 100,
+                     100, 100, 100, 100,
+                     100, 100, 100, 100]
 rl_kp: [40, 40, 40, 40,
         40, 40, 40, 40,
         40, 40, 40, 40,

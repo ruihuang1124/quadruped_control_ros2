@@ -703,7 +703,7 @@
       <material name="orange"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 -0.024"/>
+      <!-- <origin rpy="0 0 0" xyz="0 0 -0.024"/>
       <!-- <geometry>
         <cylinder length="0.05" radius="0.10025"/>
       </geometry> -->

@@ -19,11 +19,11 @@ namespace rl_quadruped_wheel_controller
             {
                 if (!command_prefix_.empty())
                 {
-                    conf.names.push_back(command_prefix_ + "/" + joint_name + "/" += interface_type);
+                    conf.names.push_back(command_prefix_ + "/" + joint_name + "/" + interface_type);
                 }
                 else
                 {
-                    conf.names.push_back(joint_name + "/" += interface_type);
+                    conf.names.push_back(joint_name + "/" + interface_type);
                 }
             }
         }
@@ -40,7 +40,7 @@ namespace rl_quadruped_wheel_controller
         {
             for (const auto& interface_type : state_interface_types_)
             {
-                conf.names.push_back(joint_name + "/" += interface_type);
+                conf.names.push_back(joint_name + "/" + interface_type);
             }
         }
 
@@ -172,7 +172,7 @@ namespace rl_quadruped_wheel_controller
                 // RCLCPP_INFO(get_node()->get_logger(), "received joy msg!!!");
                 // Handle message
                 ctrl_interfaces_.control_inputs_.lx = 0.6*msg->axes[1];
-                ctrl_interfaces_.control_inputs_.ly = 0.6*msg->axes[0];
+                ctrl_interfaces_.control_inputs_.ly = 0.0*msg->axes[0];
                 ctrl_interfaces_.control_inputs_.rx = 0.6*msg->axes[2];
                 if (msg->buttons[10]) // RB
                 {

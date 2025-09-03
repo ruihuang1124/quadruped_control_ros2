@@ -1,5 +1,6 @@
 <mujoco model="sirius_wheel scene">
     <include file="sirius_wheel.xml"/>
+    <option timestep="0.005" integrator="RK4" />
     <statistic center="0 0 0.1" extent="0.8"/>
     <visual>
         <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
@@ -17,10 +18,11 @@
         <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
         <geom name="box_obs"
             type="box"
-            size="2.0 2.0 0.11"
-            pos="3 0 0.1"
+            size="2.0 2.0 0.05"  
+            pos="2.8 0 0.15"  
             rgba="0.8 0.2 0.2 1"
             contype="1" conaffinity="1"/>
+
 
         <body mocap="true" name="esti_indicator" pos="0.0 0.0 0.1">
             <site pos="0 0 0.075" size="0.003 0.003 0.1" type="box" name="mocap_left_site1" rgba="0 0 1 1"/>

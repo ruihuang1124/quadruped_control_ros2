@@ -140,6 +140,7 @@ struct Observations
     torch::Tensor dof_pos_leg;
     torch::Tensor dof_vel_wheel;
     torch::Tensor actions;
+    torch::Tensor height;
 };
 
 

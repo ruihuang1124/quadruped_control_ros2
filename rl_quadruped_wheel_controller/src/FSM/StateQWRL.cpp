@@ -138,7 +138,7 @@ void StateQWRL::enter()
     obs_.dof_vel = torch::zeros({1, params_.num_of_dofs});
     obs_.dof_vel_wheel = torch::zeros({1, 4});
     obs_.actions = torch::zeros({1, params_.num_of_dofs});
-
+    obs_.height = torch::tensor({{0.2}});
     // Init output
     output_torques = torch::zeros({1, params_.num_of_dofs});
     output_dof_pos_ = params_.default_dof_pos;
@@ -237,6 +237,11 @@ torch::Tensor StateQWRL::computeObservation()
         {
             obs_list.push_back(obs_.actions);
         }
+        else if (observation == "height")
+        {
+            obs_list.push_back(obs_.height);
+        }
+        
     }
     // for (int i = 0; i <obs_list.size(); i++)
     // {
@@ -477,6 +482,7 @@ void StateQWRL::runModel()
     obs_.dof_pos_leg = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, 12).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel_wheel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 12, 4).unsqueeze(0);
+    obs_.height = torch::tensor({{0.2}});
 
 
 

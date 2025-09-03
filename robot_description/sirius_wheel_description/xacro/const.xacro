@@ -25,7 +25,7 @@
     <xacro:property name="abad_radius" value="0.055"/>
     <xacro:property name="abad_length" value="0.09"/>
 
-    <xacro:property name="wheel_origin_z" value="-0.024"/>
+    <xacro:property name="wheel_origin_z" value="0.0"/>
     <xacro:property name="wheel_radius" value="0.10025"/>
     <xacro:property name="wheel_length" value="0.05"/>
 
