@@ -2066,7 +2066,9 @@ void Simulate::Sync() {
 
   // update scene
   if (!is_passive_) {
-    // std::cout<<"update sine 1\n";
+    // std::cout<<"update scene in Sync func\n";
+    // std::cout.flush();
+
     mjv_updateScene(m_, d_, &this->opt, &this->pert, &this->cam, mjCAT_ALL, &this->scn);
   } else {
     mjv_updateSceneState(m_, d_, &this->opt, &scnstate_);
@@ -2170,9 +2172,9 @@ void Simulate::LoadMessageClear(void) {
 void Simulate::LoadOnRenderThread() {
   this->m_ = this->mnew_;
   this->d_ = this->dnew_;
-
+  std::cout<<"LoadOnRenderThread ray caster generating!!!\n";
+  std::cout.flush();
   // initializing ray caster related sensors.
-  printf("checkpoint 1\n");
   ray_caster_base = RayCaster(m_, d_, "RayCaster_base", 0.2, {2.0, 1.0},
                               {0.01, 0.6}, RayCasterType::base);
   ray_caster_yaw = RayCaster(m_, d_, "RayCaster_yaw", 0.1, {1.8, 0.8},
@@ -2194,7 +2196,6 @@ void Simulate::LoadOnRenderThread() {
                                             ray_caster_camera.v_ray_num];
   ray_caster_lidar_img = new unsigned char[ray_caster_lidar.h_ray_num *
                                            ray_caster_lidar.v_ray_num];
-  printf("checkpoint 2\n");
   ncam_ = this->m_->ncam;
   nkey_ = this->m_->nkey;
   body_parentid_.resize(this->m_->nbody);
@@ -2610,7 +2611,6 @@ void Simulate::Render() {
     ShowSensor(this, smallrect);
   }
   // draw ray caster line.
-  draw();
   // std::cout<<"after drawing!!!!!!!!!"<<std::endl;
   // take screenshot, save to file
   if (this->screenshotrequest.exchange(false)) {
@@ -2652,6 +2652,10 @@ void Simulate::Render() {
 
 void Simulate::RenderLoop() {
   // Set timer callback (milliseconds)
+  // printf("render loop start!!!\n");
+
+  std::cout<<"render loop start!!!\n";
+  std::cout.flush();
   mjcb_time = Timer;
 
   // init abstract visualization
@@ -2728,14 +2732,23 @@ void Simulate::RenderLoop() {
   while (!this->platform_ui->ShouldCloseWindow() && !this->exitrequest.load()) {
     {
       const MutexLock lock(this->mtx);
-
+      // std::cout<<"current loadrequest:"<<std::endl;
+      // std::cout<<this->loadrequest<<std::endl;
+      // std::cout.flush();
       // load model (not on first pass, to show "loading" label)
       if (this->loadrequest==1) {
+        //   3: display a loading message
+        //   2: render thread asked to update its model
+        //   1: showing "loading" label, about to load
+        //   0: model loaded or no load requested.
+        // std::cout<<"load request 1!!!\n";
+        std::cout.flush();
         this->LoadOnRenderThread();
       } else if (this->loadrequest == 2) {
+        // std::cout<<"load request 2!!!\n";
+        std::cout.flush();
         this->loadrequest = 1;
       }
-
       // poll and handle events
       this->platform_ui->PollEvents();
 
@@ -2767,11 +2780,15 @@ void Simulate::RenderLoop() {
         scnstate_.data.warning[mjWARN_VGEOMFULL].number += mjv_updateSceneFromState(
             &scnstate_, &this->opt, &this->pert, &this->cam, mjCAT_ALL, &this->scn);
       }
+      if (this->loadrequest==0) {
+        draw();
+      }
     }  // MutexLock (unblocks simulation thread)
 
     // render while simulation is running
     this->Render();
-    // std::cout<<"After render!!!!!!!!!"<<std::endl;
+    // std::cout<<"after rayCaster rendering\n";
+    // std::cout.flush();
 
     // update FPS stat, at most 5 times per second
     auto now = mj::Simulate::Clock::now();
