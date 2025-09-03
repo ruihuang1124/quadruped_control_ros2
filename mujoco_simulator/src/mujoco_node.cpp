@@ -1,14 +1,14 @@
 //
 // Created by lbt on 24-12-3.
 //
-#include <rclcpp/rclcpp.hpp>
-#include "mujoco/mujoco.h"
 #include "mujoco_node.h"
-#include "stdio.h"
-#include "rclcpp/rclcpp.hpp"
-#include "custom_msgs/msg/mujoco_msg.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include "array_safety.h"
 #include "simulate.h"
+#include "stdio.h"
+#include "custom_msgs/msg/mujoco_msg.hpp"
+#include "mujoco/mujoco.h"
+#include "rclcpp/rclcpp.hpp"
 
 #include <cerrno>
 #include <chrono>
@@ -24,13 +24,21 @@
 #include <thread>
 
 #include <mujoco/mujoco.h>
-#include "glfw_adapter.h"
-#include "simulate.h"
-#include "array_safety.h"
-#include "mujoco_msg_handler.h"
-#include "piper_mujoco_msg_handler.h"
-#include "qm_mujoco_msg_handler.h"
-#include "qw_mujoco_msg_handler.h"
+#include "../include/mujoco_node/array_safety.h"
+#include "../include/mujoco_node/glfw_adapter.h"
+#include "../include/mujoco_node/mujoco_msg_handler.h"
+#include "../include/mujoco_node/piper_mujoco_msg_handler.h"
+#include "../include/mujoco_node/qm_mujoco_msg_handler.h"
+#include "../include/mujoco_node/qw_mujoco_msg_handler.h"
+#include "../include/mujoco_node/simulate.h"
+
+// #include "array_safety.h"
+// #include "glfw_adapter.h"
+// #include "mujoco_msg_handler.h"
+// #include "piper_mujoco_msg_handler.h"
+// #include "qm_mujoco_msg_handler.h"
+// #include "qw_mujoco_msg_handler.h"
+// #include "simulate.h"
 
 #define MUJOCO_PLUGIN_DIR "mujoco_plugin"
 
@@ -533,6 +541,21 @@ namespace
           }
         }
       } // release std::lock_guard<std::mutex>
+
+      // get rayCaster info.
+
+      sim.ray_caster_base.compute_distance();
+      sim.ray_caster_yaw.compute_distance();
+      sim.ray_caster_world.compute_distance();
+      sim.ray_caster_camera.compute_distance();
+      sim.ray_caster_lidar.compute_distance();
+
+      sim.ray_caster_base.get_image_data(sim.ray_caster_base_img);
+      sim.ray_caster_yaw.get_image_data(sim.ray_caster_yaw_img);
+      sim.ray_caster_world.get_image_data(sim.ray_caster_world_img);
+      sim.ray_caster_camera.get_image_data(sim.ray_caster_camera_img);
+      sim.ray_caster_lidar.get_image_data(sim.ray_caster_lidar_img);
+
     }
   }
 } // namespace

@@ -18,7 +18,7 @@
 #include "rl_quadruped_wheel_controller/FSM/StateQWFixedDown.h"
 #include "rl_quadruped_wheel_controller/FSM/StateQWPassive.h"
 #include "rl_quadruped_wheel_controller/FSM/StateQWRL.h"
-
+#include "custom_msgs/msg/ray_caster.hpp"
 
 namespace rl_quadruped_wheel_controller
 {
@@ -122,6 +122,7 @@ namespace rl_quadruped_wheel_controller
         rclcpp::Subscription<control_input_msgs::msg::Inputs>::SharedPtr control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
+        rclcpp::Subscription<custom_msgs::msg::RayCaster>::SharedPtr quadruped_ray_caster_subscriber_;
 
 
         FSMMode mode_ = FSMMode::NORMAL;

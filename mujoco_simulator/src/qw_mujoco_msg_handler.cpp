@@ -1,5 +1,8 @@
-#include "qw_mujoco_msg_handler.h"
+#include "../include/mujoco_node/qw_mujoco_msg_handler.h"
 #include <algorithm>
+#include <iostream>
+#include <ostream>
+
 #include "sensor_msgs/image_encodings.hpp"
 
 namespace ArcLab
@@ -16,6 +19,7 @@ namespace ArcLab
         imu_publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("imu_data", qos);
         joint_state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", qos);
         mujoco_msg_publisher_ = this->create_publisher<custom_msgs::msg::MujocoMsg>("mujoco_msg", qos);
+        ray_caster_publisher_ = this->create_publisher<custom_msgs::msg::RayCaster>("ray_caster_msg", qos);
 
         timers_.emplace_back(this->create_wall_timer(2ms, std::bind(&QWMujocoMsgHandler::publish_mujoco_callback, this)));
 
@@ -40,6 +44,8 @@ namespace ArcLab
             const std::unique_lock<std::recursive_mutex> lock(sim_->mtx);
             imu_callback();
             joint_callback();
+            ray_caster_callback();
+
             // contact_callback();
         }
     }
@@ -74,6 +80,21 @@ namespace ArcLab
         }
 
         imu_publisher_->publish(message);
+    }
+
+
+    void QWMujocoMsgHandler::ray_caster_callback()
+    {
+        auto message = custom_msgs::msg::RayCaster();
+        message.header.frame_id = &sim_->m_->names[0];
+        message.header.stamp = rclcpp::Clock().now();
+        message.distance_info.resize(sim_->ray_caster_yaw.get_data().size());
+        // printf("ray caster info size is:\n");
+        // std::cout<<sim_->ray_caster_yaw.get_data().size()<<std::endl;
+        for (int i = 0; i < sim_->ray_caster_yaw.get_data().size(); i++) {
+            message.distance_info[i] = sim_->ray_caster_yaw.get_data().at(i);
+        }
+        ray_caster_publisher_->publish(message);
     }
 
     void QWMujocoMsgHandler::contact_callback()

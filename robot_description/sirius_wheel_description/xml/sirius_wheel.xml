@@ -118,7 +118,11 @@
             <site name="head" pos="0.3 0 0" rgba="1 0 0 1" size="0.02" group="0"/>
             <inertial pos="0.02677303 0.000 0.00632505"
                       mass="21.5654" fullinertia="0.10767656 2.82545723 2.85571634 0.00000033 -0.00871520 -0.00000024"/>
-            <freejoint/>
+            <freejoint />
+                <camera name="RayCasterCamera" pos="0.4 0 0.07" xyaxes="0 -1 0 0 0 1" fovy="80"/>
+                <camera name="RayCaster_base" pos="0 1.2 0" xyaxes="0 -1 0 1 0 0"/>
+                <camera name="RayCaster_yaw" pos="0 0 0" xyaxes="0 -1 0 1 0 0"/>
+                <camera name="RayCaster_world" pos="0 -1.2 0" xyaxes="0 -1 0 1 0 0"/>
             <geom class="visual" pos="0 0.0 0" mesh="base_link" rgba="0.847058824 0.643137255 0.498039216 1"/>
             <!--            <geom name="collision_body" type="mesh" pos="0 0.0 0" mesh="base_link" priority="3" group="3"/>-->
             <geom class="collision" type="box" size="0.2623 0.125 0.056"/>

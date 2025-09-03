@@ -1,4 +1,4 @@
-#include "qm_mujoco_msg_handler.h"
+#include "../include/mujoco_node/qm_mujoco_msg_handler.h"
 #include <algorithm>
 #include "sensor_msgs/image_encodings.hpp"
 

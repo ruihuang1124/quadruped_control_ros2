@@ -18,6 +18,7 @@
 #include "custom_msgs/msg/sensor_msg.h"
 #include "custom_msgs/msg/actuator_cmds.hpp"
 #include "custom_msgs/msg/mujoco_msg.hpp"
+#include "custom_msgs/msg/ray_caster.hpp"
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <vector>
@@ -55,11 +56,13 @@ namespace ArcLab
         void imu_callback();
         void contact_callback();
         void joint_callback();
+        void ray_caster_callback();
         void actuator_cmd_callback(const custom_msgs::msg::ActuatorCmds::SharedPtr msg) const;
 
         mj::Simulate *sim_;
         std::vector<rclcpp::TimerBase::SharedPtr> timers_;
         rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
+        rclcpp::Publisher<custom_msgs::msg::RayCaster>::SharedPtr ray_caster_publisher_;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
         rclcpp::Publisher<custom_msgs::msg::MujocoMsg>::SharedPtr mujoco_msg_publisher_;
         rclcpp::Subscription<custom_msgs::msg::ActuatorCmds>::SharedPtr actuator_cmd_subscription_;

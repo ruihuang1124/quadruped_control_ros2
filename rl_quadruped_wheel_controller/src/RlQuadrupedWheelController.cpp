@@ -246,6 +246,23 @@ namespace rl_quadruped_wheel_controller
         next_state_name_ = current_state_->state_name;
         mode_ = FSMMode::NORMAL;
 
+
+        quadruped_ray_caster_subscriber_ = get_node()->create_subscription<custom_msgs::msg::RayCaster>(
+            "/ray_caster_msg", rclcpp::SensorDataQoS(), [this](const custom_msgs::msg::RayCaster::SharedPtr msg) {
+                std::cout << "received caster info!!!!!!" << std::endl;
+                // Handle message
+                for (int i = 0; i < 171; i++) {
+                    state_list_.rl->ray_caster_info_.at(i) = msg->distance_info[i];
+                    // state_list_.rl->ray_caster_info_.at(i) = 0.0;
+                }
+                for (int i = 0; i < 19; i++) {
+                    for (int j = 0; j < 9; j++) {
+                        std::cout << state_list_.rl->ray_caster_info_.at(i*9 + j) << " ";
+                    }
+                    std::cout << std::endl;
+                }
+            });
+
         return CallbackReturn::SUCCESS;
     }
 

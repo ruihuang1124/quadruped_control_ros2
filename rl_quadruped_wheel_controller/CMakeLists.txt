@@ -29,6 +29,7 @@ set(dependencies
         ament_index_cpp
         controller_common
         sensor_msgs
+        custom_msgs
 )
 
 # find dependencies

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "simulate.h"
+#include "../include/mujoco_node/simulate.h"
 
 #include <algorithm>
 #include <atomic>
@@ -20,21 +20,23 @@
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <ratio>
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <bits/ostream.tcc>
 
-#include "lodepng.h"
+#include "../include/mujoco_node/lodepng.h"
 #include <mujoco/mjdata.h>
 #include <mujoco/mjui.h>
 #include <mujoco/mjvisualize.h>
 #include <mujoco/mjxmacro.h>
 #include <mujoco/mujoco.h>
-#include "platform_ui_adapter.h"
-#include "array_safety.h"
+#include "../include/mujoco_node/platform_ui_adapter.h"
+#include "../include/mujoco_node/array_safety.h"
 
 // When launched via an App Bundle on macOS, the working directory is the path to the App Bundle's
 // resource directory. This causes files to be saved into the bundle, which is not the desired
@@ -2064,6 +2066,7 @@ void Simulate::Sync() {
 
   // update scene
   if (!is_passive_) {
+    // std::cout<<"update sine 1\n";
     mjv_updateScene(m_, d_, &this->opt, &this->pert, &this->cam, mjCAT_ALL, &this->scn);
   } else {
     mjv_updateSceneState(m_, d_, &this->opt, &scnstate_);
@@ -2168,6 +2171,30 @@ void Simulate::LoadOnRenderThread() {
   this->m_ = this->mnew_;
   this->d_ = this->dnew_;
 
+  // initializing ray caster related sensors.
+  printf("checkpoint 1\n");
+  ray_caster_base = RayCaster(m_, d_, "RayCaster_base", 0.2, {2.0, 1.0},
+                              {0.01, 0.6}, RayCasterType::base);
+  ray_caster_yaw = RayCaster(m_, d_, "RayCaster_yaw", 0.1, {1.8, 0.8},
+                             {0.01, 0.6}, RayCasterType::yaw);
+  ray_caster_world = RayCaster(m_, d_, "RayCaster_world", 0.2, {2.0, 1.0},
+                               {0.01, 0.6}, RayCasterType::world);
+  ray_caster_camera = RayCasterCamera(m_, d_, "RayCasterCamera", 24.0, 20.955, 1,
+                                      20, 20, {0.0, 5.0});
+  ray_caster_lidar =
+      RayCasterLidar(m_, d_, "RayCasterCamera", 200.0, 50.0, 100, 100, {0.01, 6});
+  // img
+  ray_caster_base_img =
+      new unsigned char[ray_caster_base.h_ray_num * ray_caster_base.v_ray_num];
+  ray_caster_yaw_img =
+      new unsigned char[ray_caster_yaw.h_ray_num * ray_caster_yaw.v_ray_num];
+  ray_caster_world_img = new unsigned char[ray_caster_world.h_ray_num *
+                                           ray_caster_world.v_ray_num];
+  ray_caster_camera_img = new unsigned char[ray_caster_camera.h_ray_num *
+                                            ray_caster_camera.v_ray_num];
+  ray_caster_lidar_img = new unsigned char[ray_caster_lidar.h_ray_num *
+                                           ray_caster_lidar.v_ray_num];
+  printf("checkpoint 2\n");
   ncam_ = this->m_->ncam;
   nkey_ = this->m_->nkey;
   body_parentid_.resize(this->m_->nbody);
@@ -2348,8 +2375,35 @@ void Simulate::LoadOnRenderThread() {
 
 //------------------------------------------- rendering --------------------------------------------
 
+void Simulate::draw() {
+  // printf("checkpoint draw here!!!\n");
+  float color1[4] = {1.0, 0.0, 0.0, 0.5};
+  float color2[4] = {0.0, 1.0, 0.0, 0.3};
+  float color3[4] = {0.0, 0.0, 1.0, 0.3};
+  float color4[4] = {1.0, 1.0, 0.0, 0.5};
+  float color5[4] = {0.0, 1.0, 1.0, 0.3};
+  float color6[4] = {1.0, 0.0, 1.0, 1.0};
+
+  // ray_caster_base.draw_deep_ray(&scn, 1, 5, false, color1);
+  // ray_caster_base.draw_hip_point(&scn, 1, 0.02, color1);
+  //
+  ray_caster_yaw.draw_deep_ray(&scn, 1, 5, false, color2);
+  ray_caster_yaw.draw_hip_point(&scn, 1, 0.02, color2);
+  //
+  // ray_caster_world.draw_deep_ray(&scn, 1, 5, false, color3);
+  // ray_caster_world.draw_hip_point(&scn, 1, 0.02, color3);
+  //
+  // ray_caster_camera.draw_deep_ray(&scn, 1, 5, true, color2);
+  // ray_caster_camera.draw_hip_point(&scn, 1, 0.02, color1);
+  // ray_caster_camera.draw_deep(&scn, 1, 5, color4);
+  // ray_caster_camera.draw_deep_ray(&scn, 0, 10, color6);
+  // ray_caster_camera.draw_deep_ray(&scn, 99, 10, color6);
+  // ray_caster_lidar.draw_hip_point(&scn, 1, 0.02, color5);
+}
+
 // render the ui to the window
 void Simulate::Render() {
+  // std::cout<<"start rendering!!!!!!!!!"<<std::endl;
   // update rendering context buffer size if required
   if (this->platform_ui->EnsureContextSize()) {
     UiModify(&this->ui0, &this->uistate, &this->platform_ui->mjr_context());
@@ -2555,7 +2609,9 @@ void Simulate::Render() {
   if (this->sensor) {
     ShowSensor(this, smallrect);
   }
-
+  // draw ray caster line.
+  draw();
+  // std::cout<<"after drawing!!!!!!!!!"<<std::endl;
   // take screenshot, save to file
   if (this->screenshotrequest.exchange(false)) {
     const unsigned int h = uistate.rect[0].height;
@@ -2715,6 +2771,7 @@ void Simulate::RenderLoop() {
 
     // render while simulation is running
     this->Render();
+    // std::cout<<"After render!!!!!!!!!"<<std::endl;
 
     // update FPS stat, at most 5 times per second
     auto now = mj::Simulate::Clock::now();

@@ -77,6 +77,7 @@ StateQWRL::StateQWRL(CtrlInterfaces& ctrl_interfaces,
     {
         init_pos_[i] = target_pos[i];
     }
+    ray_caster_info_.resize(171);
     // RCLCPP_ERROR(node_->get_logger(), "Here init pose set!!!!!!!!");
     // read params from yaml
     loadYaml(model_path);
@@ -236,6 +237,9 @@ torch::Tensor StateQWRL::computeObservation()
         else if (observation == "actions")
         {
             obs_list.push_back(obs_.actions);
+        }
+        else if (observation == "height_scan") {
+            obs_list.push_back(obs_.ray_caster_info);
         }
     }
     // for (int i = 0; i <obs_list.size(); i++)
@@ -477,7 +481,7 @@ void StateQWRL::runModel()
     obs_.dof_pos_leg = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, 12).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel_wheel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 12, 4).unsqueeze(0);
-
+    obs_.ray_caster_info = torch::tensor(ray_caster_info_).unsqueeze(0);
 
 
     // 17 policy

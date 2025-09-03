@@ -29,6 +29,9 @@
 #include <mujoco/mjui.h>
 #include <mujoco/mujoco.h>
 #include "platform_ui_adapter.h"
+#include "../cpp_ray_caster/RayCaster.h"
+#include "../cpp_ray_caster/RayCasterCamera.h"
+#include "../cpp_ray_caster/RayCasterLidar.h"
 
 namespace mujoco {
 
@@ -43,6 +46,22 @@ using MutexLock = std::unique_lock<std::recursive_mutex>;
 // Simulate states not contained in MuJoCo structures
 class Simulate {
  public:
+
+  void draw();
+
+  // RayCasterCamera
+  RayCaster ray_caster_base;
+  RayCaster ray_caster_yaw;
+  RayCaster ray_caster_world;
+  RayCasterCamera ray_caster_camera;
+  RayCasterLidar ray_caster_lidar;
+
+  unsigned char* ray_caster_base_img;
+  unsigned char* ray_caster_yaw_img;
+  unsigned char* ray_caster_world_img;
+  unsigned char* ray_caster_camera_img;
+  unsigned char* ray_caster_lidar_img;
+
   using Clock = std::chrono::steady_clock;
   static_assert(std::ratio_less_equal_v<Clock::period, std::milli>);
 

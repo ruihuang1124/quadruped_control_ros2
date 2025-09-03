@@ -22,6 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/JointStates.msg"
         "msg/RobotCMD.msg"
         "msg/RobotState.msg"
+        "msg/RayCaster.msg"
         "srv/ExecuteMotorActivation.srv"
         DEPENDENCIES std_msgs sensor_msgs geometry_msgs
 )

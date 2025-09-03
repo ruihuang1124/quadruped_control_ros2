@@ -140,6 +140,7 @@ struct Observations
     torch::Tensor dof_pos_leg;
     torch::Tensor dof_vel_wheel;
     torch::Tensor actions;
+    torch::Tensor ray_caster_info;
 };
 
 
@@ -156,6 +157,9 @@ public:
              const rclcpp::Duration& period) override;
 
     void exit() override;
+
+    std::vector<double> ray_caster_info_;
+    // double ray_caster_info_[171] = {};
 
     FSMStateName checkChange() override;
 

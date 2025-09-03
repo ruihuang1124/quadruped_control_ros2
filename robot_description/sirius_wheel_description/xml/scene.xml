@@ -1,26 +1,66 @@
 <mujoco model="sirius_wheel scene">
     <include file="sirius_wheel.xml"/>
     <statistic center="0 0 0.1" extent="0.8"/>
+
     <visual>
         <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
         <rgba haze="0.15 0.25 0.35 1"/>
         <global azimuth="-130" elevation="-20"/>
     </visual>
+
     <asset>
         <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
-        <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+        <texture type="2d" name="groundplane" builtin="checker" mark="edge"
+                 rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
                  markrgb="0.8 0.8 0.8" width="300" height="300"/>
         <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
     </asset>
+
     <worldbody>
-<!--        <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>-->
+        <!-- =========  Rangefinder 网格锚定体（随机器人移动，位于其上方） ========= -->
+<!--        <body name="rf_grid_anchor">-->
+<!--            <freejoint/>-->
+<!--            &lt;!&ndash; 作为“可动体”，需要质量/惯量；加一个极小、不可碰撞、不可见的假几何体 &ndash;&gt;-->
+<!--            <geom type="sphere" size="0.1" mass="1e-6"-->
+<!--                  contype="0" conaffinity="0"-->
+<!--                  rgba="0 1 0 0.5"  group="3"/>-->
+
+
+<!--            &lt;!&ndash; 生成 19 × 9 = 171 个 site，形成 1.8m × 0.8m 的扫描网格（分辨率 0.1m） &ndash;&gt;-->
+<!--            <replicate count="19" sep="ix" offset="0.1 0 0">-->
+<!--                <replicate count="9" sep="iy" offset="0 0.1 0">-->
+<!--                    &lt;!&ndash; 射线方向 = +Z，绕 X 轴翻转 180° 使其竖直向下 &ndash;&gt;-->
+<!--                    <site name="rf" pos="-0.9 -0.4 0" size="0.003"-->
+<!--                          quat="0 1 0 0" rgba="0.9 0.4 0.1 0.3"/>-->
+<!--                </replicate>-->
+<!--            </replicate>-->
+<!--        </body>-->
+
+<!--        <body name="rf_grid_anchor">-->
+<!--            &lt;!&ndash; 自由关节，但限制 roll(x) 和 pitch(y) 的旋转 &ndash;&gt;-->
+<!--            <joint name="rf_anchor_joint" type="free" ref="0 0 0 1 0 0 0">-->
+<!--                &lt;!&ndash; 锁定 x/y 轴旋转（roll/pitch），允许 z 轴旋转（yaw） &ndash;&gt;-->
+<!--                <limit stiffness="1e8" range="0 0" />  &lt;!&ndash; x-axis (roll) &ndash;&gt;-->
+<!--                <limit stiffness="1e8" range="0 0" />  &lt;!&ndash; y-axis (pitch) &ndash;&gt;-->
+<!--            </joint>-->
+
+<!--            &lt;!&ndash; 其余部分保持不变 &ndash;&gt;-->
+<!--            <geom type="sphere" size="0.1" mass="1e-6" contype="0" conaffinity="0"/>-->
+<!--            <replicate count="19" sep="ix" offset="0.1 0 0">-->
+<!--                <replicate count="9" sep="iy" offset="0 0.1 0">-->
+<!--                    <site name="rf" pos="-0.9 -0.4 0" size="0.003" quat="0 1 0 0"/>-->
+<!--                </replicate>-->
+<!--            </replicate>-->
+<!--        </body>-->
+
         <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
         <geom name="box_obs"
-            type="box"
-            size="2.0 2.0 0.11"
-            pos="3 0 0.1"
-            rgba="0.8 0.2 0.2 1"
-            contype="1" conaffinity="1"/>
+              type="box"
+              size="2.0 2.0 0.11"
+              pos="3 0 0.1"
+              rgba="0.8 0.2 0.2 1"
+              contype="1" conaffinity="1"/>
 
         <body mocap="true" name="esti_indicator" pos="0.0 0.0 0.1">
             <site pos="0 0 0.075" size="0.003 0.003 0.1" type="box" name="mocap_left_site1" rgba="0 0 1 1"/>
@@ -34,4 +74,25 @@
             <site pos="0.075 0 0" size="0.1 0.003 0.003" type="box" name="start_pos3" rgba="1 0 0 1"/>
         </body>
     </worldbody>
+
+    <!-- 只需定义一次，MuJoCo 会自动为所有 replicate 出来的 rf-* 站点复制传感器 -->
+<!--    <sensor>-->
+<!--        <rangefinder name="rf" site="rf" cutoff="1000"/>-->
+<!--    </sensor>-->
+
+    <!-- 焊接到机器人基座，上移 20 m（保持相对姿态不变，随机器人运动） -->
+<!--    <equality>-->
+<!--        &lt;!&ndash; ⚠️ 如有需要，把 body2 改成你真实的基座 body 名（例如 base、chassis、torso 等） &ndash;&gt;-->
+<!--        <weld body1="rf_grid_anchor" body2="base"-->
+<!--              relpose="0 0 -20   1 0 0 0"/>-->
+<!--&lt;!&ndash;        &lt;!&ndash; 添加旋转约束：强制 roll/pitch=0 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <tendon>&ndash;&gt;-->
+<!--&lt;!&ndash;            <fixed name="lock_roll"  stiffness="1e6" width="0.001">&ndash;&gt;-->
+<!--&lt;!&ndash;                <joint joint="rf_anchor_joint" coef="0 0 0 1 0 0"/>  &lt;!&ndash; x-axis (roll) &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;            </fixed>&ndash;&gt;-->
+<!--&lt;!&ndash;            <fixed name="lock_pitch" stiffness="1e6" width="0.001">&ndash;&gt;-->
+<!--&lt;!&ndash;                <joint joint="rf_anchor_joint" coef="0 0 0 0 1 0"/>  &lt;!&ndash; y-axis (pitch) &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;            </fixed>&ndash;&gt;-->
+<!--&lt;!&ndash;        </tendon>&ndash;&gt;-->
+<!--    </equality>-->
 </mujoco>

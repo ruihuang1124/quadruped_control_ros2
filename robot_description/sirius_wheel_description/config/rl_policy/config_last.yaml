@@ -1,0 +1,44 @@
+model_name: "policy.pt"
+#model_name: "only_quad_policy.pt"
+framework: "isaacsim"
+rows: 4
+cols: 4
+decimation: 4
+num_observations: 41
+observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
+observations_history: [0]
+clip_obs: 100.0
+clip_actions_lower: [-25, -25, -25, -25,
+                     -25, -25, -25, -25,
+                     -25, -25, -25, -25,
+                     -25, -25, -25, -25]
+clip_actions_upper: [25, 25, 25, 25,
+                     25, 25, 25, 25,
+                     25, 25, 25, 25,
+                     25, 25, 25, 25]
+rl_kp: [40, 40, 40, 40,
+        40, 40, 40, 40,
+        40, 40, 40, 40,
+        40, 40, 40, 40]
+
+#rl_kd: [0.5, 0.5, 0.5, 0.5,
+#        0.5, 0.5, 0.5, 0.5,
+#        0.5, 0.5, 0.5, 0.5,
+#        0.5, 0.5, 0.5, 0.5]
+
+rl_kd: [2.0, 2.0, 2.0, 2.0,
+        2.0, 2.0, 2.0, 2.0,
+        2.0, 2.0, 2.0, 2.0,
+        2.0, 2.0, 2.0, 2.0]
+hip_scale_reduction: 1.0
+hip_scale_reduction_indices: [1, 4, 7, 10]
+num_of_dofs: 16
+action_scale: 0.25
+action_scale_wheel: 1.5
+
+lin_vel_scale: 2.0
+ang_vel_scale: 0.25
+dof_pos_scale: 1.0
+dof_vel_scale: 0.05
+
+commands_scale: [0.6, 0.5, 0.5]
