@@ -1,7 +1,9 @@
 #include "RayCaster.h"
+#include "Noise.h"
 #include <algorithm>
 #include <iterator>
 #include <mujoco/mujoco.h>
+#include <utility>
 
 RayCaster::RayCaster() {}
 
@@ -72,6 +74,8 @@ void RayCaster::_init(mjModel *m, mjData *d, std::string cam_name,
   geomids = new int[h_ray_num * v_ray_num];
   dist = new mjtNum[h_ray_num * v_ray_num];
   dist_ratio = new mjtNum[h_ray_num * v_ray_num];
+
+  _noise = new ray_noise::Noise;
   create_rays();
 }
 
@@ -82,6 +86,13 @@ int RayCaster::get_idx(int v, int h) {
     return -1;
   }
   return idx;
+}
+
+void RayCaster::setNoise(ray_noise::UniformNoise noise) {
+  _noise = new ray_noise::UniformNoise(noise);
+}
+void RayCaster::setNoise(ray_noise::GaussianNoise noise) {
+  _noise = new ray_noise::GaussianNoise(noise);
 }
 
 int RayCaster::_get_idx(int v, int h) { return v * h_ray_num + h; }
@@ -110,21 +121,45 @@ void RayCaster::compute_ray_vec() {
 }
 
 void RayCaster::create_rays() {
-  mjtNum start_x = -size[0] / 2;
-  mjtNum start_y = size[1] / 2;
-  for (int i = 0; i < v_ray_num; i++) {
-    for (int j = 0; j < h_ray_num; j++) {
-      int idx = _get_idx(i, j) * 3;
-      ray_vec[idx + 0] = _ray_vec[idx + 0] = 0.0;
-      ray_vec[idx + 1] = _ray_vec[idx + 1] = 0.0;
-      ray_vec[idx + 2] = _ray_vec[idx + 2] = -deep_max;
-      ray_vec_offset[idx + 0] = _ray_vec_offset[idx + 0] = start_x;
-      ray_vec_offset[idx + 1] = _ray_vec_offset[idx + 1] = start_y;
-      ray_vec_offset[idx + 2] = _ray_vec_offset[idx + 2] = 0.0;
-      start_x += resolution;
+
+  if (type != RayCasterType::world) {
+    mjtNum start_x = -size[0] / 2;
+    mjtNum start_y = size[1] / 2;
+    for (int i = 0; i < v_ray_num; i++) {
+      for (int j = 0; j < h_ray_num; j++) {
+        int idx = _get_idx(i, j) * 3;
+        ray_vec[idx + 0] = _ray_vec[idx + 0] = 0.0;
+        ray_vec[idx + 1] = _ray_vec[idx + 1] = 0.0;
+        ray_vec[idx + 2] = _ray_vec[idx + 2] = -deep_max;
+        ray_vec_offset[idx + 0] = _ray_vec_offset[idx + 0] = start_x;
+        ray_vec_offset[idx + 1] = _ray_vec_offset[idx + 1] = start_y;
+        ray_vec_offset[idx + 2] = _ray_vec_offset[idx + 2] = 0.0;
+        start_x += resolution;
+      }
+      start_x = -size[0] / 2;
+      start_y -= resolution;
     }
-    start_x = -size[0] / 2;
-    start_y -= resolution;
+  } else {
+    // x和y互换
+    mjtNum start_x = size[0] / 2;
+    mjtNum start_y = size[1] / 2;
+    int tmp = h_ray_num;
+    h_ray_num = v_ray_num;
+    v_ray_num = tmp;
+    for (int i = 0; i < v_ray_num; i++) {
+      for (int j = 0; j < h_ray_num; j++) {
+        int idx = _get_idx(i, j) * 3;
+        ray_vec[idx + 0] = _ray_vec[idx + 0] = 0.0;
+        ray_vec[idx + 1] = _ray_vec[idx + 1] = 0.0;
+        ray_vec[idx + 2] = _ray_vec[idx + 2] = -deep_max;
+        ray_vec_offset[idx + 0] = _ray_vec_offset[idx + 0] = start_x;
+        ray_vec_offset[idx + 1] = _ray_vec_offset[idx + 1] = start_y;
+        ray_vec_offset[idx + 2] = _ray_vec_offset[idx + 2] = 0.0;
+        start_y -= resolution;
+      }
+      start_x -= resolution;
+      start_y = size[1] / 2;
+    }
   }
 }
 
@@ -147,6 +182,12 @@ void RayCaster::compute_distance() {
         dist_ratio[i] = deep_min_ratio;
       }
       dist[i] = deep_max * dist_ratio[i];
+      _noise->produce_noise(dist[i]);
+      if (dist[i] > deep_max) {
+        dist[i] = deep_max;
+      } else if (dist[i] < deep_min) {
+        dist[i] = deep_min;
+      }
     }
   } else {
     mj_multiRay(m, d, pos, ray_vec, geomgroup, 1, no_detect_body_id, geomids,
@@ -160,27 +201,49 @@ void RayCaster::compute_distance() {
         dist_ratio[i] = deep_min_ratio;
       }
       dist[i] = deep_max * dist_ratio[i];
+      _noise->produce_noise(dist[i]);
+      if (dist[i] > deep_max) {
+        dist[i] = deep_max;
+      } else if (dist[i] < deep_min) {
+        dist[i] = deep_min;
+      }
     }
   }
 }
 
-void RayCaster::get_image_data(unsigned char *image_data, bool is_info_max) {
-  if (is_info_max) {
-    for (int idx = 0; idx < nray; idx++) {
-      image_data[idx] = 255 - dist_ratio[idx] * 255;
+void RayCaster::get_image_data(unsigned char *image_data, bool is_noise,
+                               bool is_inf_max) {
+  if (!is_noise) {
+    if (is_inf_max) {
+      for (int idx = 0; idx < nray; idx++) {
+        image_data[idx] = 255 - dist_ratio[idx] * 255;
+      }
+    } else {
+      for (int idx = 0; idx < v_ray_num; idx++) {
+        if (geomids[idx] < 0)
+          image_data[idx] = 0;
+        else
+          image_data[idx] = 255 - dist_ratio[idx] * 255;
+      }
     }
   } else {
-    for (int idx = 0; idx < v_ray_num; idx++) {
-      if (geomids[idx] < 0)
-        image_data[idx] = 0;
-      else
-        image_data[idx] = 255 - dist_ratio[idx] * 255;
+    if (is_inf_max) {
+      for (int idx = 0; idx < nray; idx++) {
+        image_data[idx] = 255 - (dist[idx] / deep_max) * 255;
+      }
+    } else {
+      for (int idx = 0; idx < v_ray_num; idx++) {
+        if (geomids[idx] < 0)
+          image_data[idx] = 0;
+        else
+          image_data[idx] = 255 - (dist[idx] / deep_max) * 255;
+      }
     }
   }
 }
 
-void RayCaster::get_data(double *data, bool is_info_max) {
-  if (is_info_max)
+void RayCaster::get_data(double *data, bool is_inf_max) {
+  if (is_inf_max)
     memcpy(data, dist, nray * sizeof(double));
   else {
     for (int i = 0; i < nray; i++) {
@@ -192,8 +255,8 @@ void RayCaster::get_data(double *data, bool is_info_max) {
   }
 }
 
-std::vector<double> RayCaster::get_data(bool is_info_max) {
-  if (is_info_max)
+std::vector<double> RayCaster::get_data(bool is_inf_max) {
+  if (is_inf_max)
     return std::vector<double>(dist, dist + nray);
   else {
     std::vector<double> vec(nray);
@@ -205,6 +268,49 @@ std::vector<double> RayCaster::get_data(bool is_info_max) {
     }
     return vec;
   }
+}
+
+void RayCaster::get_data_pos_w(double *data) {
+  for (int i = 0; i < v_ray_num; i++) {
+    for (int j = 0; j < h_ray_num; j++) {
+      int idx = _get_idx(i, j);
+      if (geomids[idx] == -1) {
+        data[idx] = data[idx + 1] = data[idx + 2] = NAN;
+      } else {
+        if (is_offert) {
+          data[idx * 3] = pos[0] + ray_vec_offset[idx * 3];
+          data[idx * 3 + 1] = pos[1] + ray_vec_offset[idx * 3 + 1];
+          data[idx * 3 + 2] = pos[2] + ray_vec_offset[idx * 3 + 2];
+        }
+        mju_addToScl3(data + (idx * 3), ray_vec + (idx * 3), dist_ratio[idx]);
+      }
+    }
+  }
+}
+
+std::vector<std::vector<double>> RayCaster::get_data_pos_w() {
+  std::vector<std::vector<double>> pos_w =
+      std::vector<std::vector<double>>(nray, std::vector<double>(3, 0));
+  for (int i = 0; i < v_ray_num; i++) {
+    for (int j = 0; j < h_ray_num; j++) {
+      int idx = _get_idx(i, j);
+      mjtNum end[3] = {pos[0], pos[1], pos[2]};
+      if (geomids[idx] == -1) {
+        end[0] = end[1] = end[2] = NAN;
+      } else {
+        if (is_offert) {
+          end[0] += ray_vec_offset[idx * 3];
+          end[1] += ray_vec_offset[idx * 3 + 1];
+          end[2] += ray_vec_offset[idx * 3 + 2];
+        }
+        mju_addToScl3(end, ray_vec + (idx * 3), dist_ratio[idx]);
+      }
+      pos_w[idx][0] = end[0];
+      pos_w[idx][1] = end[1];
+      pos_w[idx][2] = end[2];
+    }
+  }
+  return pos_w;
 }
 
 void RayCaster::draw_line(mjvScene *scn, mjtNum *from, mjtNum *to, mjtNum width,

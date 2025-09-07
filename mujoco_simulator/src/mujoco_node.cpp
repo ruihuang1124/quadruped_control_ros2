@@ -554,6 +554,7 @@ namespace
       sim.ray_caster_yaw.get_image_data(sim.ray_caster_yaw_img);
       sim.ray_caster_world.get_image_data(sim.ray_caster_world_img);
       sim.ray_caster_camera.get_image_data(sim.ray_caster_camera_img);
+      sim.ray_caster_camera.get_image_data(sim.ray_caster_camera_noise_img, true);
       sim.ray_caster_lidar.get_image_data(sim.ray_caster_lidar_img);
 
     }

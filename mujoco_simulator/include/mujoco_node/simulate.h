@@ -49,6 +49,22 @@ class Simulate {
 
   void draw();
 
+  void draw_windows();
+
+  // 绘制
+  std::vector<int> img_left{0};
+  std::vector<int> img_bottom{0};
+  unsigned char *scaleImageToRGB(const unsigned char *src, int srcWidth,
+                                 int srcHeight, int dstWidth, int dstHeight,
+                                 int srcChannels,
+                                 bool convertToOpenGLCoords = true);
+
+  void drawRGBPixels(const unsigned char *rgb, int idx,
+                   const std::array<int, 2> src_size,
+                   const std::array<int, 2> dst_size);
+  void drawGrayPixels(const unsigned char *gray, int idx,
+                      const std::array<int, 2> src_size,
+                      const std::array<int, 2> dst_size);
   // RayCasterCamera
   RayCaster ray_caster_base;
   RayCaster ray_caster_yaw;
@@ -60,6 +76,7 @@ class Simulate {
   unsigned char* ray_caster_yaw_img;
   unsigned char* ray_caster_world_img;
   unsigned char* ray_caster_camera_img;
+  unsigned char* ray_caster_camera_noise_img;
   unsigned char* ray_caster_lidar_img;
 
   using Clock = std::chrono::steady_clock;
@@ -262,6 +279,7 @@ class Simulate {
   mjvCamera& cam;
   mjvOption& opt;
   mjvPerturb& pert;
+  mjrContext con;       // custom GPU context
   mjvFigure figconstraint = {};
   mjvFigure figcost = {};
   mjvFigure figtimer = {};

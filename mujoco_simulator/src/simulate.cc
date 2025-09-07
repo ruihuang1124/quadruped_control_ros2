@@ -1812,6 +1812,7 @@ Simulate::Simulate(std::unique_ptr<PlatformUIAdapter> platform_ui,
       uistate(this->platform_ui->state()) {
   mjv_defaultScene(&scn);
   mjv_defaultSceneState(&scnstate_);
+  mjr_defaultContext(&con);
 }
 
 // synchronize model and data
@@ -2183,6 +2184,7 @@ void Simulate::LoadOnRenderThread() {
                                {0.01, 0.6}, RayCasterType::world);
   ray_caster_camera = RayCasterCamera(m_, d_, "RayCasterCamera", 24.0, 20.955, 1,
                                       20, 20, {0.0, 5.0});
+  ray_caster_camera.setNoise(ray_noise::UniformNoise(-0.3, 0.3));
   ray_caster_lidar =
       RayCasterLidar(m_, d_, "RayCasterCamera", 200.0, 50.0, 100, 100, {0.01, 6});
   // img
@@ -2194,6 +2196,8 @@ void Simulate::LoadOnRenderThread() {
                                            ray_caster_world.v_ray_num];
   ray_caster_camera_img = new unsigned char[ray_caster_camera.h_ray_num *
                                             ray_caster_camera.v_ray_num];
+  ray_caster_camera_noise_img = new unsigned char[ray_caster_camera.h_ray_num *
+                                                ray_caster_camera.v_ray_num];
   ray_caster_lidar_img = new unsigned char[ray_caster_lidar.h_ray_num *
                                            ray_caster_lidar.v_ray_num];
   ncam_ = this->m_->ncam;
@@ -2393,13 +2397,165 @@ void Simulate::draw() {
   //
   // ray_caster_world.draw_deep_ray(&scn, 1, 5, false, color3);
   // ray_caster_world.draw_hip_point(&scn, 1, 0.02, color3);
-  //
+
   // ray_caster_camera.draw_deep_ray(&scn, 1, 5, true, color2);
   // ray_caster_camera.draw_hip_point(&scn, 1, 0.02, color1);
   // ray_caster_camera.draw_deep(&scn, 1, 5, color4);
   // ray_caster_camera.draw_deep_ray(&scn, 0, 10, color6);
   // ray_caster_camera.draw_deep_ray(&scn, 99, 10, color6);
   // ray_caster_lidar.draw_hip_point(&scn, 1, 0.02, color5);
+}
+
+unsigned char *
+Simulate::scaleImageToRGB(const unsigned char *src, int srcWidth,
+                               int srcHeight, int dstWidth, int dstHeight,
+                               int srcChannels, // 源图像的通道数（1或3或4等）
+                               bool convertToOpenGLCoords) {
+  // 总是输出三通道图像
+  const int dstChannels = 3;
+  unsigned char *dst = new unsigned char[dstWidth * dstHeight * dstChannels];
+
+  // 如果尺寸相同，且只需要转换 OpenGL 坐标系，直接翻转即可（无需插值）
+  if (srcWidth == dstWidth && srcHeight == dstHeight) {
+    int rowSize = srcWidth * dstChannels;
+
+    for (int y = 0; y < srcHeight; y++) {
+      // 计算目标行（如果需要 OpenGL 坐标系则垂直翻转）
+      int targetY = convertToOpenGLCoords ? (srcHeight - 1 - y) : y;
+
+      // 源行和目标行的指针
+      const unsigned char *srcRow = src + y * srcWidth * srcChannels;
+      unsigned char *dstRow = dst + targetY * dstWidth * dstChannels;
+
+      // 复制像素数据（并处理通道转换）
+      for (int x = 0; x < srcWidth; x++) {
+        int srcIndex = x * srcChannels;
+        int dstIndex = x * dstChannels;
+
+        if (srcChannels == 1) {
+          // 单通道转三通道（灰度值复制到RGB）
+          unsigned char gray = srcRow[srcIndex];
+          dstRow[dstIndex] = gray;     // R
+          dstRow[dstIndex + 1] = gray; // G
+          dstRow[dstIndex + 2] = gray; // B
+        } else {
+          // 多通道转三通道（取前3个通道）
+          for (int c = 0; c < dstChannels; c++) {
+            dstRow[dstIndex + c] = (c < srcChannels) ? srcRow[srcIndex + c] : 0;
+          }
+        }
+      }
+    }
+    return dst;
+  }
+
+  // 否则，执行完整的双线性插值缩放 + OpenGL 坐标系转换
+  // 计算缩放比例
+  float scaleX = static_cast<float>(srcWidth - 1) / dstWidth;
+  float scaleY = static_cast<float>(srcHeight - 1) / dstHeight;
+
+  for (int y = 0; y < dstHeight; y++) {
+    // 如果需要转换为OpenGL坐标系，垂直翻转Y坐标
+    int targetY = convertToOpenGLCoords ? (dstHeight - 1 - y) : y;
+
+    for (int x = 0; x < dstWidth; x++) {
+      // 计算源图像中的对应位置
+      float srcX = x * scaleX;
+      float srcY = targetY * scaleY;
+
+      // 取整和取小数部分
+      int x1 = static_cast<int>(srcX);
+      int y1 = static_cast<int>(srcY);
+      int x2 = std::min(x1 + 1, srcWidth - 1);
+      int y2 = std::min(y1 + 1, srcHeight - 1);
+
+      float dx = srcX - x1;
+      float dy = srcY - y1;
+
+      // 计算四个相邻像素的索引
+      int idx1 = (y1 * srcWidth + x1) * srcChannels;
+      int idx2 = (y1 * srcWidth + x2) * srcChannels;
+      int idx3 = (y2 * srcWidth + x1) * srcChannels;
+      int idx4 = (y2 * srcWidth + x2) * srcChannels;
+
+      // 目标像素索引（总是三通道）
+      int dstIndex = (y * dstWidth + x) * dstChannels;
+
+      if (srcChannels == 1) {
+        // 单通道转三通道（灰度值复制到RGB三个通道）
+        float grayValue = src[idx1] * (1 - dx) * (1 - dy) +
+                          src[idx2] * dx * (1 - dy) +
+                          src[idx3] * (1 - dx) * dy + src[idx4] * dx * dy;
+
+        unsigned char value = static_cast<unsigned char>(
+            std::min(255.0f, std::max(0.0f, grayValue)));
+        dst[dstIndex] = value;     // R
+        dst[dstIndex + 1] = value; // G
+        dst[dstIndex + 2] = value; // B
+      } else {
+        // 多通道转三通道
+        for (int c = 0; c < dstChannels; c++) {
+          if (c < srcChannels) {
+            float value = src[idx1 + c] * (1 - dx) * (1 - dy) +
+                          src[idx2 + c] * dx * (1 - dy) +
+                          src[idx3 + c] * (1 - dx) * dy +
+                          src[idx4 + c] * dx * dy;
+
+            dst[dstIndex + c] = static_cast<unsigned char>(
+                std::min(255.0f, std::max(0.0f, value)));
+          } else {
+            // 如果源图像没有足够的通道（比如只有2个通道），第三个通道设为0
+            dst[dstIndex + c] = 0;
+          }
+        }
+      }
+    }
+  }
+
+  return dst;
+}
+
+void Simulate::drawGrayPixels(const unsigned char* gray, int idx,
+                              const std::array<int, 2> src_size,
+                              const std::array<int, 2> dst_size)
+{
+  if (img_left.size() == idx + 1)
+  {
+    img_left.push_back(img_left[idx] + dst_size[0] + 1);
+    img_bottom.push_back(0);
+  }
+  auto img = scaleImageToRGB(gray, src_size[0], src_size[1], dst_size[0],
+                             dst_size[1], 1);
+  mjrRect viewport = {img_left[idx], img_bottom[idx], dst_size[0], dst_size[1]};
+  mjr_drawPixels(img, nullptr, viewport, &con);
+  delete[] img;
+}
+
+
+void Simulate::drawRGBPixels(const unsigned char* rgb, int idx,
+                             const std::array<int, 2> src_size,
+                             const std::array<int, 2> dst_size)
+{
+  if (img_left.size() == idx + 1)
+  {
+    img_left.push_back(img_left[idx] + dst_size[0] + 1);
+    img_bottom.push_back(0);
+  }
+  auto img = scaleImageToRGB(rgb, src_size[0], src_size[1], dst_size[0],
+                             dst_size[1], 1);
+  mjrRect viewport = {img_left[idx], img_bottom[idx], dst_size[0], dst_size[1]};
+  mjr_drawPixels(img, nullptr, viewport, &con);
+  delete[] img;
+}
+
+void Simulate::draw_windows()
+{
+  drawGrayPixels(ray_caster_camera_img, 0,
+                 {ray_caster_camera.h_ray_num, ray_caster_camera.v_ray_num},
+                 {400, 400});
+  drawGrayPixels(ray_caster_camera_noise_img, 1,
+                 {ray_caster_camera.h_ray_num, ray_caster_camera.v_ray_num},
+                 {400, 400});
 }
 
 // render the ui to the window
@@ -2611,6 +2767,7 @@ void Simulate::Render() {
     ShowSensor(this, smallrect);
   }
   // draw ray caster line.
+  draw_windows();
   // std::cout<<"after drawing!!!!!!!!!"<<std::endl;
   // take screenshot, save to file
   if (this->screenshotrequest.exchange(false)) {
