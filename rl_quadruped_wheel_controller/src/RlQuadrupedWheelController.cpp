@@ -174,6 +174,15 @@ namespace rl_quadruped_wheel_controller
                 ctrl_interfaces_.control_inputs_.lx = 0.6*msg->axes[1];
                 ctrl_interfaces_.control_inputs_.ly = 0.5*msg->axes[0];
                 ctrl_interfaces_.control_inputs_.rx = 0.5*msg->axes[2];
+                if (msg->buttons[2] || msg->buttons[0]) {
+                    ctrl_interfaces_.control_inputs_.ry = 0.0;
+                }
+                if (msg->buttons[1]) {
+                    ctrl_interfaces_.control_inputs_.ry = 0.2;
+                }
+                if (msg->buttons[3]) {
+                    ctrl_interfaces_.control_inputs_.ry = 0.4;
+                }
                 if (msg->buttons[10]) // RB
                 {
                     if (msg->buttons[3]) // Y

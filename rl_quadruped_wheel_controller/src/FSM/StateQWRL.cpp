@@ -482,7 +482,7 @@ void StateQWRL::runModel()
     obs_.dof_pos_leg = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, 12).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel_wheel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 12, 4).unsqueeze(0);
-    obs_.height = torch::tensor({{control_.vel_yaw}});
+    obs_.height = torch::tensor({{ctrl_interfaces_.control_inputs_.ry}});
     // float v = control_.vel_yaw;                   // 假设是标量
     // v = std::clamp(v, 0.0f, 1.0f);
     // float vd = std::floor(v * 10.0f) / 10.0f;
