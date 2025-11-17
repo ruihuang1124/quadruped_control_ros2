@@ -14,12 +14,13 @@ FSMStateName StateFixedStand::checkChange() {
     if (percent_ < 1.5) {
         return FSMStateName::FIXEDSTAND;
     }
-    switch (ctrl_interfaces_.control_inputs_.command) {
+    switch (ctrl_interfaces_.control_inputs_.command)
+    {
         case 0:
             return FSMStateName::PASSIVE;
         case 1:
             return FSMStateName::FIXEDDOWN;
-        case 3:
+        case 2:
             return FSMStateName::RL;
         default:
             return FSMStateName::FIXEDSTAND;

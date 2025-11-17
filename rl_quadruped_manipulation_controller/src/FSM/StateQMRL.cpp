@@ -7,54 +7,44 @@
 #include <rclcpp/logging.hpp>
 #include <yaml-cpp/yaml.h>
 
-template <typename T>
-std::vector<T> ReadVectorFromYaml(const YAML::Node& node)
-{
+template<typename T>
+std::vector<T> ReadVectorFromYaml(const YAML::Node &node) {
     std::vector<T> values;
-    for (const auto& val : node)
-    {
+    for (const auto &val: node) {
         values.push_back(val.as<T>());
     }
     return values;
 }
 
-template <typename T>
-std::vector<T> ReadVectorFromYaml(const YAML::Node& node, const std::string& framework, const int& rows,
-                                  const int& cols)
-{
+template<typename T>
+std::vector<T> ReadVectorFromYaml(const YAML::Node &node, const std::string &framework, const int &rows,
+                                  const int &cols) {
     std::vector<T> values;
-    for (const auto& val : node)
-    {
+    for (const auto &val: node) {
         values.push_back(val.as<T>());
     }
 
-    if (framework == "isaacsim")
-    {
+    if (framework == "isaacsim") {
         std::vector<T> transposed_values(cols * rows);
-        for (int r = 0; r < rows; ++r)
-        {
-            for (int c = 0; c < cols; ++c)
-            {
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
                 transposed_values[c * rows + r] = values[r * cols + c];
             }
         }
         return transposed_values;
     }
-    if (framework == "isaacgym")
-    {
+    if (framework == "isaacgym") {
         return values;
     }
     throw std::invalid_argument("Unsupported framework: " + framework);
 }
 
-StateQMRL::StateQMRL(CtrlInterfaces& ctrl_interfaces,
-                 CtrlComponent& ctrl_component,
-                 const std::vector<double>& target_pos) :
-    FSMState(FSMStateName::QMRL, "qm rl", ctrl_interfaces),
-    node_(ctrl_component.node_),
-    enable_estimator_(ctrl_component.enable_estimator_),
-    estimator_(ctrl_component.estimator_)
-{
+StateQMRL::StateQMRL(CtrlInterfaces &ctrl_interfaces,
+                     CtrlComponent &ctrl_component,
+                     const std::vector<double> &target_pos) : FSMState(FSMStateName::QMRL, "qm rl", ctrl_interfaces),
+                                                              node_(ctrl_component.node_),
+                                                              enable_estimator_(ctrl_component.enable_estimator_),
+                                                              estimator_(ctrl_component.estimator_) {
     if (!node_->has_parameter("robot_pkg")) {
         node_->declare_parameter("robot_pkg", robot_pkg_);
     }
@@ -73,16 +63,14 @@ StateQMRL::StateQMRL(CtrlInterfaces& ctrl_interfaces,
     const std::string package_share_directory = ament_index_cpp::get_package_share_directory(robot_pkg_);
     const std::string model_path = package_share_directory + "/config/" + model_folder_;
 
-    for (int i = 0; i < 20; i++)
-    {
+    for (int i = 0; i < 20; i++) {
         init_pos_[i] = target_pos[i];
     }
     // RCLCPP_ERROR(node_->get_logger(), "Here init pose set!!!!!!!!");
     // read params from yaml
     loadYaml(model_path);
 
-    if (!params_.observations_history.empty())
-    {
+    if (!params_.observations_history.empty()) {
         history_obs_buf_ = std::make_shared<ObservationBuffer>(1, params_.num_observations,
                                                                params_.observations_history.size());
     }
@@ -96,25 +84,18 @@ StateQMRL::StateQMRL(CtrlInterfaces& ctrl_interfaces,
     // }
 
 
-    if (use_rl_thread_)
-    {
-        rl_thread_ = std::thread([&]{
-            while (true)
-            {
-                try
-                {
+    if (use_rl_thread_) {
+        rl_thread_ = std::thread([&] {
+            while (true) {
+                try {
                     executeAndSleep(
-                        [&]
-                        {
-                            if (running_)
-                            {
+                        [&] {
+                            if (running_) {
                                 runModel();
                             }
                         },
                         ctrl_interfaces_.frequency_ / params_.decimation);
-                }
-                catch (const std::exception& e)
-                {
+                } catch (const std::exception &e) {
                     running_ = false;
                     RCLCPP_ERROR(rclcpp::get_logger("StateRL"), "Error in RL thread: %s", e.what());
                 }
@@ -124,14 +105,13 @@ StateQMRL::StateQMRL(CtrlInterfaces& ctrl_interfaces,
     }
 }
 
-void StateQMRL::enter()
-{
+void StateQMRL::enter() {
     // Init observations
     obs_.lin_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.ang_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.gravity_vec = torch::tensor({{0.0, 0.0, -1.0}});
     obs_.commands = torch::tensor({{0.0, 0.0, 0.0}});
-    obs_.pose_commands = torch::tensor({{0.55, 0.0, 0.35, 1.0, 0.0, 0.0, 0.0}});
+    obs_.pose_commands = torch::tensor({{0.6498513221740723, -0.032649196684360504, 0.10801926255226135, -0.014631232246756554, 0.013575111515820026, 0.9998008012771606, 0.00019866018556058407}});
     obs_.base_quat = torch::tensor({{0.0, 0.0, 0.0, 1.0}});
     obs_.dof_pos = params_.default_dof_pos;
     obs_.dof_vel = torch::zeros({1, params_.num_of_dofs});
@@ -160,74 +140,53 @@ void StateQMRL::enter()
     running_ = true;
 }
 
-void StateQMRL::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
-{
+void StateQMRL::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
     getState();
-    if (!use_rl_thread_)
-    {
+    if (!use_rl_thread_) {
         runModel();
     }
     setCommand();
 }
 
-void StateQMRL::exit()
-{
+void StateQMRL::exit() {
     running_ = false;
 }
 
-FSMStateName StateQMRL::checkChange()
-{
-    if (enable_estimator_ and !estimator_->safety())
-    {
+FSMStateName StateQMRL::checkChange() {
+    if (enable_estimator_ and !estimator_->safety()) {
         return FSMStateName::QMPASSIVE;
     }
-    switch (ctrl_interfaces_.control_inputs_.command)
-    {
-    case 1:
-        return FSMStateName::QMPASSIVE;
-    case 2:
-        return FSMStateName::QMFIXEDDOWN;
-    default:
-        return FSMStateName::QMRL;
+    switch (ctrl_interfaces_.control_inputs_.command) {
+        case 0:
+            return FSMStateName::QMPASSIVE;
+        case 1:
+            return FSMStateName::QMFIXEDDOWN;
+        case 3:
+            return FSMStateName::QMFIXEDSTAND;
+        default:
+            return FSMStateName::QMRL;
     }
 }
 
-torch::Tensor StateQMRL::computeObservation()
-{
+torch::Tensor StateQMRL::computeObservation() {
     std::vector<torch::Tensor> obs_list;
 
-    for (const std::string& observation : params_.observations)
-    {
-        if (observation == "lin_vel")
-        {
+    for (const std::string &observation: params_.observations) {
+        if (observation == "lin_vel") {
             obs_list.push_back(obs_.lin_vel * params_.lin_vel_scale);
-        }
-        else if (observation == "ang_vel")
-        {
+        } else if (observation == "ang_vel") {
             obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
-        }
-        else if (observation == "gravity_vec")
-        {
+        } else if (observation == "gravity_vec") {
             obs_list.push_back(quatRotateInverse(obs_.base_quat, obs_.gravity_vec, params_.framework));
-        }
-        else if (observation == "vel_commands")
-        {
+        } else if (observation == "vel_commands") {
             obs_list.push_back(obs_.commands);
-        }
-        else if (observation == "pose_commands")
-        {
+        } else if (observation == "pose_commands") {
             obs_list.push_back(obs_.pose_commands); // scale TODO.
-        }
-        else if (observation == "dof_pos")
-        {
+        } else if (observation == "dof_pos") {
             obs_list.push_back((obs_.dof_pos - params_.default_dof_pos) * params_.dof_pos_scale);
-        }
-        else if (observation == "dof_vel")
-        {
+        } else if (observation == "dof_vel") {
             obs_list.push_back(obs_.dof_vel * params_.dof_vel_scale);
-        }
-        else if (observation == "actions")
-        {
+        } else if (observation == "actions") {
             obs_list.push_back(obs_.actions);
         }
     }
@@ -239,15 +198,11 @@ torch::Tensor StateQMRL::computeObservation()
     return clamped_obs;
 }
 
-void StateQMRL::loadYaml(const std::string& config_path)
-{
+void StateQMRL::loadYaml(const std::string &config_path) {
     YAML::Node config;
-    try
-    {
+    try {
         config = YAML::LoadFile(config_path + "/config_qm.yaml");
-    }
-    catch ([[maybe_unused]] YAML::BadFile& e)
-    {
+    } catch ([[maybe_unused]] YAML::BadFile &e) {
         RCLCPP_ERROR(rclcpp::get_logger("StateRL"), "The file '%s' does not exist", config_path.c_str());
         return;
     }
@@ -258,25 +213,19 @@ void StateQMRL::loadYaml(const std::string& config_path)
     params_.framework = config["framework"].as<std::string>();
     const int rows = config["rows"].as<int>();
     const int cols = config["cols"].as<int>();
-    if (config["observations_history"].IsNull())
-    {
+    if (config["observations_history"].IsNull()) {
         params_.observations_history = {};
-    }
-    else
-    {
+    } else {
         params_.observations_history = ReadVectorFromYaml<int>(config["observations_history"]);
     }
     params_.decimation = config["decimation"].as<int>();
     params_.num_observations = config["num_observations"].as<int>();
     params_.observations = ReadVectorFromYaml<std::string>(config["observations"]);
     params_.clip_obs = config["clip_obs"].as<double>();
-    if (config["clip_actions_lower"].IsNull() && config["clip_actions_upper"].IsNull())
-    {
+    if (config["clip_actions_lower"].IsNull() && config["clip_actions_upper"].IsNull()) {
         params_.clip_actions_upper = torch::tensor({}).view({1, -1});
         params_.clip_actions_lower = torch::tensor({}).view({1, -1});
-    }
-    else
-    {
+    } else {
         params_.clip_actions_upper = torch::tensor(
             ReadVectorFromYaml<double>(config["clip_actions_upper"], params_.framework, rows, cols)).view({1, -1});
         params_.clip_actions_lower = torch::tensor(
@@ -304,7 +253,8 @@ void StateQMRL::loadYaml(const std::string& config_path)
     params_.torque_limits = torch::tensor(
         ReadVectorFromYaml<double>(config["torque_limits"], params_.framework, rows, cols)).view({1, -1});
 
-    params_.default_dof_pos = torch::from_blob(init_pos_, {params_.num_of_dofs}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    params_.default_dof_pos = torch::from_blob(init_pos_, {params_.num_of_dofs}, torch::kDouble).clone().
+            to(torch::kFloat).unsqueeze(0);
 
     // 18 policy
     for (int i = 0; i < params_.num_of_dofs; i++) {
@@ -318,22 +268,19 @@ void StateQMRL::loadYaml(const std::string& config_path)
     // for (int i = 0; i < 5; i++) {
     //     params_.default_dof_pos[0][i+12] = init_pos_[i+13];
     // }
-    std::cout << "params_.default_dof_pos: " << params_.default_dof_pos << std::endl;
+    // std::cout << "params_.default_dof_pos: " << params_.default_dof_pos << std::endl;
     // params_.default_dof_pos = torch::tensor(
     //     ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1});
 }
 
-torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor& q, const torch::Tensor& v, const std::string& framework)
-{
+torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor &q, const torch::Tensor &v,
+                                           const std::string &framework) {
     torch::Tensor q_w;
     torch::Tensor q_vec;
-    if (framework == "isaacsim")
-    {
+    if (framework == "isaacsim") {
         q_w = q.index({torch::indexing::Slice(), 0});
         q_vec = q.index({torch::indexing::Slice(), torch::indexing::Slice(1, 4)});
-    }
-    else if (framework == "isaacgym")
-    {
+    } else if (framework == "isaacgym") {
         q_w = q.index({torch::indexing::Slice(), 3});
         q_vec = q.index({torch::indexing::Slice(), torch::indexing::Slice(0, 3)});
     }
@@ -345,42 +292,33 @@ torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor& q, const torch::
     return a - b + c;
 }
 
-torch::Tensor StateQMRL::forward()
-{
+torch::Tensor StateQMRL::forward() {
     // std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
     torch::autograd::GradMode::set_enabled(false);
     torch::Tensor clamped_obs = computeObservation();
     torch::Tensor actions;
 
-    if (!params_.observations_history.empty())
-    {
+    if (!params_.observations_history.empty()) {
         history_obs_buf_->insert(clamped_obs);
         history_obs_ = history_obs_buf_->getObsVec(params_.observations_history);
         actions = model_.forward({history_obs_}).toTensor();
-    }
-    else
-    {
+    } else {
         actions = model_.forward({clamped_obs}).toTensor();
     }
 
-    if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
-    {
+    if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0) {
         return clamp(actions, params_.clip_actions_lower, params_.clip_actions_upper);
     }
     return actions;
 }
 
-void StateQMRL::getState()
-{
-    if (params_.framework == "isaacgym")
-    {
+void StateQMRL::getState() {
+    if (params_.framework == "isaacgym") {
         robot_state_.imu.quaternion[3] = ctrl_interfaces_.imu_state_interface_[0].get().get_value();
         robot_state_.imu.quaternion[0] = ctrl_interfaces_.imu_state_interface_[1].get().get_value();
         robot_state_.imu.quaternion[1] = ctrl_interfaces_.imu_state_interface_[2].get().get_value();
         robot_state_.imu.quaternion[2] = ctrl_interfaces_.imu_state_interface_[3].get().get_value();
-    }
-    else if (params_.framework == "isaacsim")
-    {
+    } else if (params_.framework == "isaacsim") {
         robot_state_.imu.quaternion[0] = ctrl_interfaces_.imu_state_interface_[0].get().get_value();
         robot_state_.imu.quaternion[1] = ctrl_interfaces_.imu_state_interface_[1].get().get_value();
         robot_state_.imu.quaternion[2] = ctrl_interfaces_.imu_state_interface_[2].get().get_value();
@@ -395,8 +333,7 @@ void StateQMRL::getState()
     robot_state_.imu.accelerometer[1] = ctrl_interfaces_.imu_state_interface_[8].get().get_value();
     robot_state_.imu.accelerometer[2] = ctrl_interfaces_.imu_state_interface_[9].get().get_value();
 
-    for (int i = 0; i < 20; i++)
-    {
+    for (int i = 0; i < 20; i++) {
         robot_state_.motor_state.q[i] = ctrl_interfaces_.joint_position_state_interface_[i].get().get_value();
         robot_state_.motor_state.dq[i] = ctrl_interfaces_.joint_velocity_state_interface_[i].get().get_value();
         robot_state_.motor_state.tauEst[i] = ctrl_interfaces_.joint_effort_state_interface_[i].get().get_value();
@@ -416,12 +353,10 @@ void StateQMRL::getState()
     updated_ = true;
 }
 
-void StateQMRL::runModel()
-{
-    if (enable_estimator_)
-    {
+void StateQMRL::runModel() {
+    if (enable_estimator_) {
         obs_.lin_vel = torch::from_blob(estimator_->getVelocity().data(), {3}, torch::kDouble).clone().
-            to(torch::kFloat).unsqueeze(0);
+                to(torch::kFloat).unsqueeze(0);
     }
     obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
     obs_.commands = torch::tensor({{control_.vel_x, control_.vel_y, control_.vel_yaw}});
@@ -437,7 +372,6 @@ void StateQMRL::runModel()
     // 18 policy
     obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
-
 
 
     // 17 policy
@@ -458,8 +392,7 @@ void StateQMRL::runModel()
     // }
     // clamped_actions[0][12] = clamped_actions_output[0][8];
 
-    for (const int i : params_.hip_scale_reduction_indices)
-    {
+    for (const int i: params_.hip_scale_reduction_indices) {
         clamped_actions[0][i] *= params_.hip_scale_reduction;
     }
 
@@ -473,14 +406,124 @@ void StateQMRL::runModel()
     //             actions_scaled[0][0], actions_scaled[0][1], actions_scaled[0][2], actions_scaled[0][3],
     //             actions_scaled[0][4], actions_scaled[0][5], actions_scaled[0][6], actions_scaled[0][7],
     //             actions_scaled[0][8], actions_scaled[0][9], actions_scaled[0][10], actions_scaled[0][11]);
-    // std::cout << "obs_base_ang_vel: " << obs_.ang_vel << std::endl;
-    // std::cout << "obs_joint_pose: " << obs_.dof_pos << std::endl;
-    // std::cout << "obs_joint_vel: " << obs_.dof_vel << std::endl;
-    // std::cout << "obs_actions: " << obs_.actions << std::endl;
-    // std::cout << "obs_velocity_commands: " << obs_.commands << std::endl;
-    // std::cout << "obs_pose_command: " << obs_.pose_commands << std::endl;
-    // std::cout << "obs_projected_gravity: " << obs_.gravity_vec << std::endl;
-    // std::cout << "obs_actions: " << obs_.actions << std::endl;
+    // std::cout << "obs_base_ang_vel: " << obs_.ang_vel[0][0] << obs_.ang_vel[0][1] << obs_.ang_vel[0][2] << std::endl;
+    // std::cout << "obs_joint_pose: " << obs_.dof_pos[0] << std::endl;
+    // std::cout << "obs_joint_vel: " << obs_.dof_vel[0] << std::endl;
+    // std::cout << "obs_actions: " << obs_.actions[0] << std::endl;
+    // std::cout << "obs_velocity_commands: " << obs_.commands[0] << std::endl;
+    // std::cout << "obs_pose_command: " << obs_.pose_commands[0] << std::endl;
+    // std::cout << "obs_projected_gravity: " << obs_.gravity_vec[0] << std::endl;
+    // std::cout << "obs_actions: " << obs_.actions[0] << std::endl;
+
+    auto ang_vel_cpu = obs_.ang_vel.to(torch::kCPU);
+    auto project_gravity_cpu = obs_.gravity_vec.to(torch::kCPU);
+    auto vel_command_cpu = obs_.commands.to(torch::kCPU);
+    auto joint_pose_rel_cpu = obs_.dof_pos.to(torch::kCPU);
+    auto joint_vel_cpu = obs_.dof_vel.to(torch::kCPU);
+    auto action_cpu = obs_.actions.to(torch::kCPU);
+    auto pose_command_cup = obs_.pose_commands.to(torch::kCPU);
+
+    // 获取访问器（2D 张量）
+    auto ang_vel_a = ang_vel_cpu.accessor<float, 2>();
+    auto project_gravity_a = project_gravity_cpu.accessor<float, 2>();
+    auto vel_command_a = vel_command_cpu.accessor<float, 2>();
+    auto joint_pose_rel_a = joint_pose_rel_cpu.accessor<float, 2>();
+    auto joint_vel_a = joint_vel_cpu.accessor<float, 2>();
+    auto action_a = action_cpu.accessor<float, 2>();
+    auto pose_command_a = pose_command_cup.accessor<float, 2>();
+
+
+    // 打印值
+    RCLCPP_INFO(node_->get_logger(),
+                "obs_base_ang_vel: %.3f, %.3f, %.3f",
+                ang_vel_a[0][0], // 第一行第一列
+                ang_vel_a[0][1], // 第一行第二列
+                ang_vel_a[0][2]); // 第一行第三列
+    RCLCPP_INFO(node_->get_logger(),
+                "project_gravity: %.3f, %.3f, %.3f",
+                project_gravity_a[0][0], // 第一行第一列
+                project_gravity_a[0][1], // 第一行第二列
+                project_gravity_a[0][2]); // 第一行第三列
+    RCLCPP_INFO(node_->get_logger(),
+                "Veloity command: %.3f, %.3f, %.3f",
+                vel_command_a[0][0], // 第一行第一列
+                vel_command_a[0][1], // 第一行第二列
+                vel_command_a[0][2]); // 第一行第三列
+
+    RCLCPP_INFO(node_->get_logger(),
+                "joint pose: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
+                joint_pose_rel_a[0][0], // 第一行第一列
+                joint_pose_rel_a[0][1], // 第一行第二列
+                joint_pose_rel_a[0][2],
+                joint_pose_rel_a[0][3], // 第一行第一列
+                joint_pose_rel_a[0][4], // 第一行第二列
+                joint_pose_rel_a[0][5],
+                joint_pose_rel_a[0][6], // 第一行第一列
+                joint_pose_rel_a[0][7], // 第一行第二列
+                joint_pose_rel_a[0][8],
+                joint_pose_rel_a[0][9], // 第一行第一列
+                joint_pose_rel_a[0][10], // 第一行第二列
+                joint_pose_rel_a[0][11],
+                joint_pose_rel_a[0][12], // 第一行第一列
+                joint_pose_rel_a[0][13], // 第一行第二列
+                joint_pose_rel_a[0][14],
+                joint_pose_rel_a[0][15], // 第一行第一列
+                joint_pose_rel_a[0][16], // 第一行第二列
+                joint_pose_rel_a[0][17]); // 第一行第三列
+
+    RCLCPP_INFO(node_->get_logger(),
+            "joint vel: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
+            joint_vel_a[0][0], // 第一行第一列
+            joint_vel_a[0][1], // 第一行第二列
+            joint_vel_a[0][2],
+            joint_vel_a[0][3], // 第一行第一列
+            joint_vel_a[0][4], // 第一行第二列
+            joint_vel_a[0][5],
+            joint_vel_a[0][6], // 第一行第一列
+            joint_vel_a[0][7], // 第一行第二列
+            joint_vel_a[0][8],
+            joint_vel_a[0][9], // 第一行第一列
+            joint_vel_a[0][10], // 第一行第二列
+            joint_vel_a[0][11],
+            joint_vel_a[0][12], // 第一行第一列
+            joint_vel_a[0][13], // 第一行第二列
+            joint_vel_a[0][14],
+            joint_vel_a[0][15], // 第一行第一列
+            joint_vel_a[0][16], // 第一行第二列
+            joint_vel_a[0][17]); // 第一行第三列
+
+    RCLCPP_INFO(node_->get_logger(),
+            "action: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
+            action_a[0][0], // 第一行第一列
+            action_a[0][1], // 第一行第二列
+            action_a[0][2],
+            action_a[0][3], // 第一行第一列
+            action_a[0][4], // 第一行第二列
+            action_a[0][5],
+            action_a[0][6], // 第一行第一列
+            action_a[0][7], // 第一行第二列
+            action_a[0][8],
+            action_a[0][9], // 第一行第一列
+            action_a[0][10], // 第一行第二列
+            action_a[0][11],
+            action_a[0][12], // 第一行第一列
+            action_a[0][13], // 第一行第二列
+            action_a[0][14],
+            action_a[0][15], // 第一行第一列
+            action_a[0][16], // 第一行第二列
+            action_a[0][17]); // 第一行第三列
+    std::cout<<"================================================"<<std::endl;
+
+    RCLCPP_INFO(node_->get_logger(),
+        "pose_command: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
+        pose_command_a[0][0], // 第一行第一列
+        pose_command_a[0][1], // 第一行第二列
+        pose_command_a[0][2],
+        pose_command_a[0][3], // 第一行第一列
+        pose_command_a[0][4], // 第一行第二列
+        pose_command_a[0][5],
+        pose_command_a[0][6]); // 第一行第三列
+    std::cout<<"================================================"<<std::endl;
 
     // torch::Tensor output_torques = params_.rl_kp * (actions_scaled + params_.default_dof_pos - obs_.dof_pos) - params_.rl_kd * obs_.dof_vel;
     // output_torques = clamp(output_torques, -(params_.torque_limits), params_.torque_limits);
@@ -503,6 +546,12 @@ void StateQMRL::runModel()
         robot_command_.motor_command.kp[i] = params_.rl_kp[0][i].item<double>();
         robot_command_.motor_command.kd[i] = params_.rl_kd[0][i].item<double>();
         robot_command_.motor_command.tau[i] = 0;
+
+        // robot_command_.motor_command.q[i] = params_.default_dof_pos[0][i].item<double>();
+        // robot_command_.motor_command.dq[i] = 0;
+        // robot_command_.motor_command.kp[i] = 100.0;
+        // robot_command_.motor_command.kd[i] = 3.0;
+        // robot_command_.motor_command.tau[i] = 0;
         // if (i>=12) {
         //     robot_command_.motor_command.q[i] = params_.default_dof_pos[0][i].item<double>();
         //     robot_command_.motor_command.dq[i] = 0;
@@ -516,7 +565,6 @@ void StateQMRL::runModel()
         //     robot_command_.motor_command.kd[i] = params_.rl_kd[0][i].item<double>();
         //     robot_command_.motor_command.tau[i] = 0;
         // }
-
     }
     // for (int i = 0; i < 8; ++i) {
     //     robot_command_.motor_command.q[i+12] = init_pos_[i+12];
@@ -546,10 +594,8 @@ void StateQMRL::runModel()
     // std::cout << "command q are: " << robot_command_.motor_command.q << std::endl;
 }
 
-void StateQMRL::setCommand() const
-{
-    for (int i = 0; i < params_.num_of_dofs + 2; i++)
-    {
+void StateQMRL::setCommand() const {
+    for (int i = 0; i < params_.num_of_dofs + 2; i++) {
         ctrl_interfaces_.joint_position_command_interface_[i].get().set_value(robot_command_.motor_command.q[i]);
         ctrl_interfaces_.joint_velocity_command_interface_[i].get().set_value(robot_command_.motor_command.dq[i]);
         ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(robot_command_.motor_command.kp[i]);

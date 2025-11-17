@@ -61,11 +61,11 @@ FSMStateName StateFixedDown::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-    case 0:
-        return FSMStateName::PASSIVE;
-    case 2:
-        return FSMStateName::FIXEDSTAND;
-    default:
-        return FSMStateName::FIXEDDOWN;
+        case 0:
+            return FSMStateName::PASSIVE;
+        case 3:
+            return FSMStateName::FIXEDSTAND;
+        default:
+            return FSMStateName::FIXEDDOWN;
     }
 }

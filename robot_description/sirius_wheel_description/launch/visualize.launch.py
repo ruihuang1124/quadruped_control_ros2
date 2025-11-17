@@ -7,7 +7,7 @@ from launch_ros.actions import Node
 
 import xacro
 
-package_description = "sirius_sheel_description"
+package_description = "sirius_wheel_description"
 
 def process_xacro():
     pkg_path = os.path.join(get_package_share_directory(package_description))

@@ -43,71 +43,64 @@ private:
 
     void cmdMappingCallback(const std_msgs::msg::String keyboard_input) {
         switch (keyboard_input.data[0]) {
-            case 'w':
-            case 'W':
-                pose_control_input_cmd_.pos_x += 0.1;
+            // Position control
+            case 'j':
+                pose_control_input_cmd_.pos_y += 0.05;
                 break;
-            case 's':
-            case 'S':
-                pose_control_input_cmd_.pos_x -= 0.1;
+            case 'l':
+                pose_control_input_cmd_.pos_y -= 0.05;
                 break;
-            case 'a':
-            case 'A':
-                pose_control_input_cmd_.pos_z += 0.1;
+            case 'i':
+                pose_control_input_cmd_.pos_x += 0.05;
                 break;
-            case 'd':
-            case 'D':
-                pose_control_input_cmd_.pos_z -= 0.1;
+            case 'k':
+                pose_control_input_cmd_.pos_x -= 0.05;
                 break;
-            case '=':
-            case '+':
-                control_input_cmd_.ly += 0.25;
-                control_input_cmd_.command = 4;
+            case 'u':
+                pose_control_input_cmd_.pos_z += 0.05;
                 break;
-            case '-':
-            case '_':
-                control_input_cmd_.ly -= 0.25;
-                control_input_cmd_.command = 4;
+            case 'o':
+                pose_control_input_cmd_.pos_z -= 0.05;
                 break;
-            case '1':
-                user_cmd_.gait_name = "stance";
-                control_input_cmd_.command = 1;
-                break;
-            case '2':
-                user_cmd_.gait_name = "trot";
-                control_input_cmd_.command = 2;
-                break;
-            case '3':
-                user_cmd_.gait_name = "standing_trot";
-                control_input_cmd_.command = 3;
+
+            // Orientation Control
+            case '7':
+                pose_control_input_cmd_.pos_roll += 0.05;
                 break;
             case '4':
-                user_cmd_.gait_name = "flying_trot";
-                control_input_cmd_.command = 4;
+                pose_control_input_cmd_.pos_roll -= 0.05;
+                break;
+            case '8':
+                pose_control_input_cmd_.pos_pitch += 0.05;
                 break;
             case '5':
-                user_cmd_.gait_name = "standing_pace";
-                control_input_cmd_.command = 5;
-                break;
-            case '6':
-                user_cmd_.gait_name = "dynamic_walk";
-                control_input_cmd_.command = 6;
-                break;
-            case '7':
-                user_cmd_.gait_name = "bound";
-                break;
-            case ' ':
-                user_cmd_.passive_enable = true;
+                pose_control_input_cmd_.pos_pitch -= 0.05;
                 break;
             case '9':
-                handleSwitchController();
+                pose_control_input_cmd_.pos_yaw += 0.05;
                 break;
+            case '6':
+                pose_control_input_cmd_.pos_yaw -= 0.05;
+                break;
+
+            case 'r': // reset
+                pose_control_input_cmd_.pos_x = 0.6;
+                pose_control_input_cmd_.pos_y = 0.0;
+                pose_control_input_cmd_.pos_z = 0.06;
+                pose_control_input_cmd_.pos_roll = 0.0;
+                pose_control_input_cmd_.pos_pitch = 3.14;
+                pose_control_input_cmd_.pos_yaw = 0.0;
+                break;
+                // Fingers
+            // case '1': // catch
+            //     pose_control_input_cmd_.L_finger_pos = 0.017;
+            //     pose_control_input_cmd_.R_finger_pos = -0.017;
+            //     break;
+            // case '2': // release
+            //     pose_control_input_cmd_.L_finger_pos = 0.035;
+            //     pose_control_input_cmd_.R_finger_pos = -0.035;
+            //     break;
         }
-
-        user_cmd_.height_ratio = std::clamp(user_cmd_.height_ratio, 0.0, 1.0);
-
-        cmd_publisher->publish(user_cmd_);
-        control_input_publisher_->publish(control_input_cmd_);
         pose_control_input_publisher_->publish(pose_control_input_cmd_);
     }
 
@@ -131,9 +124,9 @@ private:
     }
 
     void initPoseControlInputCmd() {
-        pose_control_input_cmd_.pos_x = 0.65;
+        pose_control_input_cmd_.pos_x = 0.60;
         pose_control_input_cmd_.pos_y = 0.0;
-        pose_control_input_cmd_.pos_z = 0.48;
+        pose_control_input_cmd_.pos_z = 0.06;
         pose_control_input_cmd_.pos_roll = 0.0;
         pose_control_input_cmd_.pos_pitch = 3.14;
         pose_control_input_cmd_.pos_yaw = 0.0;

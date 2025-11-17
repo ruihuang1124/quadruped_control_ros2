@@ -60,11 +60,11 @@ FSMStateName StateQMFixedStand::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-        case 1:
+        case 0:
             return FSMStateName::QMPASSIVE;
-        case 2:
+        case 1:
             return FSMStateName::QMFIXEDDOWN;
-        case 3:
+        case 2:
             return FSMStateName::QMRL;
         default:
             return FSMStateName::QMFIXEDSTAND;

@@ -46,7 +46,7 @@ namespace ArcLab
             const std::unique_lock<std::recursive_mutex> lock(sim_->mtx);
             imu_callback();
             joint_callback();
-            contact_callback();
+            // contact_callback();
         }
     }
 

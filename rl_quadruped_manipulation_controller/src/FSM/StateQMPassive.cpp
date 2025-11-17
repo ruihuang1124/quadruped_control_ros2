@@ -51,7 +51,7 @@ void StateQMPassive::exit()
 
 FSMStateName StateQMPassive::checkChange()
 {
-    if (ctrl_interfaces_.control_inputs_.command == 2)
+    if (ctrl_interfaces_.control_inputs_.command == 1)
     {
         return FSMStateName::QMFIXEDDOWN;
     }

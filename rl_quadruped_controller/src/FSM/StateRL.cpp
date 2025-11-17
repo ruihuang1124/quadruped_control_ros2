@@ -176,14 +176,14 @@ FSMStateName StateRL::checkChange()
     }
     switch (ctrl_interfaces_.control_inputs_.command)
     {
-    case 0:
-        return FSMStateName::PASSIVE;
-    case 1:
-        return FSMStateName::FIXEDDOWN;
-    case 2:
-        return FSMStateName::FIXEDSTAND;
-    default:
-        return FSMStateName::RL;
+        case 0:
+            return FSMStateName::PASSIVE;
+        case 1:
+            return FSMStateName::FIXEDDOWN;
+        case 3:
+            return FSMStateName::FIXEDSTAND;
+        default:
+            return FSMStateName::RL;
     }
 }
 
@@ -199,8 +199,7 @@ torch::Tensor StateRL::computeObservation()
         }
         else if (observation == "ang_vel")
         {
-            obs_list.push_back(
-                quatRotateInverse(obs_.base_quat, obs_.ang_vel, params_.framework) * params_.ang_vel_scale);
+            obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
         }
         else if (observation == "gravity_vec")
         {
@@ -394,7 +393,7 @@ void StateRL::runModel()
     obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
     obs_.commands = torch::tensor({{control_.x, control_.y, control_.yaw}});
     obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
-    obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
+    // obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
 
     const torch::Tensor clamped_actions = forward();

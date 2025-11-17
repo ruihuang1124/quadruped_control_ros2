@@ -7,6 +7,7 @@
 #include <controller_interface/controller_interface.hpp>
 #include <rl_quadruped_manipulation_controller/FSM/StateQMRL.h>
 #include <std_msgs/msg/string.hpp>
+#include <sensor_msgs/msg/joy.hpp>
 
 #include "rl_quadruped_manipulation_controller/control/CtrlComponent.h"
 // #include "controller_common/FSM/StateFixedDown.h"
@@ -118,6 +119,7 @@ namespace rl_quadruped_manipulation_controller
         rclcpp::Subscription<control_input_msgs::msg::Inputs>::SharedPtr control_input_subscription_;
         rclcpp::Subscription<control_input_msgs::msg::PoseCmdInputs>::SharedPtr pose_control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
 
         FSMMode mode_ = FSMMode::NORMAL;
         std::string state_name_;

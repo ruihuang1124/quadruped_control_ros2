@@ -137,9 +137,9 @@ namespace rl_quadruped_manipulation_controller
                 ctrl_component_.estimator_ = std::make_shared<Estimator>(ctrl_interfaces_, ctrl_component_);
             }
             ctrl_component_.node_ = get_node();
-            ctrl_interfaces_.pose_cmd_inputs_.pos_x = 0.65;
+            ctrl_interfaces_.pose_cmd_inputs_.pos_x = 0.6;
             ctrl_interfaces_.pose_cmd_inputs_.pos_y = 0.0;
-            ctrl_interfaces_.pose_cmd_inputs_.pos_z = 0.50;
+            ctrl_interfaces_.pose_cmd_inputs_.pos_z = 0.06;
             ctrl_interfaces_.pose_cmd_inputs_.pos_roll = 0.0;
             ctrl_interfaces_.pose_cmd_inputs_.pos_pitch = 3.14;
             ctrl_interfaces_.pose_cmd_inputs_.pos_yaw = 0.0;
@@ -189,10 +189,31 @@ namespace rl_quadruped_manipulation_controller
                 ctrl_interfaces_.pose_cmd_inputs_.pos_roll = msg->pos_roll;
                 ctrl_interfaces_.pose_cmd_inputs_.pos_pitch = msg->pos_pitch;
                 ctrl_interfaces_.pose_cmd_inputs_.pos_yaw = msg->pos_yaw;
-                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_x = msg->pos_quat_x;
-                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_y = msg->pos_quat_y;
-                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_z = msg->pos_quat_z;
-                ctrl_interfaces_.pose_cmd_inputs_.pos_quat_w = msg->pos_quat_w;
+            });
+
+        sub_joy_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
+            "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
+                // RCLCPP_INFO(get_node()->get_logger(), "received joy msg!!!");
+                // Handle message
+                ctrl_interfaces_.control_inputs_.lx = 0.6 * msg->axes[1];
+                ctrl_interfaces_.control_inputs_.ly = 0.5 * msg->axes[0];
+                ctrl_interfaces_.control_inputs_.rx = 0.5 * msg->axes[2];
+                if (msg->buttons[10]) // RB
+                {
+                    if (msg->buttons[3]) // Y
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 2;
+                    } else if (msg->buttons[0]) // A
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 1;
+                    } else if (msg->buttons[1]) // B
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 0;
+                    } else if (msg->buttons[2]) // X
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 3;
+                    }
+                }
             });
 
         return CallbackReturn::SUCCESS;

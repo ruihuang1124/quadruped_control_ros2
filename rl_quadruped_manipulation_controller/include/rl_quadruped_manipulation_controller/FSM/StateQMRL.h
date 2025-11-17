@@ -87,11 +87,11 @@ struct Control
     double vel_x = 0.0;
     double vel_y = 0.0;
     double vel_yaw = 0.0;
-    double pos_x = 0.0;
+    double pos_x = 0.6;
     double pos_y = 0.0;
-    double pos_z = 0.0;
+    double pos_z = 0.1;
     double pos_roll = 0.0;
-    double pos_pitch = 0.0;
+    double pos_pitch = 3.14;
     double pos_yaw = 0.0;
 };
 
