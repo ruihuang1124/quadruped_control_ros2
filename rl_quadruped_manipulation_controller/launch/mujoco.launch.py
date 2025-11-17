@@ -85,8 +85,16 @@ def launch_setup(context, *args, **kwargs):
         executable="cmd_mapping",
     )
 
+    joy_node = Node(
+        package='joy',
+        namespace='',
+        executable='game_controller_node',
+        name='joy_package'
+    )
+
     return [
-        rviz,
+        joy_node,
+        # rviz,
         cmd_mapping,
         robot_state_publisher,
         controller_manager,

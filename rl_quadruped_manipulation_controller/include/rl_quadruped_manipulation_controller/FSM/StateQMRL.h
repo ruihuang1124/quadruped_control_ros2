@@ -205,6 +205,8 @@ private:
     // output buffer
     torch::Tensor output_torques;
     torch::Tensor output_dof_pos_;
+
+    int debug_;
 };
 
 

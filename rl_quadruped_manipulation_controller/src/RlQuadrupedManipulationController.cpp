@@ -137,9 +137,9 @@ namespace rl_quadruped_manipulation_controller
                 ctrl_component_.estimator_ = std::make_shared<Estimator>(ctrl_interfaces_, ctrl_component_);
             }
             ctrl_component_.node_ = get_node();
-            ctrl_interfaces_.pose_cmd_inputs_.pos_x = 0.6;
+            ctrl_interfaces_.pose_cmd_inputs_.pos_x = 0.55;
             ctrl_interfaces_.pose_cmd_inputs_.pos_y = 0.0;
-            ctrl_interfaces_.pose_cmd_inputs_.pos_z = 0.06;
+            ctrl_interfaces_.pose_cmd_inputs_.pos_z = 0.25;
             ctrl_interfaces_.pose_cmd_inputs_.pos_roll = 0.0;
             ctrl_interfaces_.pose_cmd_inputs_.pos_pitch = 3.14;
             ctrl_interfaces_.pose_cmd_inputs_.pos_yaw = 0.0;

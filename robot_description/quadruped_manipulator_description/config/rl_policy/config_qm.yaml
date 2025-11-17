@@ -1,34 +1,32 @@
-model_name: "policy_3500.pt"
+model_name: "policy_1117.pt"
 framework: "isaacsim"
+debug: 0
 rows: 6
 cols: 3
 decimation: 4
 num_observations: 70
-#observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
-#observations: ["ang_vel", "dof_pos", "dof_vel", "actions", "vel_commands", "pose_commands", "gravity_vec"]
 observations: ["ang_vel", "gravity_vec", "vel_commands", "dof_pos", "dof_vel", "actions", "pose_commands"]
 observations_history: [0]
 clip_obs: 60.0
-clip_actions_lower: [-100, -100, -100,
-                     -100, -100, -100,
-                     -100, -100, -100,
-                     -100, -100, -100,
+clip_actions_lower: [-60, -60, -60,
+                     -60, -60, -60,
+                     -60, -60, -60,
+                     -60, -60, -60,
                      -100, -100, -100,
                      -100, -100, -100]
 
-clip_actions_upper: [100, 100, 100,
+clip_actions_upper: [60, 60, 60,
+                     60, 60, 60,
+                     60, 60, 60,
+                     60, 60, 60,
                      100, 100, 100,
-                     100, 100, 100,
-                     100, 100, 100,
-                     100, 100, 100,
-                     100, 100, -100]
-rl_kp: [60, 60, 60,
-        60, 60, 60,
-        60, 60, 60,
-        60, 60, 60,
-        30, 30, 30,
-        30, 30, 30,
-        30, 30, 30]
+                     100, 100, 100]
+rl_kp: [50, 50, 50,
+        50, 50, 50,
+        50, 50, 50,
+        50, 50, 50,
+        10, 10, 10,
+        10, 10, 10]
 rl_kd: [2, 2, 2,
         2, 2, 2,
         2, 2, 2,
