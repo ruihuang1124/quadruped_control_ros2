@@ -34,12 +34,17 @@ static bool recieve_flag=0;
 
 // only used for actual robot
 const float arcdog_abad_side_sign[4] = {-1, -1, 1, 1};
-const float arcdog_hip_side_sign[4] = {-1, 1, -1, 1};
-// const float arcdog_knee_side_sign[4] = {-1, 1, -1, 1};
-const float arcdog_knee_side_sign[4] = {1, -1, 1, -1};
-float arcdog_abad_offset[4] = {-ARCDOG_K_ABAD_OFFSET_POS_0, ARCDOG_K_ABAD_OFFSET_POS_1, -ARCDOG_K_ABAD_OFFSET_POS_2, ARCDOG_K_ABAD_OFFSET_POS_3};
-float arcdog_hip_offset[4] = {-ARCDOG_K_HIP_OFFSET_POS_0, -ARCDOG_K_HIP_OFFSET_POS_1, -ARCDOG_K_HIP_OFFSET_POS_2, -ARCDOG_K_HIP_OFFSET_POS_3};
-float arcdog_knee_offset[4] = {-ARCDOG_K_KNEE_OFFSET_POS_0, -ARCDOG_K_KNEE_OFFSET_POS_1, -ARCDOG_K_KNEE_OFFSET_POS_2, -ARCDOG_K_KNEE_OFFSET_POS_3};
+// const float arcdog_hip_side_sign[4] = {-1, 1, -1, 1};
+const float arcdog_hip_side_sign[4] = {1, -1, 1, -1};
+const float arcdog_knee_side_sign[4] = {-1, 1, -1, 1};
+// const float arcdog_knee_side_sign[4] = {1, -1, 1, -1};
+// float arcdog_abad_offset[4] = {-ARCDOG_K_ABAD_OFFSET_POS_0, ARCDOG_K_ABAD_OFFSET_POS_1, -ARCDOG_K_ABAD_OFFSET_POS_2, ARCDOG_K_ABAD_OFFSET_POS_3};
+// float arcdog_hip_offset[4] = {-ARCDOG_K_HIP_OFFSET_POS_0, -ARCDOG_K_HIP_OFFSET_POS_1, -ARCDOG_K_HIP_OFFSET_POS_2, -ARCDOG_K_HIP_OFFSET_POS_3};
+// float arcdog_knee_offset[4] = {-ARCDOG_K_KNEE_OFFSET_POS_0, -ARCDOG_K_KNEE_OFFSET_POS_1, -ARCDOG_K_KNEE_OFFSET_POS_2, -ARCDOG_K_KNEE_OFFSET_POS_3};
+
+float arcdog_abad_offset[4] = {ARCDOG_K_ABAD_OFFSET_POS_0, -ARCDOG_K_ABAD_OFFSET_POS_1, ARCDOG_K_ABAD_OFFSET_POS_2, -ARCDOG_K_ABAD_OFFSET_POS_3};
+float arcdog_hip_offset[4] = {ARCDOG_K_HIP_OFFSET_POS_0, ARCDOG_K_HIP_OFFSET_POS_1, ARCDOG_K_HIP_OFFSET_POS_2, ARCDOG_K_HIP_OFFSET_POS_3};
+float arcdog_knee_offset[4] = {ARCDOG_K_KNEE_OFFSET_POS_0, ARCDOG_K_KNEE_OFFSET_POS_1, ARCDOG_K_KNEE_OFFSET_POS_2, ARCDOG_K_KNEE_OFFSET_POS_3};
 
 //const float arcdog_abad_side_sign[4] = {1, 1, 1, 1};
 //const float arcdog_hip_side_sign[4] = {1, 1, 1, 1};

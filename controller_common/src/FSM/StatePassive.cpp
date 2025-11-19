@@ -31,7 +31,7 @@ void StatePassive::enter()
     }
     for (auto i : ctrl_interfaces_.joint_kd_command_interface_)
     {
-        i.get().set_value(6);
+        i.get().set_value(5.5);
     }
     ctrl_interfaces_.control_inputs_.command = -1;
 }

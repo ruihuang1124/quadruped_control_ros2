@@ -92,8 +92,8 @@ namespace unitree_guide_controller {
             0.0, 1.3, -2.4
         };
 
-        double stand_kp_ = 80.0;
-        double stand_kd_ = 3.5;
+        double stand_kp_ = 70.0;
+        double stand_kd_ = 3.0;
 
         rclcpp::Subscription<control_input_msgs::msg::Inputs>::SharedPtr control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;

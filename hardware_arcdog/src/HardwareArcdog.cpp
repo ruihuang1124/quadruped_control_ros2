@@ -59,6 +59,7 @@ std::vector<hardware_interface::StateInterface> HardwareArcdog::export_state_int
     // joint state
     for (size_t i = 0; i < info_.joints.size(); i++)
     {
+        std::cout<<"joint name is:"<<info_.joints[i].name<<std::endl;
         state_interfaces.emplace_back(hardware_interface::StateInterface(
             info_.joints[i].name, "position", &joint_position_states_[info_.joints[i].name]));
         state_interfaces.emplace_back(hardware_interface::StateInterface(
@@ -107,7 +108,6 @@ std::vector<hardware_interface::CommandInterface> HardwareArcdog::export_command
 
 return_type HardwareArcdog::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-    iterations_++;
     // read motor states through tty and the imu info will be updated with imucallback().
     custom_msgs::msg::JointStates* joints_data = get_joint_states_msgtype();
     if (rclcpp::ok())
@@ -185,6 +185,7 @@ return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::D
         }
         break;
     case 8:
+        iterations_++;
         // printf("Motor activate!\n");
         motor_mode_flag = false;
         for (int leg = 0; leg < 4; leg++) {
