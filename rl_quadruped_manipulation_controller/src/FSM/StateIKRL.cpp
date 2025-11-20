@@ -2,7 +2,7 @@
 // Created by ray on 2025-07-25.
 //
 
-#include "rl_quadruped_manipulation_controller/FSM/StateQMRL.h"
+#include "rl_quadruped_manipulation_controller/FSM/StateIKRL.h"
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/logging.hpp>
 #include <yaml-cpp/yaml.h>
@@ -39,7 +39,7 @@ std::vector<T> ReadVectorFromYaml(const YAML::Node &node, const std::string &fra
     throw std::invalid_argument("Unsupported framework: " + framework);
 }
 
-StateQMRL::StateQMRL(CtrlInterfaces &ctrl_interfaces,
+StateIKRL::StateIKRL(CtrlInterfaces &ctrl_interfaces,
                      CtrlComponent &ctrl_component,
                      const std::vector<double> &target_pos) : FSMState(FSMStateName::QMRL, "qm rl", ctrl_interfaces),
                                                               node_(ctrl_component.node_),
@@ -90,7 +90,7 @@ StateQMRL::StateQMRL(CtrlInterfaces &ctrl_interfaces,
                         ctrl_interfaces_.frequency_ / params_.decimation);
                 } catch (const std::exception &e) {
                     running_ = false;
-                    RCLCPP_ERROR(rclcpp::get_logger("StateQMRL"), "Error in RL thread: %s", e.what());
+                    RCLCPP_ERROR(rclcpp::get_logger("StateRL"), "Error in RL thread: %s", e.what());
                 }
             }
         });
@@ -98,7 +98,7 @@ StateQMRL::StateQMRL(CtrlInterfaces &ctrl_interfaces,
     }
 }
 
-void StateQMRL::enter() {
+void StateIKRL::enter() {
     // Init observations
     obs_.lin_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.ang_vel = torch::tensor({{0.0, 0.0, 0.0}});
@@ -138,7 +138,7 @@ void StateQMRL::enter() {
     running_ = true;
 }
 
-void StateQMRL::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
+void StateIKRL::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
     getState();
     if (!use_rl_thread_) {
         runModel();
@@ -146,11 +146,11 @@ void StateQMRL::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*peri
     setCommand();
 }
 
-void StateQMRL::exit() {
+void StateIKRL::exit() {
     running_ = false;
 }
 
-FSMStateName StateQMRL::checkChange() {
+FSMStateName StateIKRL::checkChange() {
     if (enable_estimator_ and !estimator_->safety()) {
         return FSMStateName::QMPASSIVE;
     }
@@ -166,7 +166,7 @@ FSMStateName StateQMRL::checkChange() {
     }
 }
 
-torch::Tensor StateQMRL::computeObservation() {
+torch::Tensor StateIKRL::computeObservation() {
     std::vector<torch::Tensor> obs_list;
 
     for (const std::string &observation: params_.observations) {
@@ -216,7 +216,7 @@ torch::Tensor StateQMRL::computeObservation() {
     return clamped_obs;
 }
 
-void StateQMRL::loadYaml(const std::string &config_path) {
+void StateIKRL::loadYaml(const std::string &config_path) {
     YAML::Node config;
     try {
         config = YAML::LoadFile(config_path + "/config_qm.yaml");
@@ -281,7 +281,7 @@ void StateQMRL::loadYaml(const std::string &config_path) {
     }
 }
 
-torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor &q, const torch::Tensor &v,
+torch::Tensor StateIKRL::quatRotateInverse(const torch::Tensor &q, const torch::Tensor &v,
                                            const std::string &framework) {
     torch::Tensor q_w;
     torch::Tensor q_vec;
@@ -300,7 +300,7 @@ torch::Tensor StateQMRL::quatRotateInverse(const torch::Tensor &q, const torch::
     return a - b + c;
 }
 
-torch::Tensor StateQMRL::forward() {
+torch::Tensor StateIKRL::forward() {
     // std::cout << "start forwarding!!!!!!!!!!!!!!! " << std::endl;
     torch::autograd::GradMode::set_enabled(false);
     torch::Tensor clamped_obs = computeObservation();
@@ -321,7 +321,7 @@ torch::Tensor StateQMRL::forward() {
     return actions;
 }
 
-void StateQMRL::getState() {
+void StateIKRL::getState() {
     if (params_.framework == "isaacgym") {
         robot_state_.imu.quaternion[3] = ctrl_interfaces_.imu_state_interface_[0].get().get_value();
         robot_state_.imu.quaternion[0] = ctrl_interfaces_.imu_state_interface_[1].get().get_value();
@@ -362,7 +362,7 @@ void StateQMRL::getState() {
     updated_ = true;
 }
 
-void StateQMRL::runModel() {
+void StateIKRL::runModel() {
     if (debug_ == 1) {
         obs_.actions = torch::tensor({
             {
@@ -594,7 +594,7 @@ void StateQMRL::runModel() {
     // std::cout << "command q are: " << robot_command_.motor_command.q << std::endl;
 }
 
-void StateQMRL::setCommand() const {
+void StateIKRL::setCommand() const {
     for (int i = 0; i < params_.num_of_dofs + 2; i++) {
         ctrl_interfaces_.joint_position_command_interface_[i].get().set_value(robot_command_.motor_command.q[i]);
         ctrl_interfaces_.joint_velocity_command_interface_[i].get().set_value(robot_command_.motor_command.dq[i]);
@@ -605,7 +605,7 @@ void StateQMRL::setCommand() const {
 }
 
 
-torch::Tensor StateQMRL::EulartoQuat(torch::Tensor euler) {
+torch::Tensor StateIKRL::EulartoQuat(torch::Tensor euler) {
     // euler: [roll, pitch, yaw]
     double roll = euler[0].item<double>();
     double pitch = euler[1].item<double>();

@@ -28,7 +28,10 @@ set(dependencies
         kdl_parser
         ament_index_cpp
         controller_common
+        pinocchio
 )
+
+find_package(pinocchio REQUIRED)
 
 # find dependencies
 foreach (Dependency IN ITEMS ${dependencies})
@@ -44,9 +47,11 @@ add_library(${PROJECT_NAME} SHARED
         src/FSM/StateQMFixedDown.cpp
         src/FSM/StateQMPassive.cpp
         src/FSM/StateQMRL.cpp
+        src/FSM/StateIKRL.cpp
 
         src/control/LowPassFilter.cpp
         src/control/Estimator.cpp
+        src/control/arm_controller.cpp
 
         src/robot/QuadrupedRobot.cpp
         src/robot/RobotLeg.cpp
@@ -62,6 +67,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PUBLIC
         "${TORCH_LIBRARIES}"
         yaml-cpp
+        pinocchio::pinocchio
 )
 ament_target_dependencies(
         ${PROJECT_NAME} PUBLIC
