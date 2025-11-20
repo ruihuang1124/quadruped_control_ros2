@@ -36,7 +36,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="file://$(find arcdog_description)/meshes/trunk.dae" scale="1 1 1"/>
+                <mesh filename="file://$(find arcdog_description)/meshes/trunk1.dae" scale="1 1 1"/>
             </geometry>
         </visual>
         <collision>

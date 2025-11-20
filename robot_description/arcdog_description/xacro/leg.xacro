@@ -57,7 +57,7 @@
                     <origin rpy="${pi} ${pi} 0" xyz="0 0 0"/>
                 </xacro:if>
                 <geometry>
-                    <mesh filename="package://arcdog_description/meshes/hip.dae"
+                    <mesh filename="package://arcdog_description/meshes/hip1.dae"
                           scale="1 1 1"/>
                 </geometry>
    
@@ -109,18 +109,18 @@
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
                     <xacro:if value="${mirror_dae == True}">
-                        <mesh filename="package://arcdog_description/meshes/thigh.dae"
+                        <mesh filename="package://arcdog_description/meshes/thigh1.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${mirror_dae == False}">
-                        <mesh filename="package://arcdog_description/meshes/thigh_mirror.dae"
+                        <mesh filename="package://arcdog_description/meshes/thigh_mirror1.dae"
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
                 <material name="orange"/>
             </visual>
             <collision>
-                <origin rpy="0 ${pi/2.0+0.1} 0" xyz="${thigh_x_offset} 0 ${-thigh_length/2.0}"/>
+                <origin rpy="0 ${pi/2.0} 0" xyz="${thigh_x_offset} 0 ${-thigh_length/2.0}"/>
                 <geometry>
                     <box size="${thigh_length} ${thigh_width} ${thigh_height}"/>
                 </geometry>
@@ -167,7 +167,7 @@
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                   <mesh filename="package://arcdog_description/meshes/calf.dae"
+                   <mesh filename="package://arcdog_description/meshes/calf1.dae"
                           scale="1 1 1"/>
                 </geometry>
                 <material name="orange"/>
