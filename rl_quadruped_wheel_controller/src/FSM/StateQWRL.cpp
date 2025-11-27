@@ -89,7 +89,7 @@ StateQWRL::StateQWRL(CtrlInterfaces& ctrl_interfaces,
 
     RCLCPP_INFO(node_->get_logger(), "Model loading: %s", params_.model_name.c_str());
     model_ = torch::jit::load(model_path + "/" + params_.model_name);
-
+    gru_hidden_state_ = torch::zeros({num_layers_, 1, hidden_size_}, torch::kFloat32);
 
     // for (const auto &param: model_.parameters()) {
     //     std::cout << "Parameter dtype: " << param.dtype() << std::endl;
@@ -229,8 +229,8 @@ torch::Tensor StateQWRL::computeObservation()
         }
         else if (observation == "dof_vel")
         {
-            // obs_list.push_back(obs_.dof_vel * params_.dof_vel_scale);
-            obs_list.push_back(obs_.dof_vel_wheel * params_.dof_vel_scale);
+            obs_list.push_back(obs_.dof_vel * params_.dof_vel_scale);
+            // obs_list.push_back(obs_.dof_vel_wheel * params_.dof_vel_scale);
             // obs_list.push_back(obs_.dof_vel.slice(/*dim=*/0, /*start=*/12, /*end=*/16) * params_.dof_vel_scale);
         }
         else if (observation == "actions")
@@ -391,27 +391,67 @@ torch::Tensor StateQWRL::quatRotateInverse(const torch::Tensor& q, const torch::
 //     }
 //     return actions;
 // }
+// torch::Tensor StateQWRL::forward()
+// {
+//     torch::autograd::GradMode::set_enabled(false);
+//     torch::Tensor clamped_obs = computeObservation();
+//     torch::Tensor actions;
+//
+//     if (!params_.observations_history.empty())
+//     {
+//         history_obs_buf_->insert(clamped_obs);
+//         history_obs_ = history_obs_buf_->getObsVec(params_.observations_history);
+//         actions = model_.forward({history_obs_}).toTensor();
+//     }
+//     else
+//     {
+//         actions = model_.forward({clamped_obs}).toTensor();
+//     }
+//
+//     return actions;
+// }
+
+
 torch::Tensor StateQWRL::forward()
 {
-    torch::autograd::GradMode::set_enabled(false);
-    torch::Tensor clamped_obs = computeObservation();
-    torch::Tensor actions;
+    torch::NoGradGuard no_grad;
 
+    // 1. 获取当前观测输入
+    torch::Tensor clamped_obs = computeObservation();
+
+    torch::Tensor input_obs;
     if (!params_.observations_history.empty())
     {
         history_obs_buf_->insert(clamped_obs);
         history_obs_ = history_obs_buf_->getObsVec(params_.observations_history);
-        actions = model_.forward({history_obs_}).toTensor();
+        input_obs = history_obs_;
     }
     else
     {
-        actions = model_.forward({clamped_obs}).toTensor();
+        input_obs = clamped_obs;
     }
 
+    // 2. 构造输入向量
+    // [修正] 只传入 Observation，不传 Hidden State
+    std::vector<torch::jit::IValue> inputs;
+    inputs.push_back(input_obs);
+
+    // 3. 执行推理
+    // 模型内部会自动读取并更新 self.hidden_state
+    auto output_ivalue = model_.forward(inputs);
+
+    // 4. 获取输出
+    // [修正] 输出不再是 Tuple，而是直接的 Action Tensor
+    torch::Tensor actions;
+    if (output_ivalue.isTensor()) {
+        actions = output_ivalue.toTensor();
+    } else {
+        // 防御性编程：以防万一未来导出的模型结构变了
+        std::cerr << "[Error] Unexpected model output type. Expected Tensor." << std::endl;
+    }
 
     return actions;
 }
-
 
 void StateQWRL::getState()
 {
@@ -467,7 +507,7 @@ void StateQWRL::runModel()
             to(torch::kFloat).unsqueeze(0);
     }
     obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
-    obs_.commands = torch::tensor({{control_.vel_x, 0.0, 0.0}});
+    obs_.commands = torch::tensor({{control_.vel_x, control_.vel_y, control_.vel_yaw}});
     torch::Tensor ee_pos = torch::tensor({control_.pos_x, control_.pos_y, control_.pos_z}).unsqueeze(0);
     torch::Tensor ee_ori = EulartoQuat(torch::tensor({control_.pos_roll, control_.pos_pitch, control_.pos_yaw}));
     // RCLCPP_INFO(node_->get_logger(), "command ee pose are, x: %.3f, y: %.3f, z: %.3f, r: %.3f, p: %.3f, y: %.3f",

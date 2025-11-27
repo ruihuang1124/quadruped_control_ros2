@@ -1,11 +1,11 @@
-model_name: "policy.pt"
+model_name: "policy_leg_exp_11252018.pt"
 #model_name: "only_quad_policy.pt"
 framework: "isaacsim"
 rows: 4
 cols: 4
 decimation: 4
-num_observations: 42
-observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions","height"]
+num_observations: 53 # 3 + 3 + 3 + 12 + 16 + 16
+observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
 observations_history: [0]
 clip_obs: 100.0
 clip_actions_lower: [-15, -15, -15, -15,
@@ -16,10 +16,10 @@ clip_actions_upper: [15, 15, 15, 15,
                      15, 15, 15, 15,
                      15, 15, 15, 15,
                      15, 15, 15, 15]
-rl_kp: [34, 34, 34, 34,
-        34, 34, 34, 34,
-        34, 34, 34, 34,
-        34, 34, 34, 34]
+rl_kp: [40, 40, 40, 40,
+        40, 40, 40, 40,
+        40, 40, 40, 40,
+        40, 40, 40, 40]
 
 #rl_kd: [0.5, 0.5, 0.5, 0.5,
 #        0.5, 0.5, 0.5, 0.5,

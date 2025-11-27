@@ -211,6 +211,10 @@ private:
     // output buffer
     torch::Tensor output_torques;
     torch::Tensor output_dof_pos_;
+
+    torch::Tensor gru_hidden_state_; // 用于存储隐藏状态
+    int64_t num_layers_ = 1;         // 根据你的模型配置修改 (例如: 1, 2, 4)
+    int64_t hidden_size_ = 256;      // 根据你的模型配置修改 (例如: 256, 512)
 };
 
 

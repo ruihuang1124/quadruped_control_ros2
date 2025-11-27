@@ -94,7 +94,7 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         joy_node,
-        rviz,
+        # rviz,
         cmd_mapping,
         robot_state_publisher,
         controller_manager,

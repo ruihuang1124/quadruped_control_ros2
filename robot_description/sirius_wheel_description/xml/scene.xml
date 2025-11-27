@@ -1,5 +1,5 @@
 <mujoco model="sirius_wheel scene">
-    <include file="sirius_wheel.xml"/>
+    <include file="sirius_wheel_new.xml"/>
     <option timestep="0.005" integrator="RK4" />
     <statistic center="0 0 0.1" extent="0.8"/>
     <visual>
