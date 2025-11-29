@@ -85,9 +85,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.000466 -0.000692 -0.008587"/>
-      <mass value="8.4845"/>
-      <inertia ixx="0.031520962" ixy="-2.732e-06" ixz="-0.000285792" iyy="0.143653339" iyz="1.1831e-05" izz="0.159618308"/>
+      <origin rpy="0 0 0" xyz="-0.00225 0.000116 -0.001452"/>
+      <mass value="5.742"/>
+      <inertia ixx="0.037914363" ixy="9.8848e-05" ixz="-7.3338e-05" iyy="0.119267297" iyz="1.3463e-05" izz="0.142804844"/>
     </inertial>
   </link>
   <joint name="unitree_imu_joint" type="fixed">
@@ -140,9 +140,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.006155 0.00693 2e-06"/>
-      <mass value="0.8365"/>
-      <inertia ixx="0.00059466" ixy="9.124e-06" ixz="4.8e-08" iyy="0.001055081" iyz="-1.6e-08" izz="0.000764676"/>
+      <origin rpy="0 0 0" xyz="-0.0082 -0.000984 0.000162"/>
+      <mass value="1.108"/>
+      <inertia ixx="0.00097267" ixy="-4.55e-06" ixz="1.39e-07" iyy="0.001754403" iyz="-1.705e-06" izz="0.001311138"/>
     </inertial>
   </link>
   <joint name="FR_HFE" type="revolute">
@@ -174,9 +174,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0.003996 -0.028346 -0.020538"/>
-      <mass value="1.987"/>
-      <inertia ixx="0.008811372" ixy="0.000167657" ixz="-0.000632186" iyy="0.007563533" iyz="-0.001133315" izz="0.003133589"/>
+      <origin rpy="0 0 0" xyz="-0.004484 0.033084 -0.030728"/>
+      <mass value="1.636"/>
+      <inertia ixx="0.009596889" ixy="0.000241414" ixz="0.000789459" iyy="0.009201469" iyz="0.001676085" izz="0.002385568"/>
     </inertial>
   </link>
   <joint name="FR_KFE" type="revolute">
@@ -202,9 +202,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.000873 0.0 -0.114455"/>
-      <mass value="0.213"/>
-      <inertia ixx="0.00156189" ixy="-0.0" ixz="2.1547e-05" iyy="0.001566663" iyz="1e-09" izz="1.9643e-05"/>
+      <origin rpy="0 0 0" xyz="0.005552 0.0 -0.108279"/>
+      <mass value="0.18"/>
+      <inertia ixx="0.001206453" ixy="-0.0" ixz="-2.6747e-05" iyy="0.001233919" iyz="1e-09" izz="3.9128e-05"/>
     </inertial>
   </link>
   <joint dont_collapse="true" name="FR_foot_fixed" type="fixed">
@@ -341,9 +341,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.006155 -0.00693 2e-06"/>
-      <mass value="0.8365"/>
-      <inertia ixx="0.00059466" ixy="-9.124e-06" ixz="4.8e-08" iyy="0.001055081" iyz="1.6e-08" izz="0.000764676"/>
+      <origin rpy="0 0 0" xyz="-0.0082 0.000984 0.000162"/>
+      <mass value="1.108"/>
+      <inertia ixx="0.00097267" ixy="4.55e-06" ixz="1.39e-07" iyy="0.001754403" iyz="1.705e-06" izz="0.001311138"/>
     </inertial>
   </link>
   <joint name="FL_HFE" type="revolute">
@@ -375,9 +375,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0.003996 0.028346 -0.020538"/>
-      <mass value="1.987"/>
-      <inertia ixx="0.008811372" ixy="-0.000167657" ixz="-0.000632186" iyy="0.007563533" iyz="0.001133315" izz="0.003133589"/>
+      <origin rpy="0 0 0" xyz="-0.004484 -0.033084 -0.030728"/>
+      <mass value="1.636"/>
+      <inertia ixx="0.009596889" ixy="-0.000241414" ixz="0.000789459" iyy="0.009201469" iyz="-0.001676085" izz="0.002385568"/>
     </inertial>
   </link>
   <joint name="FL_KFE" type="revolute">
@@ -403,9 +403,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.000873 0.0 -0.114455"/>
-      <mass value="0.213"/>
-      <inertia ixx="0.00156189" ixy="-0.0" ixz="2.1547e-05" iyy="0.001566663" iyz="1e-09" izz="1.9643e-05"/>
+      <origin rpy="0 0 0" xyz="0.005552 0.0 -0.108279"/>
+      <mass value="0.18"/>
+      <inertia ixx="0.001206453" ixy="-0.0" ixz="-2.6747e-05" iyy="0.001233919" iyz="1e-09" izz="3.9128e-05"/>
     </inertial>
   </link>
   <joint dont_collapse="true" name="FL_foot_fixed" type="fixed">
@@ -542,9 +542,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0.006155 0.00693 2e-06"/>
-      <mass value="0.8365"/>
-      <inertia ixx="0.00059466" ixy="-9.124e-06" ixz="-4.8e-08" iyy="0.001055081" iyz="-1.6e-08" izz="0.000764676"/>
+      <origin rpy="0 0 0" xyz="0.0082 -0.000984 0.000162"/>
+      <mass value="1.108"/>
+      <inertia ixx="0.00097267" ixy="4.55e-06" ixz="-1.39e-07" iyy="0.001754403" iyz="-1.705e-06" izz="0.001311138"/>
     </inertial>
   </link>
   <joint name="RR_HFE" type="revolute">
@@ -576,9 +576,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0.003996 -0.028346 -0.020538"/>
-      <mass value="1.987"/>
-      <inertia ixx="0.008811372" ixy="0.000167657" ixz="-0.000632186" iyy="0.007563533" iyz="-0.001133315" izz="0.003133589"/>
+      <origin rpy="0 0 0" xyz="-0.004484 0.033084 -0.030728"/>
+      <mass value="1.636"/>
+      <inertia ixx="0.009596889" ixy="0.000241414" ixz="0.000789459" iyy="0.009201469" iyz="0.001676085" izz="0.002385568"/>
     </inertial>
   </link>
   <joint name="RR_KFE" type="revolute">
@@ -604,9 +604,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.000873 0.0 -0.114455"/>
-      <mass value="0.213"/>
-      <inertia ixx="0.00156189" ixy="-0.0" ixz="2.1547e-05" iyy="0.001566663" iyz="1e-09" izz="1.9643e-05"/>
+      <origin rpy="0 0 0" xyz="0.005552 0.0 -0.108279"/>
+      <mass value="0.18"/>
+      <inertia ixx="0.001206453" ixy="-0.0" ixz="-2.6747e-05" iyy="0.001233919" iyz="1e-09" izz="3.9128e-05"/>
     </inertial>
   </link>
   <joint dont_collapse="true" name="RR_foot_fixed" type="fixed">
@@ -743,9 +743,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0.006155 -0.00693 2e-06"/>
-      <mass value="0.8365"/>
-      <inertia ixx="0.00059466" ixy="9.124e-06" ixz="-4.8e-08" iyy="0.001055081" iyz="1.6e-08" izz="0.000764676"/>
+      <origin rpy="0 0 0" xyz="0.0082 0.000984 0.000162"/>
+      <mass value="1.108"/>
+      <inertia ixx="0.00097267" ixy="-4.55e-06" ixz="-1.39e-07" iyy="0.001754403" iyz="1.705e-06" izz="0.001311138"/>
     </inertial>
   </link>
   <joint name="RL_HFE" type="revolute">
@@ -777,9 +777,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0.003996 0.028346 -0.020538"/>
-      <mass value="1.987"/>
-      <inertia ixx="0.008811372" ixy="-0.000167657" ixz="-0.000632186" iyy="0.007563533" iyz="0.001133315" izz="0.003133589"/>
+      <origin rpy="0 0 0" xyz="-0.004484 -0.033084 -0.030728"/>
+      <mass value="1.636"/>
+      <inertia ixx="0.009596889" ixy="-0.000241414" ixz="0.000789459" iyy="0.009201469" iyz="-0.001676085" izz="0.002385568"/>
     </inertial>
   </link>
   <joint name="RL_KFE" type="revolute">
@@ -805,9 +805,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="-0.000873 0.0 -0.114455"/>
-      <mass value="0.213"/>
-      <inertia ixx="0.00156189" ixy="-0.0" ixz="2.1547e-05" iyy="0.001566663" iyz="1e-09" izz="1.9643e-05"/>
+      <origin rpy="0 0 0" xyz="0.005552 0.0 -0.108279"/>
+      <mass value="0.18"/>
+      <inertia ixx="0.001206453" ixy="-0.0" ixz="-2.6747e-05" iyy="0.001233919" iyz="1e-09" izz="3.9128e-05"/>
     </inertial>
   </link>
   <joint dont_collapse="true" name="RL_foot_fixed" type="fixed">
