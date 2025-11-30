@@ -1,0 +1,131 @@
+# Controller Manager configuration
+controller_manager:
+  ros__parameters:
+    update_rate: 1000  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    imu_sensor_broadcaster:
+      type: imu_sensor_broadcaster/IMUSensorBroadcaster
+
+    rl_quadruped_manipulation_controller:
+      type: rl_quadruped_manipulation_controller/LeggedManipulationRLController
+
+imu_sensor_broadcaster:
+  ros__parameters:
+    sensor_name: "imu_sensor"
+    frame_id: "imu_link"
+
+rl_quadruped_manipulation_controller:
+  ros__parameters:
+    update_rate: 200  # Hz
+    robot_pkg: "go2_arm_description"
+    use_rl_thread: false
+    model_folder: "rl_policy"
+
+    joints:
+      - FL_hip_joint
+      - FR_hip_joint
+      - RL_hip_joint
+      - RR_hip_joint
+      - FL_thigh_joint
+      - FR_thigh_joint
+      - RL_thigh_joint
+      - RR_thigh_joint
+      - FL_calf_joint
+      - FR_calf_joint
+      - RL_calf_joint
+      - RR_calf_joint
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+      - joint7
+      - joint8
+    #
+    down_pos:
+      - 0.01
+      - -0.01
+      - 0.3
+      - -0.3
+      - 1.27
+      - 1.27
+      - 1.27
+      - 1.27
+      - -2.8
+      - -2.8
+      - -2.8
+      - -2.8
+      - 0.0
+      - 0.59
+      - -0.23
+      - -0.36
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+    #
+    stand_pos:
+      - 0.1
+      - -0.1
+      - 0.1
+      - -0.1
+      - 0.8
+      - 0.8
+      - 0.8
+      - 0.8
+      - -1.5
+      - -1.5
+      - -1.5
+      - -1.5
+      - 0.0
+      - 0.7
+      - -1.2
+      - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+
+    command_interfaces:
+      - effort
+      - position
+      - velocity
+      - kp
+      - kd
+
+    state_interfaces:
+      - effort
+      - position
+      - velocity
+
+    feet_names:
+      - FL_foot
+      - FR_foot
+      - RL_foot
+      - RR_foot
+
+    foot_force_name: "foot_contact_sensor"
+    foot_force_interfaces:
+      - FL_foot
+      - RL_foot
+      - FR_foot
+      - RR_foot
+
+    imu_name: "imu_sensor"
+    base_name: "base"
+
+    imu_interfaces:
+      - orientation.w
+      - orientation.x
+      - orientation.y
+      - orientation.z
+      - angular_velocity.x
+      - angular_velocity.y
+      - angular_velocity.z
+      - linear_acceleration.x
+      - linear_acceleration.y
+      - linear_acceleration.z

@@ -307,7 +307,7 @@ torch::Tensor StateQMRL::forward() {
     torch::Tensor actions;
 
     if (!params_.observations_history.empty()) {
-        printf("obs_history!!!!!!!!");
+        // printf("obs_history!!!!!!!!");
         history_obs_buf_->insert(clamped_obs);
         history_obs_ = history_obs_buf_->getObsVec(params_.observations_history);
         actions = model_.forward({history_obs_}).toTensor();
@@ -348,9 +348,9 @@ void StateQMRL::getState() {
         robot_state_.motor_state.tauEst[i] = ctrl_interfaces_.joint_effort_state_interface_[i].get().get_value();
     }
 
-    control_.vel_x = ctrl_interfaces_.control_inputs_.ly;
-    control_.vel_y = -ctrl_interfaces_.control_inputs_.lx;
-    control_.vel_yaw = -ctrl_interfaces_.control_inputs_.rx;
+    control_.vel_x = ctrl_interfaces_.control_inputs_.lx;
+    control_.vel_y = ctrl_interfaces_.control_inputs_.ly;
+    control_.vel_yaw = ctrl_interfaces_.control_inputs_.rx;
 
     control_.pos_x = ctrl_interfaces_.pose_cmd_inputs_.pos_x;
     control_.pos_y = ctrl_interfaces_.pose_cmd_inputs_.pos_y;
