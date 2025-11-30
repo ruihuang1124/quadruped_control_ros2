@@ -180,7 +180,7 @@ FSMStateName StateRL::checkChange()
             return FSMStateName::PASSIVE;
         case 1:
             return FSMStateName::FIXEDDOWN;
-        case 3:
+        case 2:
             return FSMStateName::FIXEDSTAND;
         default:
             return FSMStateName::RL;
@@ -281,8 +281,8 @@ void StateRL::loadYaml(const std::string& config_path)
     params_.ang_vel_scale = config["ang_vel_scale"].as<double>();
     params_.dof_pos_scale = config["dof_pos_scale"].as<double>();
     params_.dof_vel_scale = config["dof_vel_scale"].as<double>();
-    // params_.commands_scale = torch::tensor(ReadVectorFromYaml<double>(config["commands_scale"])).view({1, -1});
-    params_.commands_scale = torch::tensor({params_.lin_vel_scale, params_.lin_vel_scale, params_.ang_vel_scale});
+    params_.commands_scale = torch::tensor(ReadVectorFromYaml<double>(config["commands_scale"])).view({1, -1});
+    // params_.commands_scale = torch::tensor({params_.lin_vel_scale, params_.lin_vel_scale, params_.ang_vel_scale});
     params_.rl_kp = torch::tensor(ReadVectorFromYaml<double>(config["rl_kp"], params_.framework, rows, cols)).view({
         1, -1
     });
@@ -393,7 +393,7 @@ void StateRL::runModel()
     obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
     obs_.commands = torch::tensor({{control_.x, control_.y, control_.yaw}});
     obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
-    // obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
+    obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
     obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
 
     const torch::Tensor clamped_actions = forward();

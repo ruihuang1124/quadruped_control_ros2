@@ -20,9 +20,13 @@ controller_manager:
     ocs2_quadruped_controller:
       type: ocs2_quadruped_controller/Ocs2QuadrupedController
 
+    rl_quadruped_controller:
+      type: rl_quadruped_controller/LeggedGymController
+
 imu_sensor_broadcaster:
   ros__parameters:
     sensor_name: "imu_sensor"
+    # frame_id: "imu"
     frame_id: "imu_link"
 
 model_based_controller:
@@ -207,3 +211,159 @@ ocs2_quadruped_controller:
       - RL_foot
       - FR_foot
       - RR_foot
+
+rl_quadruped_controller:
+  ros__parameters:
+    update_rate: 200  # Hz
+    robot_pkg: "arcdog_description"
+    use_rl_thread: false
+    model_folder: "rl_policy"
+
+    joints:
+      # - FL_hip_joint
+      # - FR_hip_joint
+      # - RL_hip_joint
+      # - RR_hip_joint
+      # - FL_thigh_joint
+      # - FR_thigh_joint
+      # - RL_thigh_joint
+      # - RR_thigh_joint
+      # - FL_calf_joint
+      # - FR_calf_joint
+      # - RL_calf_joint
+      # - RR_calf_joint
+      # - FL_box_joint
+      # - FR_box_joint
+      # - RL_box_joint
+      # - RR_box_joint
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+      
+
+    down_pos:
+      # - -0.01
+      # - 0.01
+      # - -0.01
+      # - 0.01
+      # - 1.27
+      # - 1.27
+      # - 1.27
+      # - 1.27
+      # - -2.8
+      # - -2.8  
+      # - -2.8
+      # - -2.8
+      # - 0.12
+      # - 0.12
+      # - 0.12
+      # - 0.12
+      - 0.01
+      - 1.27
+      - -2.8
+      - 0.01
+      - 1.27
+      - -2.8
+      - 0.01
+      - 1.27
+      - -2.8
+      - 0.01
+      - 1.27
+      - -2.8
+
+    # down_pos:
+    #   - 0.0
+    #   - 0.0
+    #   - 0.0
+    #   - 0.0
+    #   - 0.67
+    #   - 0.67
+    #   - 0.67
+    #   - 0.67
+    #   - -1.3
+    #   - -1.3
+    #   - -1.3
+    #   - -1.3
+    #   - 0.12
+    #   - 0.12
+    #   - 0.12
+    #   - 0.12
+
+    stand_pos:
+      # - 0.01
+      # - -0.01
+      # - 0.01
+      # - -0.01
+      # - 0.60
+      # - 0.60
+      # - 0.60
+      # - 0.60
+      # - -0.95
+      # - -0.95
+      # - -0.95
+      # - -0.95
+      # - 0.075
+      # - 0.075
+      # - 0.075
+      # - 0.075
+      - 0.01
+      - 1.2
+      - -1.6
+      - 0.01
+      - 1.2
+      - -1.6
+      - 0.01
+      - 1.2
+      - -1.6
+      - 0.01
+      - 1.2
+      - -1.6
+
+    command_interfaces:
+      - effort
+      - position
+      - velocity
+      - kp
+      - kd
+
+    state_interfaces:
+      - effort
+      - position
+      - velocity
+
+    feet_names:
+      - FL_foot
+      - FR_foot
+      - RL_foot
+      - RR_foot
+
+    foot_force_name: "foot_contact_sensor"
+    foot_force_interfaces:
+      - FL_foot
+      - RL_foot
+      - FR_foot
+      - RR_foot
+
+    imu_name: "imu_sensor"
+    base_name: "base"
+
+    imu_interfaces:
+      - orientation.w
+      - orientation.x
+      - orientation.y
+      - orientation.z
+      - angular_velocity.x
+      - angular_velocity.y
+      - angular_velocity.z
+      - linear_acceleration.x
+      - linear_acceleration.y
+      - linear_acceleration.z

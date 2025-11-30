@@ -20,7 +20,7 @@ FSMStateName StateFixedStand::checkChange() {
             return FSMStateName::PASSIVE;
         case 1:
             return FSMStateName::FIXEDDOWN;
-        case 2:
+        case 3:
             return FSMStateName::RL;
         default:
             return FSMStateName::FIXEDSTAND;
