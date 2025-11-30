@@ -105,10 +105,10 @@ extern "C" {
 
 
 // original value: -0.029
-#define ARCDOG_K_ABAD_OFFSET_POS_0  -0.031f
-#define ARCDOG_K_ABAD_OFFSET_POS_1  -0.031f
-#define ARCDOG_K_ABAD_OFFSET_POS_2  -0.031f
-#define ARCDOG_K_ABAD_OFFSET_POS_3  -0.031f
+#define ARCDOG_K_ABAD_OFFSET_POS_0  -0.0307f
+#define ARCDOG_K_ABAD_OFFSET_POS_1  -0.0307f
+#define ARCDOG_K_ABAD_OFFSET_POS_2  -0.0307f
+#define ARCDOG_K_ABAD_OFFSET_POS_3  -0.0307f
 
 // // original value: 1.219
 // #define ARCLAB_K_HIP_OFFSET_POS_0   1.207f  // 1.219+(1.368-(1.380+1.380)*0.5)
@@ -117,10 +117,10 @@ extern "C" {
 // #define ARCLAB_K_HIP_OFFSET_POS_3   1.2345f  // 1.219+(1.368-(1.351+1.354)*0.5)
 
 // original value: 1.319
-#define ARCDOG_K_HIP_OFFSET_POS_0   1.317f
-#define ARCDOG_K_HIP_OFFSET_POS_1   1.317f
-#define ARCDOG_K_HIP_OFFSET_POS_2   1.317f
-#define ARCDOG_K_HIP_OFFSET_POS_3   1.317f
+#define ARCDOG_K_HIP_OFFSET_POS_0   1.315f
+#define ARCDOG_K_HIP_OFFSET_POS_1   1.315f
+#define ARCDOG_K_HIP_OFFSET_POS_2   1.315f
+#define ARCDOG_K_HIP_OFFSET_POS_3   1.315f
 
 // // original value: -2.841
 // //GearRatio = 7.65
@@ -131,10 +131,10 @@ extern "C" {
 
 // original value: -2.884
 //GearRatio = 7.65
-#define ARCDOG_K_KNEE_OFFSET_POS_0   -2.884f
-#define ARCDOG_K_KNEE_OFFSET_POS_1   -2.884f
-#define ARCDOG_K_KNEE_OFFSET_POS_2   -2.884f
-#define ARCDOG_K_KNEE_OFFSET_POS_3   -2.884f
+#define ARCDOG_K_KNEE_OFFSET_POS_0   -2.920f
+#define ARCDOG_K_KNEE_OFFSET_POS_1   -2.920f
+#define ARCDOG_K_KNEE_OFFSET_POS_2   -2.920f
+#define ARCDOG_K_KNEE_OFFSET_POS_3   -2.920f
 
 /*!
 * USB command compose message
