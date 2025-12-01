@@ -95,7 +95,7 @@ def launch_setup(context, *args, **kwargs):
     return [
         joy_node,
         # rviz,
-        cmd_mapping,
+        # cmd_mapping,
         robot_state_publisher,
         controller_manager,
         joint_state_publisher,
@@ -117,22 +117,22 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     pkg_description = DeclareLaunchArgument(
         'pkg_description',
-        default_value='quadruped_manipulator_description', # sirius_description, sirius_mid_v3_description, quadruped_manipulator_description
+        default_value='go2_arm_description', #go2_arm_description sirius_description, sirius_mid_v3_description, quadruped_manipulator_description
         description='package for robot description'
     )
 
     return LaunchDescription([
         pkg_description,
         OpaqueFunction(function=launch_setup),
-        ExecuteProcess(
-            cmd=[
-                "gnome-terminal",
-                "--",
-                "ros2",
-                "run",
-                "keyboard_input",
-                "keyboard_publisher",
-            ],
-            output="screen",
-        ),
+        # ExecuteProcess(
+        #     cmd=[
+        #         "gnome-terminal",
+        #         "--",
+        #         "ros2",
+        #         "run",
+        #         "keyboard_input",
+        #         "keyboard_publisher",
+        #     ],
+        #     output="screen",
+        # ),
     ])

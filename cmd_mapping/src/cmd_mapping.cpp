@@ -84,9 +84,9 @@ private:
                 break;
 
             case 'r': // reset
-                pose_control_input_cmd_.pos_x = 0.52;
+                pose_control_input_cmd_.pos_x = 0.1;
                 pose_control_input_cmd_.pos_y = 0.0;
-                pose_control_input_cmd_.pos_z = 0.10;
+                pose_control_input_cmd_.pos_z = 0.30;
                 pose_control_input_cmd_.pos_roll = 0.0;
                 pose_control_input_cmd_.pos_pitch = 3.14;
                 pose_control_input_cmd_.pos_yaw = 0.0;
@@ -124,9 +124,9 @@ private:
     }
 
     void initPoseControlInputCmd() {
-        pose_control_input_cmd_.pos_x = 0.52;
+        pose_control_input_cmd_.pos_x = 0.1;
         pose_control_input_cmd_.pos_y = 0.0;
-        pose_control_input_cmd_.pos_z = 0.10;
+        pose_control_input_cmd_.pos_z = 0.3;
         pose_control_input_cmd_.pos_roll = 0.0;
         pose_control_input_cmd_.pos_pitch = 3.14;
         pose_control_input_cmd_.pos_yaw = 0.0;

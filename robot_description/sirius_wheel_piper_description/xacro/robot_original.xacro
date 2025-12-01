@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sirius_wheel_piper_description">
+
+    <xacro:arg name="DEBUG" default="false"/>
+    <xacro:include filename="$(find sirius_wheel_piper_description)/xacro/materials.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_piper_description)/xacro/leg.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_piper_description)/xacro/gazebo.xacro"/>
+    <xacro:include filename="$(find sirius_wheel_piper_description)/xacro/const.xacro"/>
+    <!--   <xacro:include filename="$(find sirius_wheel_piper_description)/xacro/ros2_control_real_robot.xacro"/>-->
+    <xacro:include filename="$(find sirius_wheel_piper_description)/xacro/ros2_control.xacro"/>
+
+    <xacro:if value="$(arg DEBUG)">
+        <link name="world"/>
+        <joint name="base_static_joint" type="fixed">
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <parent link="world"/>
+            <child link="base"/>
+        </joint>
+    </xacro:if>
+
+    <link name="base">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="floating_base" type="fixed">
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="base"/>
+        <child link="trunk"/>
+    </joint>
+
+
+    <link name="trunk">
+        <visual>
+            <origin rpy="0 0 0" xyz="-0 0 0"/>
+            <geometry>
+                <mesh filename="package://sirius_wheel_piper_description/simplified_meshes/base_link.dae" scale="1 1 1"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+<!--                <mesh filename="package://sirius_wheel_piper_description/simplified_meshes/base_link.dae" scale="1 1 1"/>-->
+                <box size="${base_length} ${base_width} ${base_height}"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="0.418 0 0"/>
+            <geometry>
+                <box size="${base_head_length} ${base_head_width} ${base_head_height}"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="-0.4105 0 0"/>
+            <geometry>
+                <box size="${base_tail_length} ${base_tail_width} ${base_tail_height}"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="${base_contact_sphere_x} ${base_contact_sphere_y} ${base_contact_sphere_z}"/>
+            <geometry>
+                <sphere radius="${base_contact_sphere_radius}"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="${-base_contact_sphere_x} ${base_contact_sphere_y} ${base_contact_sphere_z}"/>
+            <geometry>
+                <sphere radius="${base_contact_sphere_radius}"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="${base_contact_sphere_x} ${-base_contact_sphere_y} ${base_contact_sphere_z}"/>
+            <geometry>
+                <sphere radius="${base_contact_sphere_radius}"/>
+            </geometry>
+        </collision>
+        <collision>
+            <origin rpy="0 0 0" xyz="${-base_contact_sphere_x} ${-base_contact_sphere_y} ${base_contact_sphere_z}"/>
+            <geometry>
+                <sphere radius="${base_contact_sphere_radius}"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <origin rpy="0 0 0" xyz="${base_com_x} ${base_com_y} ${base_com_z}"/>
+            <mass value="${base_mass}"/>
+            <inertia
+                    ixx="${base_ixx}" ixy="${base_ixy}" ixz="${base_ixz}"
+                    iyy="${base_iyy}" iyz="${base_iyz}"
+                    izz="${base_izz}"/>
+        </inertial>
+    </link>
+
+    <joint name="imu_joint" type="fixed">
+        <parent link="trunk"/>
+        <child link="imu_link"/>
+        <origin rpy="0 0 0" xyz="-0.01592 -0.06659 -0.00617"/>
+    </joint>
+
+    <link name="imu_link">
+        <inertial>
+            <mass value="0.001"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+        </inertial>
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <!-- <material name="red"/> -->
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=".001 .001 .001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <xacro:leg prefix="RF" left_right_bool="False" left_right_mirror="-1"
+               front_hind_bool="True" front_hind_mirror="1">
+        <origin rpy="0 0 0" xyz="${leg_origin_x} ${-leg_origin_y} 0"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="LF" left_right_bool="True" left_right_mirror="1" front_hind_bool="True"
+               front_hind_mirror="1">
+        <origin rpy="0 0 0" xyz="${leg_origin_x} ${leg_origin_y} 0"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="RH" left_right_bool="False" left_right_mirror="-1"
+               front_hind_bool="False" front_hind_mirror="-1">
+        <origin rpy="0 0 0" xyz="${-leg_origin_x} ${-leg_origin_y} 0"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="LH" left_right_bool="True" left_right_mirror="1" front_hind_bool="False"
+               front_hind_mirror="-1">
+        <origin rpy="0 0 0" xyz="${-leg_origin_x} ${leg_origin_y} 0"/>
+    </xacro:leg>
+
+</robot>

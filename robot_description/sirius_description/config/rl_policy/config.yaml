@@ -1,4 +1,4 @@
-model_name: "policy_new_initial.pt"
+model_name: "policy_sirius_flat_1.pt"
 #model_name: "only_quad_policy.pt"
 framework: "isaacsim"
 rows: 4
@@ -16,10 +16,10 @@ clip_actions_upper: [100, 100, 100,
                      100, 100, 100,
                      100, 100, 100,
                      100, 100, 100]
-rl_kp: [60, 60, 60,
-        60, 60, 60,
-        60, 60, 60,
-        60, 60, 60]
+rl_kp: [30, 30, 30,
+        30, 30, 30,
+        30, 30, 30,
+        30, 30, 30]
 rl_kd: [2, 2, 2,
         2, 2, 2,
         2, 2, 2,

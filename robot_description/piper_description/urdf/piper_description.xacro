@@ -534,7 +534,7 @@
         <legacyModeNS>true</legacyModeNS>
     </plugin>
   </gazebo>
- 
+
   <!-- <gazebo reference="base_link">
     <material>Gazebo/Black</material>
   </gazebo>
@@ -542,7 +542,7 @@
   <gazebo reference="link1">
     <material>Gazebo/White</material>
   </gazebo>
- 
+
   <gazebo reference="link2">
     <material>Gazebo/White</material>
   </gazebo>
@@ -550,23 +550,23 @@
   <gazebo reference="link3">
     <material>Gazebo/White</material>
   </gazebo>
- 
+
   <gazebo reference="link4">
     <material>Gazebo/Black</material>
   </gazebo>
- 
+
   <gazebo reference="link5">
     <material>Gazebo/White</material>
   </gazebo>
- 
+
   <gazebo reference="link6">
     <material>Gazebo/White</material>
   </gazebo>
- 
+
   <gazebo reference="link7">
     <material>Gazebo/Orange</material>
   </gazebo>
- 
+
   <gazebo reference="link8">
     <material>Gazebo/Orange</material>
   </gazebo> -->
