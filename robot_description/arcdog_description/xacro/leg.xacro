@@ -25,7 +25,7 @@
         </xacro:if>
 
         <xacro:if value="${simulator == 'test'}">
-            <joint name="${prefix}_HAA" type="revolute">
+            <joint name="${prefix}_hip_joint" type="revolute">
                 <xacro:insert_block name="origin"/>
                 <parent link="base"/>
                 <child link="${prefix}_hip"/>
@@ -57,10 +57,10 @@
                     <origin rpy="${pi} ${pi} 0" xyz="0 0 0"/>
                 </xacro:if>
                 <geometry>
-                    <mesh filename="package://arcdog_description/meshes/hip1.dae"
+                    <mesh filename="package://arcdog_description/meshes/hip.stl"
                           scale="1 1 1"/>
                 </geometry>
-   
+
                 <material name="orange"/>
             </visual>
             <collision>
@@ -93,7 +93,7 @@
         </xacro:if>
 
         <xacro:if value="${simulator == 'test'}">
-            <joint name="${prefix}_HFE" type="revolute">
+            <joint name="${prefix}_thigh_joint" type="revolute">
                 <origin rpy="0 0 0" xyz="0 ${thigh_offset*mirror} 0"/>
                 <parent link="${prefix}_hip"/>
                 <child link="${prefix}_thigh"/>
@@ -109,11 +109,11 @@
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
                     <xacro:if value="${mirror_dae == True}">
-                        <mesh filename="package://arcdog_description/meshes/thigh1.dae"
+                        <mesh filename="package://arcdog_description/meshes/thigh.stl"
                               scale="1 1 1"/>
                     </xacro:if>
                     <xacro:if value="${mirror_dae == False}">
-                        <mesh filename="package://arcdog_description/meshes/thigh_mirror1.dae"
+                        <mesh filename="package://arcdog_description/meshes/thigh_mirror.stl"
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
@@ -153,7 +153,7 @@
         </xacro:if>
 
         <xacro:if value="${simulator == 'test'}">
-            <joint name="${prefix}_KFE" type="revolute">
+            <joint name="${prefix}_calf_joint" type="revolute">
                 <origin rpy="0 0 0" xyz="0 0 ${-thigh_length}"/>
                 <parent link="${prefix}_thigh"/>
                 <child link="${prefix}_calf"/>
@@ -167,7 +167,7 @@
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                   <mesh filename="package://arcdog_description/meshes/calf1.dae"
+                    <mesh filename="package://arcdog_description/meshes/calf.stl"
                           scale="1 1 1"/>
                 </geometry>
                 <material name="orange"/>

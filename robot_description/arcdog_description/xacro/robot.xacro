@@ -61,7 +61,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="file://$(find arcdog_description)/meshes/trunk.dae" scale="1 1 1"/>
+				<mesh filename="file://$(find arcdog_description)/meshes/trunk1.dae" scale="1 1 1"/>
 			</geometry>
 			<!-- <material name="orange"/> -->
 		</visual>
@@ -69,24 +69,6 @@
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
 				<box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
-			</geometry>
-		</collision>
-		<collision>
-			<origin rpy="0 0 0" xyz="0 0 0"/>
-			<geometry>
-				<box size="0.1881 0.04675 0.057"/>
-			</geometry>
-		</collision>
-		<collision>
-			<origin rpy="0 0 0" xyz="0.285 0 0.01"/>
-			<geometry>
-				<cylinder length="0.05" radius="0.045"/>
-			</geometry>
-		</collision>
-		<collision>
-			<origin rpy="0 0 0" xyz="0.293 0 -0.06"/>
-			<geometry>
-				<box size="0.047 0.047 0.047"/>
 			</geometry>
 		</collision>
 		<inertial>
@@ -109,49 +91,16 @@
 		<inertial>
 			<mass value="0.001"/>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
-			<inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+			<inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
 		</inertial>
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
-			<geometry>
-				<box size="0.001 0.001 0.001"/>
-			</geometry>
-			<!-- <material name="red"/> -->
+            <geometry>
+			<box size="0.015 0.015 0.004"/>
+            </geometry>
 		</visual>
-		<collision>
-			<origin rpy="0 0 0" xyz="0 0 0"/>
-			<geometry>
-				<box size=".001 .001 .001"/>
-			</geometry>
-		</collision>
-	</link>
-	<!--
-	<joint name="load_joint" type="fixed">
-			<parent link="trunk"/>
-			<child link="load_link"/>
-			<origin rpy="0 0 0" xyz="0 0 0"/>
-	</joint>
+		</link>
 
-	<link name="load_link">
-			<inertial>
-					<mass value="5"/>
-					<origin rpy="0 0 0" xyz="0 0 0"/>
-					<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-			</inertial>
-			<visual>
-					<origin rpy="0 0 0" xyz="0 0 0.2"/>
-					<geometry>
-							<box size="0.5 0.3 0.2"/>
-					</geometry>
-			</visual>
-			<collision>
-					<origin rpy="0 0 0" xyz="0 0 0"/>
-					<geometry>
-							<box size=".001 .001 .001"/>
-					</geometry>
-			</collision>
-	</link>
--->
     <xacro:leg prefix="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True" simulator="${simulator}" robot_type="${robot_type}">
         <origin rpy="0 0 0" xyz="${leg_offset_x} ${-leg_offset_y} 0"/>
     </xacro:leg>
@@ -167,4 +116,5 @@
     <xacro:leg prefix="RL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False" simulator="${simulator}" robot_type="${robot_type}">
         <origin rpy="0 0 0" xyz="${-leg_offset_x} ${leg_offset_y} 0"/>
     </xacro:leg>
+
 </robot>
