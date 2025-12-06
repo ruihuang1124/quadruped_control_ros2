@@ -37,7 +37,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     // joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
     //     "joint_states", rclcpp::SensorDataQoS(), std::bind(&HardwareArcdog::joint_state_callback, this, std::placeholders::_1));
     imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
-        "imu_data", rclcpp::SensorDataQoS(), std::bind(&HardwareArcdog::imu_callback, this, std::placeholders::_1));
+        "imu", rclcpp::SensorDataQoS(), std::bind(&HardwareArcdog::imu_callback, this, std::placeholders::_1));
     // publish
     // auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
     // actuator_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::ActuatorCmds>("actuators_cmds", qos);
@@ -107,7 +107,6 @@ std::vector<hardware_interface::CommandInterface> HardwareArcdog::export_command
 
 return_type HardwareArcdog::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-    iterations_++;
     // read motor states through tty and the imu info will be updated with imucallback().
     custom_msgs::msg::JointStates* joints_data = get_joint_states_msgtype();
     if (rclcpp::ok())
@@ -185,6 +184,7 @@ return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::D
         }
         break;
     case 8:
+        iterations_++;
         // printf("Motor activate!\n");
         motor_mode_flag = false;
         for (int leg = 0; leg < 4; leg++) {
@@ -224,6 +224,21 @@ return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::D
 void HardwareArcdog::imu_callback(const sensor_msgs::msg::Imu imu_state)
 {
     // std::cerr<<"received imu callback"<<std::endl;
+    // // 打印方向（四元数）
+    // std::cout << "Orientation: [w: " << imu_state.orientation.w 
+    //           << ", x: " << imu_state.orientation.x 
+    //           << ", y: " << imu_state.orientation.y 
+    //           << ", z: " << imu_state.orientation.z << "]" << std::endl;
+
+    // // 打印角速度
+    // std::cout << "Angular Velocity: [x: " << imu_state.angular_velocity.x 
+    //           << ", y: " << imu_state.angular_velocity.y 
+    //           << ", z: " << imu_state.angular_velocity.z << "]" << std::endl;
+
+    // // 打印线性加速度
+    // std::cout << "Linear Acceleration: [x: " << imu_state.linear_acceleration.x 
+    //           << ", y: " << imu_state.linear_acceleration.y 
+    //           << ", z: " << imu_state.linear_acceleration.z << "]" << std::endl;
     imu_states_[0] = imu_state.orientation.w;
     imu_states_[1] = imu_state.orientation.x;
     imu_states_[2] = imu_state.orientation.y;
