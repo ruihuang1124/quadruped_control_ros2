@@ -27,7 +27,25 @@
         <xacro:if value="${simulator == 'test'}">
             <joint name="${prefix}_hip_joint" type="revolute">
                 <xacro:insert_block name="origin"/>
-                <parent link="base"/>
+                <parent link="trunk"/>
+                <child link="${prefix}_hip"/>
+                <axis xyz="1 0 0"/>
+                <dynamics damping="${damping}" friction="${friction}"/>
+                <xacro:if value="${(mirror_dae == True)}">
+                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${hip_min}"
+                        upper="${hip_max}"/>
+                </xacro:if>
+                <xacro:if value="${(mirror_dae == False)}">
+                    <limit effort="${hip_torque_max}" velocity="${hip_velocity_max}" lower="${-hip_max}"
+                        upper="${-hip_min}"/>
+                </xacro:if>
+            </joint>
+        </xacro:if>
+
+        <xacro:if value="${simulator == 'mujoco'}">
+            <joint name="${prefix}_hip_joint" type="revolute">
+                <xacro:insert_block name="origin"/>
+                <parent link="trunk"/>
                 <child link="${prefix}_hip"/>
                 <axis xyz="1 0 0"/>
                 <dynamics damping="${damping}" friction="${friction}"/>
@@ -56,11 +74,18 @@
                 <xacro:if value="${(mirror_dae == False) and (front_hind_dae == False)}">
                     <origin rpy="${pi} ${pi} 0" xyz="0 0 0"/>
                 </xacro:if>
+                <xacro:if value="${robot_type == 'arcdog'}">
                 <geometry>
                     <mesh filename="package://arcdog_description/meshes/hip.stl"
                           scale="1 1 1"/>
                 </geometry>
-
+                </xacro:if>
+                <xacro:if value="${robot_type == 'arcdog_mini'}">
+                <geometry>
+                    <mesh filename="package://arcdog_description/meshes/hip.stl"
+                          scale="1 1 1"/>
+                </geometry>
+                </xacro:if>
                 <material name="orange"/>
             </visual>
             <collision>
@@ -104,9 +129,22 @@
             </joint>
         </xacro:if>
 
+        <xacro:if value="${simulator == 'mujoco'}">
+            <joint name="${prefix}_thigh_joint" type="revolute">
+                <origin rpy="0 0 0" xyz="0 ${thigh_offset*mirror} 0"/>
+                <parent link="${prefix}_hip"/>
+                <child link="${prefix}_thigh"/>
+                <axis xyz="0 1 0"/>
+                <dynamics damping="${damping}" friction="${friction}"/>
+                <limit effort="${thigh_torque_max}" velocity="${thigh_velocity_max}" lower="${thigh_min}"
+                    upper="${thigh_max}"/>
+            </joint>
+        </xacro:if>
+
         <link name="${prefix}_thigh">
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
+                <xacro:if value="${robot_type == 'arcdog'}">
                 <geometry>
                     <xacro:if value="${mirror_dae == True}">
                         <mesh filename="package://arcdog_description/meshes/thigh.stl"
@@ -117,10 +155,23 @@
                               scale="1 1 1"/>
                     </xacro:if>
                 </geometry>
+                </xacro:if>
+                <xacro:if value="${robot_type == 'arcdog_mini'}">
+                <geometry>
+                    <xacro:if value="${mirror_dae == True}">
+                        <mesh filename="package://arcdog_description/meshes/arcdog_mini/thigh.stl"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:if value="${mirror_dae == False}">
+                        <mesh filename="package://arcdog_description/meshes/thigh_mirror.stl"
+                              scale="1 1 1"/>
+                    </xacro:if>
+                </geometry>
+                </xacro:if>
                 <material name="orange"/>
             </visual>
             <collision>
-                <origin rpy="0 ${pi/2.0} 0" xyz="${thigh_x_offset} 0 ${-thigh_length/2.0}"/>
+                <origin rpy="0 ${pi/2.0+0.1} 0" xyz="${thigh_x_offset} 0 ${-thigh_length/2.0}"/>
                 <geometry>
                     <box size="${thigh_length} ${thigh_width} ${thigh_height}"/>
                 </geometry>
@@ -163,13 +214,32 @@
             </joint>
         </xacro:if>
 
+        <xacro:if value="${simulator == 'mujoco'}">
+            <joint name="${prefix}_calf_joint" type="revolute">
+                <origin rpy="0 0 0" xyz="0 0 ${-thigh_length}"/>
+                <parent link="${prefix}_thigh"/>
+                <child link="${prefix}_calf"/>
+                <axis xyz="0 1 0"/>
+                <dynamics damping="${damping}" friction="${friction}"/>
+                <limit effort="${calf_torque_max}" velocity="${calf_velocity_max}" lower="${calf_min}" upper="${calf_max}"/>
+            </joint>
+        </xacro:if>
+
         <link name="${prefix}_calf">
             <visual>
                 <origin rpy="0 0 0" xyz="0 0 0"/>
+                <xacro:if value="${robot_type == 'arcdog'}">
                 <geometry>
                     <mesh filename="package://arcdog_description/meshes/calf.stl"
                           scale="1 1 1"/>
                 </geometry>
+                </xacro:if>
+                <xacro:if value="${robot_type == 'arcdog_mini'}">
+                <geometry>
+                    <mesh filename="package://arcdog_description/meshes/calf.stl"
+                          scale="1 1 1"/>
+                </geometry>
+                </xacro:if>
                 <material name="orange"/>
             </visual>
             <collision>
@@ -189,7 +259,7 @@
         </link>
 
         <joint name="${prefix}_foot_fixed" type="fixed" dont_collapse="true">
-            <origin rpy="0 0 0" xyz="0 0 ${-calf_length}"/>
+            <origin rpy="0 0 0" xyz="0 0 ${-(calf_length)}"/>
             <parent link="${prefix}_calf"/>
             <child link="${prefix}_foot"/>
         </joint>
@@ -207,34 +277,6 @@
                 <geometry>
                     <sphere radius="${foot_radius}"/>
                 </geometry>
-                <surface>
-                <bounce>
-                    <restitution_coefficient>0</restitution_coefficient>
-                    <threshold>1e+06</threshold>
-                </bounce>
-                <friction>
-                    <ode>
-                    <mu>1.0</mu>
-                    <mu2>1.0</mu2>
-                    </ode>
-                    <bullet>
-                    <rolling_friction>0.3</rolling_friction>
-                    <friction2>50</friction2>
-                    </bullet>
-                </friction>
-                <contact>
-                    <ode>
-                    <kp>30000.0</kp>
-                    <kd>1000.0</kd>
-                    </ode>
-                    <bullet>
-                    <kp>30000.0</kp>
-                    <kd>1000.0</kd>
-                    <split_impulse>1</split_impulse>
-                    <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
-                    </bullet>
-                </contact>
-                </surface>
             </collision>
             <inertial>
                 <mass value="${foot_mass}"/>

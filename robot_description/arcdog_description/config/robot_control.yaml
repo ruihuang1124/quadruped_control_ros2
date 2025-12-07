@@ -14,6 +14,12 @@ controller_manager:
     unitree_guide_controller:
       type: unitree_guide_controller/UnitreeGuideController
 
+    model_based_controller:
+      type: model_based_controller/ModelBasedController
+
+    ocs2_quadruped_controller:
+      type: ocs2_quadruped_controller/Ocs2QuadrupedController
+
     rl_quadruped_controller:
       type: rl_quadruped_controller/LeggedGymController
 
@@ -23,6 +29,68 @@ imu_sensor_broadcaster:
     # frame_id: "imu"
     frame_id: "imu_link"
 
+model_based_controller:
+  ros__parameters:
+    update_rate: 200  # Hz
+    down_pos:
+      - -0.01
+      - 1.27
+      - -2.8
+      - 0.01
+      - 1.27
+      - -2.8
+      - -0.3
+      - 1.31
+      - -2.8
+      - 0.3
+      - 1.31
+      - -2.8
+    joints:
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
+
+    command_interfaces:
+      - effort
+      - position
+      - velocity
+      - kp
+      - kd
+
+    state_interfaces:
+      - effort
+      - position
+      - velocity
+
+    feet:
+      - FR_foot
+      - FL_foot
+      - RR_foot
+      - RL_foot
+
+    imu_name: "imu_sensor"
+    base_name: "base"
+
+    imu_interfaces:
+      - orientation.w
+      - orientation.x
+      - orientation.y
+      - orientation.z
+      - angular_velocity.x
+      - angular_velocity.y
+      - angular_velocity.z
+      - linear_acceleration.x
+      - linear_acceleration.y
+      - linear_acceleration.z
 
 unitree_guide_controller:
   ros__parameters:
@@ -87,6 +155,63 @@ unitree_guide_controller:
       - linear_acceleration.y
       - linear_acceleration.z
 
+ocs2_quadruped_controller:
+  ros__parameters:
+    update_rate: 1000  # Hz
+
+    joints:
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+
+    command_interfaces:
+      - effort
+      - position
+      - velocity
+      - kp
+      - kd
+
+    state_interfaces:
+      - effort
+      - position
+      - velocity
+
+    feet:
+      - FL_foot
+      - FR_foot
+      - RL_foot
+      - RR_foot
+
+    imu_name: "imu_sensor"
+
+    imu_interfaces:
+      - orientation.w
+      - orientation.x
+      - orientation.y
+      - orientation.z
+      - angular_velocity.x
+      - angular_velocity.y
+      - angular_velocity.z
+      - linear_acceleration.x
+      - linear_acceleration.y
+      - linear_acceleration.z
+
+    foot_force_name: "foot_contact_sensor"
+    foot_force_interfaces:
+      - FL_foot
+      - RL_foot
+      - FR_foot
+      - RR_foot
+
 rl_quadruped_controller:
   ros__parameters:
     update_rate: 200  # Hz
@@ -107,53 +232,47 @@ rl_quadruped_controller:
       - FR_calf_joint
       - RL_calf_joint
       - RR_calf_joint
-      # - FL_box_joint
-      # - FR_box_joint
-      # - RL_box_joint
-      # - RR_box_joint
-      #      - FL_hip_joint
-      #      - FL_thigh_joint
-      #      - FL_calf_joint
-      #      - FR_hip_joint
-      #      - FR_thigh_joint
-      #      - FR_calf_joint
-      #      - RL_hip_joint
-      #      - RL_thigh_joint
-      #      - RL_calf_joint
-      #      - RR_hip_joint
-      #      - RR_thigh_joint
-      #      - RR_calf_joint
 
+      # - FL_hip_joint
+      # - FL_thigh_joint
+      # - FL_calf_joint
+      # - FR_hip_joint
+      # - FR_thigh_joint
+      # - FR_calf_joint
+      # - RL_hip_joint
+      # - RL_thigh_joint
+      # - RL_calf_joint
+      # - RR_hip_joint
+      # - RR_thigh_joint
+      # - RR_calf_joint
+      
 
     down_pos:
-      - 0.01
       - -0.01
       - 0.01
       - -0.01
+      - 0.01
       - 1.27
       - 1.27
       - 1.27
       - 1.27
       - -2.8
+      - -2.8  
       - -2.8
       - -2.8
-      - -2.8
-      # - 0.12
-      # - 0.12
-      # - 0.12
-      # - 0.12
-    #      - 0.01
-    #      - 1.27
-    #      - -2.8
-    #      - 0.01
-    #      - 1.27
-    #      - -2.8
-    #      - 0.01
-    #      - 1.27
-    #      - -2.8
-    #      - 0.01
-    #      - 1.27
-    #      - -2.8
+
+      # - 0.01
+      # - 1.27
+      # - -2.8
+      # - 0.01
+      # - 1.27
+      # - -2.8
+      # - 0.01
+      # - 1.27
+      # - -2.8
+      # - 0.01
+      # - 1.27
+      # - -2.8
 
     # down_pos:
     #   - 0.0
@@ -174,34 +293,31 @@ rl_quadruped_controller:
     #   - 0.12
 
     stand_pos:
-      - 0.0
-      - -0.0
-      - 0.0
-      - -0.0
-      - 0.8
-      - 0.8
-      - 0.8
-      - 0.8
+      - 0.01
+      - -0.01
+      - 0.01
+      - -0.01
+      - 0.80
+      - 0.80
+      - 0.80
+      - 0.80
       - -1.8
       - -1.8
       - -1.8
       - -1.8
-      # - 0.075
-      # - 0.075
-      # - 0.075
-      # - 0.075
-    #      - 0.01
-    #      - 1.2
-    #      - -1.6
-    #      - 0.01
-    #      - 1.2
-    #      - -1.6
-    #      - 0.01
-    #      - 1.2
-    #      - -1.6
-    #      - 0.01
-    #      - 1.2
-    #      - -1.6
+
+      # - 0.0
+      # - 0.8
+      # - -1.6
+      # - 0.0
+      # - 0.8
+      # - -1.6
+      # - 0.0
+      # - 0.8
+      # - -1.6
+      # - 0.0
+      # - 0.8
+      # - -1.6
 
     command_interfaces:
       - effort
