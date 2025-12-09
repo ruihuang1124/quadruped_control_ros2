@@ -5,10 +5,6 @@
 	<xacro:arg name="DEBUG" default="false"/>
 	<xacro:arg name="GAZEBO" default="false"/>
 	<xacro:arg name="CLASSIC" default="false"/>
-    <xacro:arg name="robot_type" default="arcdog"/>
-    <xacro:property name="robot_type" value="$(arg robot_type)"/>
-	<xacro:arg name="simulator" default="test"/>
-    <xacro:property name="simulator" value="$(arg simulator)"/>
 
 	<xacro:include filename="$(find arcdog_description)/xacro/const.xacro"/>
 	<xacro:include filename="$(find arcdog_description)/xacro/materials.xacro"/>

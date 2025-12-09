@@ -143,7 +143,7 @@
 		</link>
 
 
-		<joint name="${name}_foot_fixed" type="fixed">0
+		<joint name="${name}_foot_fixed" type="fixed">
 			<origin rpy="0 0 0" xyz="0 0 ${-(calf_length)}"/>
 			<parent link="${name}_calf"/>
 			<child link="${name}_foot"/>
@@ -170,33 +170,6 @@
 								izz="${(2*foot_mass)/5.0*(foot_radius*foot_radius)}"/>
 			</inertial>
 		</link>
-
-		<gazebo reference="${name}_hip">
-			<mu1>0.2</mu1>
-			<mu2>0.2</mu2>
-		</gazebo>
-
-		<gazebo reference="${name}_thigh">
-			<mu1>0.2</mu1>
-			<mu2>0.2</mu2>
-			<self_collide>0</self_collide>
-			<kp value="1000000.0"/>
-			<kd value="100.0"/>
-		</gazebo>
-
-		<gazebo reference="${name}_calf">
-			<mu1>0.6</mu1>
-			<mu2>0.6</mu2>
-			<self_collide>1</self_collide>
-		</gazebo>
-
-		<gazebo reference="${name}_foot">
-			<mu1>0.6</mu1>
-			<mu2>0.6</mu2>
-			<self_collide>1</self_collide>
-			<kp value="1000000.0"/>
-			<kd value="100.0"/>
-		</gazebo>
 
 		<xacro:leg_transmission name="${name}"/>
 	</xacro:macro>
