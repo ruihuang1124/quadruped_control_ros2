@@ -5,10 +5,6 @@
 	<xacro:arg name="DEBUG" default="true"/>
 	<xacro:arg name="GAZEBO" default="false"/>
 	<xacro:arg name="CLASSIC" default="false"/>
-    <xacro:arg name="robot_type" default="arcdog"/>
-    <xacro:property name="robot_type" value="$(arg robot_type)"/>
-	<xacro:arg name="simulator" default="test"/>
-    <xacro:property name="simulator" value="$(arg simulator)"/>
 
 	<xacro:include filename="$(find arcdog_description)/xacro/const.xacro"/>
 	<xacro:include filename="$(find arcdog_description)/xacro/materials.xacro"/>
@@ -63,6 +59,7 @@
 			<geometry>
 				<mesh filename="file://$(find arcdog_description)/meshes/trunk.stl" scale="1 1 1"/>
 			</geometry>
+			<!-- <material name="orange"/> -->
 		</visual>
 		<collision>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
@@ -81,49 +78,61 @@
 	</link>
 
 	<joint name="imu_joint" type="fixed">
-		<origin rpy="0. 0. 0." xyz="0. 0. 0."/>
 		<parent link="trunk"/>
 		<child link="imu_link"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
 	</joint>
 
 	<link name="imu_link">
         <inertial>
-            <mass value="0.01"/>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+			<mass value="0.001"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
 		</inertial>
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<box size="0.015 0.015 0.004"/>
+				<box size="0.001 0.001 0.001"/>
 			</geometry>
+			<!-- <material name="red"/> -->
 		</visual>
-		<material name="orange">
-            <color rgba="255 108 10 255"/>
-        </material>
+		<collision>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<geometry>
+				<box size=".001 .001 .001"/>
+			</geometry>
+		</collision>
+		</link>
+		<!--
+	<joint name="load_joint" type="fixed">
+			<parent link="trunk"/>
+			<child link="load_link"/>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
 
+	<link name="load_link">
+			<inertial>
+					<mass value="5"/>
+					<origin rpy="0 0 0" xyz="0 0 0"/>
+					<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+			</inertial>
+			<visual>
+					<origin rpy="0 0 0" xyz="0 0 0.2"/>
+					<geometry>
+							<box size="0.5 0.3 0.2"/>
+					</geometry>
+			</visual>
+			<collision>
+					<origin rpy="0 0 0" xyz="0 0 0"/>
+					<geometry>
+							<box size=".001 .001 .001"/>
+					</geometry>
+			</collision>
 	</link>
-    <gazebo reference="imu_link">
-        <material>Gazebo/Orange</material>
-    </gazebo>
-    <gazebo reference="imu_joint">
-        <disableFixedJointLumping>true</disableFixedJointLumping>
-    </gazebo>
-
-    <xacro:leg prefix="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True" simulator="${simulator}" robot_type="${robot_type}">
-        <origin rpy="0 0 0" xyz="${leg_offset_x} ${-leg_offset_y} 0"/>
-    </xacro:leg>
-
-    <xacro:leg prefix="FL" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True" simulator="${simulator}" robot_type="${robot_type}">
-        <origin rpy="0 0 0" xyz="${leg_offset_x} ${leg_offset_y} 0"/>
-    </xacro:leg>
-
-    <xacro:leg prefix="RR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False" simulator="${simulator}" robot_type="${robot_type}">
-        <origin rpy="0 0 0" xyz="${-leg_offset_x} ${-leg_offset_y} 0"/>
-    </xacro:leg>
-
-    <xacro:leg prefix="RL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False" simulator="${simulator}" robot_type="${robot_type}">
-        <origin rpy="0 0 0" xyz="${-leg_offset_x} ${leg_offset_y} 0"/>
-    </xacro:leg>
+-->
+	<xacro:leg name="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True"/>
+	<xacro:leg name="FL" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True"/>
+	<xacro:leg name="RR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False"/>
+	<xacro:leg name="RL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False"/>
 
 </robot>
