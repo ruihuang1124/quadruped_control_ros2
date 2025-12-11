@@ -175,8 +175,8 @@ namespace rl_quadruped_controller
             "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
                 // Handle message
-                ctrl_interfaces_.control_inputs_.lx = msg->axes[1];
-                ctrl_interfaces_.control_inputs_.ly = msg->axes[0];
+                ctrl_interfaces_.control_inputs_.lx = 0.5*msg->axes[1];
+                ctrl_interfaces_.control_inputs_.ly = 0.34*msg->axes[0];
                 ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
                 if (msg->buttons[10]) // RB
                 {
