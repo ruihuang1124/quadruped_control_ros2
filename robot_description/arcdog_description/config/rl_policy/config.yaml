@@ -3,7 +3,7 @@ model_name: "policy1210.pt"
 framework: "isaacsim"
 rows: 4
 cols: 3
-decimation: 4
+decimation: 6
 num_observations: 45
 observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
 observations_history: [0]

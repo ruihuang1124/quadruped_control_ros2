@@ -15,7 +15,7 @@ def launch_setup(context, *args, **kwargs):
     package_description = context.launch_configurations['pkg_description']
     pkg_path = os.path.join(get_package_share_directory(package_description))
 
-    xacro_file = os.path.join(pkg_path, 'xacro', 'robot.xacro')
+    xacro_file = os.path.join(pkg_path, 'xacro', 'real_robot.xacro')
     robot_description = xacro.process_file(xacro_file).toxml()
 
     robot_controllers = PathJoinSubstitution(
@@ -26,15 +26,15 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    # rviz_config_file = os.path.join(get_package_share_directory(package_description), "config", "visualize_urdf.rviz")
+    rviz_config_file = os.path.join(get_package_share_directory(package_description), "config", "visualize_urdf.rviz")
 
-    # rviz = Node(
-    #     package='rviz2',
-    #     executable='rviz2',
-    #     name='rviz_ocs2',
-    #     output='screen',
-    #     arguments=["-d", rviz_config_file]
-    # )
+    rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz_ocs2',
+        output='screen',
+        arguments=["-d", rviz_config_file]
+    )
 
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -94,7 +94,7 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         joy_node,
-        # rviz,
+        rviz,
         cmd_mapping,
         robot_state_publisher,
         controller_manager,
@@ -117,7 +117,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     pkg_description = DeclareLaunchArgument(
         'pkg_description',
-        default_value='arcdog_description', # sirius_description, sirius_mid_v3_description
+        default_value='arcdog_description',
         description='package for robot description'
     )
 
