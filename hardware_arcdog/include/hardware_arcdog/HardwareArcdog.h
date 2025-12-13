@@ -13,6 +13,8 @@
 #include "rt_usb_cdc.h"
 #include "custom_msgs/srv/execute_motor_activation.hpp"
 
+#include "custom_msgs/msg/joint_commands.hpp"
+
 class HardwareArcdog final : public hardware_interface::SystemInterface
 {
 public:
@@ -54,6 +56,7 @@ protected:
     rclcpp::Node::SharedPtr node_;
     /*publisher*/
     // rclcpp::Publisher<custom_msgs::msg::ActuatorCmds>::SharedPtr actuator_cmd_publisher_;
+    rclcpp::Publisher<custom_msgs::msg::JointCommands>::SharedPtr joint_commands_pub_;
     /*subscriber*/
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscriber_;
 

@@ -39,8 +39,12 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
         "imu", rclcpp::SensorDataQoS(), std::bind(&HardwareArcdog::imu_callback, this, std::placeholders::_1));
     // publish
-    // auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
+    auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
     // actuator_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::ActuatorCmds>("actuators_cmds", qos);
+    joint_commands_pub_ = node_->create_publisher<custom_msgs::msg::JointCommands>(
+    "joint_commands",  // 话题名称
+    qos  // QoS 队列大小
+    );
 
     motor_mode_ = 1;
     motor_activation_server_ = node_->create_service<custom_msgs::srv::ExecuteMotorActivation>(
@@ -156,6 +160,35 @@ return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::D
         joints_command->tau_hip_ff[i] = joint_effort_commands_[info_.joints[1 + i*3].name];
         joints_command->tau_knee_ff[i] = joint_effort_commands_[info_.joints[2 + i*3].name];
     }
+
+    auto ros_msg = std::make_unique<custom_msgs::msg::JointCommands>();
+    ros_msg->header.stamp = node_->now();
+    for (size_t i = 0; i < LEG_AMOUNT; i++) {
+        // 位置命令
+        ros_msg->q_des_abad[i] = joint_position_commands_[info_.joints[0 + i*3].name];
+        ros_msg->q_des_hip[i] = joint_position_commands_[info_.joints[1 + i*3].name];
+        ros_msg->q_des_knee[i] = joint_position_commands_[info_.joints[2 + i*3].name];
+        
+        // 速度命令
+        ros_msg->qd_des_abad[i] = joint_velocity_commands_[info_.joints[0 + i*3].name];
+        ros_msg->qd_des_hip[i] = joint_velocity_commands_[info_.joints[1 + i*3].name];
+        ros_msg->qd_des_knee[i] = joint_velocity_commands_[info_.joints[2 + i*3].name];
+        
+        // 力矩前馈
+        ros_msg->tau_abad_ff[i] = joint_effort_commands_[info_.joints[0 + i*3].name];
+        ros_msg->tau_hip_ff[i] = joint_effort_commands_[info_.joints[1 + i*3].name];
+        ros_msg->tau_knee_ff[i] = joint_effort_commands_[info_.joints[2 + i*3].name];
+
+        // PID增益
+        ros_msg->kp_abad[i] = joint_kp_commands_[info_.joints[0 + i*3].name];
+        ros_msg->kp_hip[i] = joint_kp_commands_[info_.joints[1 + i*3].name];
+        ros_msg->kp_knee[i] = joint_kp_commands_[info_.joints[2 + i*3].name];
+        ros_msg->kd_abad[i] = joint_kd_commands_[info_.joints[0 + i*3].name];
+        ros_msg->kd_hip[i] = joint_kd_commands_[info_.joints[1 + i*3].name];
+        ros_msg->kd_knee[i] = joint_kd_commands_[info_.joints[2 + i*3].name];
+        // ... 其他增益命令 ...
+    }
+    joint_commands_pub_->publish(std::move(ros_msg));
 
     bool motor_mode_flag = false; // true if we want the motor move. activated_values input TODO.
     switch (motor_mode_) {
