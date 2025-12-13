@@ -32,6 +32,13 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     imu_states_.resize(info.sensors[0].state_interfaces.size(), 0);
     // foot_contact_states_.resize(info.sensors[1].state_interfaces.size(), 0);
 
+    limit_abad_.min = -1.80; 
+    limit_abad_.max =  1.80;
+    limit_hip_.min = -1.0;
+    limit_hip_.max =  4.0;
+    limit_knee_.min = -3.8;
+    limit_knee_.max = -0.5;
+
     node_ = rclcpp::Node::make_shared("ros2_control_arcdog");
     // subscription
     // joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
@@ -113,6 +120,11 @@ return_type HardwareArcdog::read(const rclcpp::Time & /*time*/, const rclcpp::Du
 {
     // read motor states through tty and the imu info will be updated with imucallback().
     custom_msgs::msg::JointStates* joints_data = get_joint_states_msgtype();
+
+    if (joints_data != nullptr) {
+        check_joint_limits(joints_data);
+    }
+
     if (rclcpp::ok())
     {
         for (size_t i = 0; i < LEG_AMOUNT; i++)
@@ -311,6 +323,66 @@ void HardwareArcdog::motor_activation_callback(const custom_msgs::srv::ExecuteMo
     }
     motor_mode_ = req->motor_mode;
     res->result_status = res->SUCCEEDED;
+}
+
+void HardwareArcdog::check_joint_limits(const custom_msgs::msg::JointStates* joints_data)
+{
+    
+    // 缓冲检查，如果运行周期小于 1600 次，直接跳过检查，不执行后续逻辑
+    if (iterations_ <= 1600) {
+        return;
+    }
+
+    // 如果电机已经是失能状态(1)，则不需要重复检查和报错
+    if (motor_mode_ == 1) {
+        return;
+    }
+
+    bool limit_violated = false;
+    std::string violated_joint_name = "";
+    double violated_value = 0.0;
+
+    // 遍历 4 条腿
+    for (size_t i = 0; i < LEG_AMOUNT; i++)
+    {
+        // 1. 检查 Abad (侧摆)
+        if (joints_data->q_abad[i] < limit_abad_.min || joints_data->q_abad[i] > limit_abad_.max) {
+            limit_violated = true;
+            violated_joint_name = "Leg " + std::to_string(i) + " Abad";
+            violated_value = joints_data->q_abad[i];
+            break; 
+        }
+
+        // 2. 检查 Hip (大腿)
+        if (joints_data->q_hip[i] < limit_hip_.min || joints_data->q_hip[i] > limit_hip_.max) {
+            limit_violated = true;
+            violated_joint_name = "Leg " + std::to_string(i) + " Hip";
+            violated_value = joints_data->q_hip[i];
+            break;
+        }
+
+        // 3. 检查 Knee (膝盖)
+        if (joints_data->q_knee[i] < limit_knee_.min || joints_data->q_knee[i] > limit_knee_.max) {
+            limit_violated = true;
+            violated_joint_name = "Leg " + std::to_string(i) + " Knee";
+            violated_value = joints_data->q_knee[i];
+            break;
+        }
+    }
+
+    if (limit_violated)
+    {
+        // 强制切换到失能模式
+        motor_mode_ = 1;
+        
+        // 打印红色致命错误日志
+        RCLCPP_FATAL(node_->get_logger(), 
+            "JOINT LIMIT VIOLATED! Emergency Stop Triggered. Joint: %s, Value: %f", 
+            violated_joint_name.c_str(), violated_value);
+            
+        // 可选：你也可以在这里清空所有的 command，防止恢复后瞬间跳变
+        // for (auto & cmd : joint_effort_commands_) cmd.second = 0.0;
+    }
 }
 
 

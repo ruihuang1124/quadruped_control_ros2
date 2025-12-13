@@ -33,10 +33,18 @@ protected:
     int iterations_;
     int motor_mode_;
     // bool motor_activation_flag_;
+    struct JointLimit {
+        double min;
+        double max;
+    };
+    JointLimit limit_abad_;
+    JointLimit limit_hip_;
+    JointLimit limit_knee_;
     void imu_callback(const sensor_msgs::msg::Imu imu_state);
     void motor_activation_callback(const custom_msgs::srv::ExecuteMotorActivation::Request::SharedPtr req,
                                    const custom_msgs::srv::ExecuteMotorActivation::Response::SharedPtr res);
     // void joint_state_callback(const sensor_msgs::msg::JointState joint_state);
+    void check_joint_limits(const custom_msgs::msg::JointStates* joints_data);
 
     // cmd
     std::unordered_map<std::string, double> joint_position_commands_;
