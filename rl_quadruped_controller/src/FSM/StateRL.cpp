@@ -424,6 +424,7 @@ void StateRL::runModel()
     for (int i = 0; i < params_.num_of_dofs; ++i)
     {
         robot_command_.motor_command.q[i] = output_dof_pos_[0][i].item<double>();
+        // robot_command_.motor_command.q[i] = params_.default_dof_pos[0][i].item<double>(); //safe value for safe test
         robot_command_.motor_command.dq[i] = 0;
         robot_command_.motor_command.kp[i] = params_.rl_kp[0][i].item<double>();
         robot_command_.motor_command.kd[i] = params_.rl_kd[0][i].item<double>();
