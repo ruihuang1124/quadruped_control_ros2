@@ -1,11 +1,10 @@
-//
-// Created by biao on 24-10-6.
-//
-
 #include "rl_quadruped_controller/FSM/StateRL.h"
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/logging.hpp>
 #include <yaml-cpp/yaml.h>
+
+// [新增] 引入消息头文件
+#include <std_msgs/msg/float32_multi_array.hpp>
 
 template <typename T>
 std::vector<T> ReadVectorFromYaml(const YAML::Node& node)
@@ -68,6 +67,10 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
     robot_pkg_ = node_->get_parameter("robot_pkg").as_string();
     model_folder_ = node_->get_parameter("model_folder").as_string();
     use_rl_thread_ = node_->get_parameter("use_rl_thread").as_bool();
+
+    // [新增] 初始化发布者
+    pub_clamped_obs_ = node_->create_publisher<std_msgs::msg::Float32MultiArray>("rl/debug/clamped_obs", 10);
+    pub_output_dof_ = node_->create_publisher<std_msgs::msg::Float32MultiArray>("rl/debug/output_dof_pos", 10);
 
     RCLCPP_INFO(node_->get_logger(), "Using robot model from %s", robot_pkg_.c_str());
     const std::string package_share_directory = ament_index_cpp::get_package_share_directory(robot_pkg_);
@@ -227,6 +230,10 @@ torch::Tensor StateRL::computeObservation()
 
     // std::cout << "Observation: " << obs << std::endl;
     torch::Tensor clamped_obs = clamp(obs, -params_.clip_obs, params_.clip_obs);
+
+    // [新增] 发布 clamped_obs
+    publishTensorData(pub_clamped_obs_, clamped_obs);
+
     return clamped_obs;
 }
 
@@ -411,6 +418,9 @@ void StateRL::runModel()
 
     output_dof_pos_ = actions_scaled + params_.default_dof_pos;
 
+    // [新增] 发布 output_dof_pos_
+    publishTensorData(pub_output_dof_, output_dof_pos_);
+
     for (int i = 0; i < params_.num_of_dofs; ++i)
     {
         robot_command_.motor_command.q[i] = output_dof_pos_[0][i].item<double>();
@@ -438,4 +448,38 @@ void StateRL::setCommand() const
                                                                           set_value(
                                                                               robot_command_.motor_command.tau[i]);
     }
+}
+
+// [新增] 辅助函数实现：发布 Tensor 数据
+void StateRL::publishTensorData(const rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr& pub, 
+                                const torch::Tensor& tensor)
+{
+    if (!pub) return;
+
+    // 确保 Tensor 在 CPU 上并且内存连续
+    // .cpu() 如果已经在 CPU 上开销很小
+    // .contiguous() 确保内存布局是连续的，方便指针操作
+    torch::Tensor cpu_tensor = tensor.cpu().contiguous();
+
+    // 转换数据类型为 float (ROS Float32MultiArray 默认是 float32)
+    if (cpu_tensor.dtype() != torch::kFloat32) {
+        cpu_tensor = cpu_tensor.to(torch::kFloat32);
+    }
+
+    std_msgs::msg::Float32MultiArray msg;
+    
+    float* data_ptr = cpu_tensor.data_ptr<float>();
+    int num_elements = cpu_tensor.numel();
+
+    // 填充数据
+    msg.data.assign(data_ptr, data_ptr + num_elements);
+
+    // 填充维度信息 (可选，但有助于调试)
+    // 这里简单地将其展平为一维数组发布，如果需要保留维度结构，可以遍历 tensor.sizes()
+    msg.layout.dim.push_back(std_msgs::msg::MultiArrayDimension());
+    msg.layout.dim[0].label = "data";
+    msg.layout.dim[0].size = num_elements;
+    msg.layout.dim[0].stride = num_elements;
+
+    pub->publish(msg);
 }

@@ -9,6 +9,8 @@
 #include <rl_quadruped_controller/control/CtrlComponent.h>
 #include <torch/script.h>
 
+#include <std_msgs/msg/float32_multi_array.hpp>
+
 #include "controller_common/FSM/FSMState.h"
 
 struct CtrlComponent;
@@ -163,9 +165,12 @@ private:
 
     void setCommand() const;
 
+    void publishTensorData(const rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr& pub, 
+                           const torch::Tensor& tensor);
+
     std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node_;
-    std::string robot_pkg_ = "go2_description";
-    std::string model_folder_ = "legged_gym";
+    std::string robot_pkg_ = "arcdog_description";
+    std::string model_folder_ = "rl_policy";
 
     bool enable_estimator_;
     std::shared_ptr<Estimator>& estimator_;
@@ -193,6 +198,10 @@ private:
     // output buffer
     torch::Tensor output_torques;
     torch::Tensor output_dof_pos_;
+
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr pub_clamped_obs_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr pub_output_dof_;
+
 };
 
 
