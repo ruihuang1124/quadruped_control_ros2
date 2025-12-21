@@ -1,4 +1,4 @@
-model_name: "policy1222.pt"
+model_name: "policy1222new.pt"
 #model_name: "only_quad_policy.pt"
 framework: "isaacsim"
 rows: 4
