@@ -35,7 +35,7 @@ void StateFixedStandAdjustableLeg::enter()
         ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_);
         ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(kd_);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
+    ctrl_interfaces_.control_inputs_.command = -1;
 }
 
 void StateFixedStandAdjustableLeg::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
@@ -75,6 +75,8 @@ FSMStateName StateFixedStandAdjustableLeg::checkChange() {
         return FSMStateName::FIXEDSTANDADJUSTABLELEG;
     }
     switch (ctrl_interfaces_.control_inputs_.command) {
+        case -1:
+            return FSMStateName::FIXEDSTANDADJUSTABLELEG;
         case 0:
             return FSMStateName::PASSIVEADJUSTABLELEG;
         case 1:

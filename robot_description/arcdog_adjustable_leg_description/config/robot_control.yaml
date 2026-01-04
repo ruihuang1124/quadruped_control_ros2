@@ -199,7 +199,7 @@ rl_quadruped_controller_adjustable_leg:
   ros__parameters:
     update_rate: 200  # Hz
     robot_pkg: "arcdog_adjustable_leg_description"
-    use_rl_thread: false
+    use_rl_thread: true
     model_folder: "rl_policy"
 
     joints:
@@ -306,22 +306,40 @@ rl_quadruped_controller_adjustable_leg:
       # - 0.075
       # - 0.075
       # - 0.075
+
       - 0.01
-      - 0.60
-      - -0.95
-      - 0.075
+      - 1.2
+      - -1.6
+      - 0.15
       - 0.01
-      - 0.60
-      - -0.95
-      - 0.075
+      - 1.2
+      - -1.6
+      - 0.15
       - 0.01
-      - 0.60
-      - -0.95
-      - 0.075
+      - 1.2
+      - -1.6
+      - 0.15
       - 0.01
-      - 0.60
-      - -0.95
-      - 0.075
+      - 1.2
+      - -1.6
+      - 0.15
+
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
+      # - 0.0
 
     command_interfaces:
       - effort
