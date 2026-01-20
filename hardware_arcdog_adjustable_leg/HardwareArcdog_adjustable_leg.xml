@@ -1,0 +1,19 @@
+<!-- <library path="hardware_arcdog">
+  <class name="hardware_arcdog/HardwareArcdog"
+         type="HardwareArcdog"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for arcdog real robot platform.
+    </description>
+  </class>
+</library> -->
+
+<library path="hardware_arcdog_adjustable_leg">
+  <class name="hardware_arcdog_adjustable_leg/HardwareArcdog_adjustable_leg"
+         type="HardwareArcdog_adjustable_leg"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Robot System for arcdog real robot platform.
+    </description>
+  </class>
+</library>
