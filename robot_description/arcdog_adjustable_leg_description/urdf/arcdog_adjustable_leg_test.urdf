@@ -419,7 +419,7 @@
     <axis xyz="0 0 1"/>
     <!-- 定义滑动轴 -->
     <dynamics damping="0.05" friction="0.01"/>
-    <limit effort="50" lower="0" upper="-0.193" velocity="50"/>
+    <limit effort="50" lower="0" upper="0.193" velocity="50"/>
     <!-- 定义限制条件 -->
   </joint>
   <joint name="FR_foot_fixed" type="fixed">
@@ -588,7 +588,7 @@
     <axis xyz="0 0 1"/>
     <!-- 定义滑动轴 -->
     <dynamics damping="0.05" friction="0.01"/>
-    <limit effort="50" lower="0" upper="-0.193" velocity="50"/>
+    <limit effort="50" lower="0" upper="0.193" velocity="50"/>
     <!-- 定义限制条件 -->
   </joint>
   <joint name="FL_foot_fixed" type="fixed">
@@ -757,7 +757,7 @@
     <axis xyz="0 0 1"/>
     <!-- 定义滑动轴 -->
     <dynamics damping="0.05" friction="0.01"/>
-    <limit effort="50" lower="0" upper="-0.193" velocity="50"/>
+    <limit effort="50" lower="0" upper="0.193" velocity="50"/>
     <!-- 定义限制条件 -->
   </joint>
   <joint name="RR_foot_fixed" type="fixed">
@@ -926,7 +926,7 @@
     <axis xyz="0 0 1"/>
     <!-- 定义滑动轴 -->
     <dynamics damping="0.05" friction="0.01"/>
-    <limit effort="50" lower="0" upper="-0.193" velocity="50"/>
+    <limit effort="50" lower="0" upper="0.193" velocity="50"/>
     <!-- 定义限制条件 -->
   </joint>
   <joint name="RL_foot_fixed" type="fixed">

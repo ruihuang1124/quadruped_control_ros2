@@ -176,7 +176,7 @@
             <child link="${name}_box"/>
             <axis xyz="0 0 1"/> <!-- 定义滑动轴 -->
             <dynamics damping="${damping}" friction="${friction}"/>
-            <limit effort="${box_effort_max}" velocity="${box_velocity_max}" lower="0" upper="${-calf_length}"/> <!-- 定义限制条件 -->
+            <limit effort="${box_effort_max}" velocity="${box_velocity_max}" lower="0" upper="${calf_length}"/> <!-- 定义限制条件 -->
         </joint>
 
         <joint name="${name}_foot_fixed" type="fixed">
