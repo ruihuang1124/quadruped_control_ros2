@@ -121,6 +121,44 @@
 			</geometry>
 		</collision>
 	</link>
+
+    <!-- ============================================================ -->
+    <!-- ADDED NUC LINK START -->
+    <!-- ============================================================ -->
+    <joint name="nuc_joint" type="fixed">
+        <parent link="trunk"/>
+        <child link="nuc_link"/>
+        <!-- xyz: Adjust this to move the NUC.  -->
+        <origin xyz="-0.02298 0 0.057" rpy="0 0 0"/>
+    </joint>
+
+    <link name="nuc_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="file://$(find go2_arm_description)/meshes/trunk_nuc.dae" scale="1 1 1"/>
+            </geometry>
+            <!-- <material name="dark_grey">
+                <color rgba="0.2 0.2 0.2 1.0"/>
+            </material> -->
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.2041 0.1 0.115"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0.003772 0.000002 0.0072569"/>
+            <mass value="0.979"/> <!-- Estimated mass of NUC -->
+            <!-- Approximate inertia for a box -->
+            <inertia ixx="0.001768616" ixy="0.000065" ixz="0.000543365" iyy="0.003780411" iyz="0.000036" izz="0.003871411"/>
+        </inertial>
+    </link>
+    <!-- ============================================================ -->
+    <!-- ADDED NUC LINK END -->
+    <!-- ============================================================ -->
+
 	<!--
 	<joint name="load_joint" type="fixed">
 			<parent link="trunk"/>
@@ -155,7 +193,7 @@
     <joint name="arm_mount_joint" type="fixed">
         <parent link="trunk"/>
         <child link="base_link"/>
-        <origin xyz="0.0 0 0.057" rpy="0 0 0"/>
+        <origin xyz="0.13949 0 0.086" rpy="0 0 0"/>
     </joint>
     <xacro:include filename="$(find piper_description)/urdf/piper_arm.xacro"/>
 </robot>
