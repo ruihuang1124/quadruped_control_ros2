@@ -16,6 +16,7 @@
 #include <iomanip> 
 // #include <lcm/lcm-cpp.hpp>
 #include <cstdio> 
+#include <cmath> // Added for math functions if needed
 
 
 /* Input buffer size.  Use a power of two larger than 512; I'd recommend 4096 - 65536.
@@ -48,6 +49,7 @@ const float arcdog_knee_side_sign[4] = {-1, 1, -1, 1};
 float arcdog_abad_offset[4] = {ARCDOG_K_ABAD_OFFSET_POS_0, -ARCDOG_K_ABAD_OFFSET_POS_1, ARCDOG_K_ABAD_OFFSET_POS_2, -ARCDOG_K_ABAD_OFFSET_POS_3};
 float arcdog_hip_offset[4] = {ARCDOG_K_HIP_OFFSET_POS_0, ARCDOG_K_HIP_OFFSET_POS_1, ARCDOG_K_HIP_OFFSET_POS_2, ARCDOG_K_HIP_OFFSET_POS_3};
 float arcdog_knee_offset[4] = {ARCDOG_K_KNEE_OFFSET_POS_0, ARCDOG_K_KNEE_OFFSET_POS_1, ARCDOG_K_KNEE_OFFSET_POS_2, ARCDOG_K_KNEE_OFFSET_POS_3};
+float arcdog_prismatic_offset[4] = {ARCDOG_K_PRISMATIC_OFFSET_POS_0, ARCDOG_K_PRISMATIC_OFFSET_POS_1, ARCDOG_K_PRISMATIC_OFFSET_POS_2, ARCDOG_K_PRISMATIC_OFFSET_POS_3};
 
 //const float arcdog_abad_side_sign[4] = {1, 1, 1, 1};
 //const float arcdog_hip_side_sign[4] = {1, 1, 1, 1};
@@ -562,11 +564,54 @@ void leg_command_to_can_command(LEG_COMMAND_T *leg_cmd, CAN_COMMAND *can_cmd) {
     can_cmd[2].kd = float_to_uint(leg_cmd->kd_knee, KD_MIN_DM, KD_MAX_DM, 12);
     can_cmd[2].t_ff = float_to_uint(leg_cmd->tau_knee_ff, T_MIN_DM, T_MAX_DM, 12);
 
-    can_cmd[3].p_des = float_to_uint(leg_cmd->q_des_prismatic, P_MIN_DM2325, P_MAX_DM2325,16);
-    can_cmd[3].v_des = float_to_uint(leg_cmd->qd_des_prismatic, V_MIN_DM2325, V_MAX_DM2325,12);
-    can_cmd[3].kp = float_to_uint(leg_cmd->kp_prismatic, KP_MIN_DM2325, KP_MAX_DM2325, 12);
-    can_cmd[3].kd = float_to_uint(leg_cmd->kd_prismatic, KD_MIN_DM2325, KD_MAX_DM2325, 12);
-    can_cmd[3].t_ff = float_to_uint(leg_cmd->tau_prismatic_ff, T_MIN_DM2325, T_MAX_DM2325, 12);
+    // ------------------------------------------------------
+    // Prismatic Joint - Inverse Mapping (Command -> Motor)
+    // ------------------------------------------------------
+    // Calculate conversion factor (Motor Radians -> Linear Meters)
+    // Formula: (1 / Total_Reduction) * (Lead / 2PI)
+    float rot_to_linear_factor = (1.0f / TOTAL_REDUCTION) * (SCREW_LEAD / (2.0f * 3.14159265f));
+    
+    float motor_q_des, motor_qd_des, motor_tau_ff, motor_kp, motor_kd;
+
+    if (rot_to_linear_factor != 0.0f) {
+        // Position: Meters -> Radians
+        // q_motor = q_linear / K
+        motor_q_des = leg_cmd->q_des_prismatic / rot_to_linear_factor;
+
+        // Velocity: m/s -> Rad/s
+        // qd_motor = qd_linear / K
+        motor_qd_des = leg_cmd->qd_des_prismatic / rot_to_linear_factor;
+
+        // Force -> Torque
+        // P = F*v = T*w  => F * (w*K) = T * w => T = F * K
+        // Torque (Nm) = Force (N) * rot_to_linear_factor
+        motor_tau_ff = leg_cmd->tau_prismatic_ff * rot_to_linear_factor;
+
+        // Kp Mapping (Linear Stiffness N/m -> Rotational Stiffness Nm/rad)
+        // F = Kp_lin * x
+        // (T / K) = Kp_lin * (theta * K)
+        // T = (Kp_lin * K^2) * theta
+        // Kp_rot = Kp_lin * K^2
+        // motor_kp = leg_cmd->kp_prismatic * (rot_to_linear_factor * rot_to_linear_factor);
+        motor_kp = leg_cmd->kp_prismatic;
+
+        // Kd Mapping (Linear Damping Ns/m -> Rotational Damping Nms/rad)
+        // Similar to Kp: Kd_rot = Kd_lin * K^2
+        // motor_kd = leg_cmd->kd_prismatic * (rot_to_linear_factor * rot_to_linear_factor);
+        motor_kd = leg_cmd->kd_prismatic;
+    } else {
+        motor_q_des = 0.0f;
+        motor_qd_des = 0.0f;
+        motor_tau_ff = 0.0f;
+        motor_kp = 0.0f;
+        motor_kd = 0.0f;
+    }
+
+    can_cmd[3].p_des = float_to_uint(motor_q_des, P_MIN_DM2325, P_MAX_DM2325, 16);
+    can_cmd[3].v_des = float_to_uint(motor_qd_des, V_MIN_DM2325, V_MAX_DM2325, 12);
+    can_cmd[3].kp = float_to_uint(motor_kp, KP_MIN_DM2325, KP_MAX_DM2325, 12);
+    can_cmd[3].kd = float_to_uint(motor_kd, KD_MIN_DM2325, KD_MAX_DM2325, 12);
+    can_cmd[3].t_ff = float_to_uint(motor_tau_ff, T_MIN_DM2325, T_MAX_DM2325, 12);
 }
 
 void can_data_to_leg_data(CAN_DATA *can_data, LEG_DATA_T *leg_data) {
@@ -655,7 +700,8 @@ void leg_can_command_msg_to_struct(custom_msgs::msg::JointCommands *leg_can_comm
     leg_cmd_struct[leg].q_des_abad = (leg_can_command_msg->q_des_abad[leg] - arcdog_abad_offset[leg]) * arcdog_abad_side_sign[leg];
     leg_cmd_struct[leg].q_des_hip = (leg_can_command_msg->q_des_hip[leg] - arcdog_hip_offset[leg]) * arcdog_hip_side_sign[leg];
     leg_cmd_struct[leg].q_des_knee = (leg_can_command_msg->q_des_knee[leg] - arcdog_knee_offset[leg]) * arcdog_knee_side_sign[leg];
-    leg_cmd_struct[leg].q_des_prismatic = leg_can_command_msg->q_des_prismatic[leg];
+    leg_cmd_struct[leg].q_des_prismatic = leg_can_command_msg->q_des_prismatic[leg] - arcdog_prismatic_offset[leg];
+    // leg_cmd_struct[leg].q_des_prismatic = leg_can_command_msg->q_des_prismatic[leg];
 
     leg_cmd_struct[leg].qd_des_abad = leg_can_command_msg->qd_des_abad[leg] * arcdog_abad_side_sign[leg];
     leg_cmd_struct[leg].qd_des_hip = leg_can_command_msg->qd_des_hip[leg] * arcdog_hip_side_sign[leg];
@@ -684,7 +730,8 @@ void leg_can_data_struct_to_msg(LEG_DATA_T *leg_data_struct, custom_msgs::msg::J
     leg_can_data_msg->q_abad[leg] = leg_data_struct[leg].q_abad * arcdog_abad_side_sign[leg] + arcdog_abad_offset[leg];
     leg_can_data_msg->q_hip[leg] = leg_data_struct[leg].q_hip * arcdog_hip_side_sign[leg] + arcdog_hip_offset[leg];
     leg_can_data_msg->q_knee[leg] = leg_data_struct[leg].q_knee * arcdog_knee_side_sign[leg] + arcdog_knee_offset[leg];
-    leg_can_data_msg->q_prismatic[leg] = leg_data_struct[leg].q_prismatic;
+    leg_can_data_msg->q_prismatic[leg] = leg_data_struct[leg].q_prismatic + arcdog_prismatic_offset[leg];
+    // leg_can_data_msg->q_prismatic[leg] = leg_data_struct[leg].q_prismatic;
 
     leg_can_data_msg->qd_abad[leg] = leg_data_struct[leg].qd_abad * arcdog_abad_side_sign[leg];
     leg_can_data_msg->qd_hip[leg] = leg_data_struct[leg].qd_hip * arcdog_hip_side_sign[leg];
@@ -845,16 +892,16 @@ void usb_send_receive(LEG_COMMAND_T *leg_command, LEG_DATA_T *leg_data, int tty_
 
   // ================= [DEBUG START: 最终结果检查] =================
     // 检查点 8: 最终物理数据
-    if(leg == 1)
-    {
-      printf("\033[6A");
-      printf("[8] Final Leg Data:\n");
-      printf("  ABAD: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_abad, leg_data[leg].qd_abad, leg_data[leg].tau_abad);
-      printf("  HIP: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_hip, leg_data[leg].qd_hip, leg_data[leg].tau_hip);
-      printf("  KNEE: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_knee, leg_data[leg].qd_knee, leg_data[leg].tau_knee);
-      printf("  PRIS: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_prismatic, leg_data[leg].qd_prismatic, leg_data[leg].tau_prismatic);
-      printf("======================================\n");
-    }
+    // if(leg == 1)
+    // {
+    //   printf("\033[6A");
+    //   printf("[8] Final Leg Data:\n");
+    //   printf("  ABAD: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_abad, leg_data[leg].qd_abad, leg_data[leg].tau_abad);
+    //   printf("  HIP: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_hip, leg_data[leg].qd_hip, leg_data[leg].tau_hip);
+    //   printf("  KNEE: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_knee, leg_data[leg].qd_knee, leg_data[leg].tau_knee);
+    //   printf("  PRIS: Pos:%.3f Vel:%.3f Tor:%.3f\n", leg_data[leg].q_prismatic, leg_data[leg].qd_prismatic, leg_data[leg].tau_prismatic);
+    //   printf("======================================\n");
+    // }
     // ================= [DEBUG END] =================
 
   // printf("\nLEGID: 1 ABAD, POS:%f, VEL:%f, Tor:%f",leg_data[1].q_abad,leg_data[1].qd_abad,leg_data[1].tau_abad);
@@ -924,6 +971,7 @@ void usb_driver_run(int tty_descriptor, bool motor_mode_flag, uint64_t current_i
       arcdog_abad_offset[i] = 2 * arcdog_abad_offset[i] - joint_states_drv_msgtype.q_abad[i];
       arcdog_hip_offset[i] = 2 * arcdog_hip_offset[i] - joint_states_drv_msgtype.q_hip[i];
       arcdog_knee_offset[i] = 2 * arcdog_knee_offset[i] - joint_states_drv_msgtype.q_knee[i];
+      arcdog_prismatic_offset[i] = 2 * arcdog_prismatic_offset[i] - joint_states_drv_msgtype.q_prismatic[i];
     }
     std::cerr<<"Finish setting offset for arcdog's motor! NO ACTIVE ON ARCDOG MINI"<<std::endl;
   }

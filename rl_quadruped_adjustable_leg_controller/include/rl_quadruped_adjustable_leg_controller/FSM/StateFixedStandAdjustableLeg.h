@@ -1,5 +1,5 @@
 //
-// Created by lxq on 24-9-10.
+// Created by lxq on 26-02-01.
 //
 
 #ifndef STATEFIXEDSTANDADJUSTABLELEG_H
@@ -11,10 +11,12 @@
 class StateFixedStandAdjustableLeg : public FSMState {
 public:
     explicit StateFixedStandAdjustableLeg(CtrlInterfaces &ctrl_interfaces,
-                             const std::vector<double> &target_pos,
+                             const std::vector<double> &target_pos_adjustable_leg,
                              double kp,
                              double kd,
-                             const std::vector<double> &target_pos_adjustable_leg);
+                             const double kp_special,  // 新增：特殊关节的 kp
+                             const double kd_special  // 新增：特殊关节的 kd
+                             );
     void enter() override;
 
     void run(const rclcpp::Time& time,
@@ -28,7 +30,7 @@ private:
     std::array<double, 16> start_pos_adjustable_leg_; 
     rclcpp::Time start_time_;
 
-    double kp_, kd_;
+    double kp_, kd_, kp_special_, kd_special_;
 
     double duration_ = 600; // steps
     double percent_ = 0; //%

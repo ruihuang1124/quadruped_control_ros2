@@ -328,7 +328,7 @@ void HardwareArcdog_adjustable_leg::motor_activation_callback(const custom_msgs:
     } else if (req->motor_mode == 0)
     {
         RCLCPP_WARN(node_->get_logger(), "robot motors activated and are allow actuated by the commands!");
-        printf("\n\n\n\n\n\n\n\n"); 
+        // printf("\n\n\n\n\n\n\n\n"); 
     } else if (req->motor_mode == 1)
     {
         RCLCPP_WARN(node_->get_logger(), "robot motors deactivated.");

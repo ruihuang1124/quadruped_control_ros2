@@ -272,9 +272,9 @@ namespace rl_quadruped_adjustable_leg_controller
         // state_list_.passive = std::make_shared<StatePassive>(ctrl_interfaces_);
         state_list_.passiveAdjustableLeg = std::make_shared<StatePassiveAdjustableLeg>(ctrl_interfaces_);
         // state_list_.fixedDown = std::make_shared<StateFixedDown>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
-        state_list_.fixedDownAdjustableLeg = std::make_shared<StateFixedDownAdjustableLeg>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_);
+        state_list_.fixedDownAdjustableLeg = std::make_shared<StateFixedDownAdjustableLeg>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_, stand_kp_prismatic_joint, stand_kd_prismatic_joint);
         // state_list_.fixedStand = std::make_shared<StateFixedStand>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_);
-        state_list_.fixedStandAdjustableLeg = std::make_shared<StateFixedStandAdjustableLeg>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_, stand_pos_adjustable_leg_);
+        state_list_.fixedStandAdjustableLeg = std::make_shared<StateFixedStandAdjustableLeg>(ctrl_interfaces_, stand_pos_adjustable_leg_, stand_kp_, stand_kd_, stand_kp_prismatic_joint, stand_kd_prismatic_joint);
         state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_adjustable_leg_);
 
         // Initialize FSM
