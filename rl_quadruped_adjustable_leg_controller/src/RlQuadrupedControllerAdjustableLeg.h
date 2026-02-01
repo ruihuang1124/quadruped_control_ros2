@@ -107,7 +107,7 @@ namespace rl_quadruped_adjustable_leg_controller
 
         double stand_kp_ = 80.0;
         double stand_kd_ = 3.5;
-        double stand_kp_prismatic_joint = 5.0;
+        double stand_kp_prismatic_joint = 10.0;
         double stand_kd_prismatic_joint = 2.0;
         double feet_force_threshold_ = 20.0;
 
