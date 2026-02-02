@@ -69,8 +69,8 @@ void StateFixedStandAdjustableLeg::run(const rclcpp::Time&/*time*/, const rclcpp
     double t_prev = t - dt; // 上一帧的时间
 
     // 定义正弦波参数
-    const double center_pos = 0.11; // 中心位置 (也是开始和结束位置)
-    const double amplitude = 0.025;  // 振幅 (0.12 - 0.09)
+    const double center_pos = 0.05; // 中心位置 (也是开始和结束位置)
+    const double amplitude = 0.015;  // 振幅 (0.12 - 0.09)
     const double omega = 1.0; 
     const double cycle_period = 2.0 * M_PI / omega; 
     const double max_duration = 3.0 * cycle_period; // 10个完整周期

@@ -571,21 +571,23 @@ void leg_command_to_can_command(LEG_COMMAND_T *leg_cmd, CAN_COMMAND *can_cmd) {
     // Formula: (1 / Total_Reduction) * (Lead / 2PI)
     float rot_to_linear_factor = (1.0f / TOTAL_REDUCTION) * (SCREW_LEAD / (2.0f * 3.14159265f));
     
+    float direction_sign = -1.0f; 
+    
     float motor_q_des, motor_qd_des, motor_tau_ff, motor_kp, motor_kd;
 
     if (rot_to_linear_factor != 0.0f) {
         // Position: Meters -> Radians
         // q_motor = q_linear / K
-        motor_q_des = leg_cmd->q_des_prismatic / rot_to_linear_factor;
+        motor_q_des = (leg_cmd->q_des_prismatic / rot_to_linear_factor) * direction_sign;
 
         // Velocity: m/s -> Rad/s
         // qd_motor = qd_linear / K
-        motor_qd_des = leg_cmd->qd_des_prismatic / rot_to_linear_factor;
+        motor_qd_des = (leg_cmd->qd_des_prismatic / rot_to_linear_factor) * direction_sign;
 
         // Force -> Torque
         // P = F*v = T*w  => F * (w*K) = T * w => T = F * K
         // Torque (Nm) = Force (N) * rot_to_linear_factor
-        motor_tau_ff = leg_cmd->tau_prismatic_ff * rot_to_linear_factor;
+        motor_tau_ff = (leg_cmd->tau_prismatic_ff * rot_to_linear_factor) * direction_sign;
 
         // Kp Mapping (Linear Stiffness N/m -> Rotational Stiffness Nm/rad)
         // F = Kp_lin * x
@@ -644,13 +646,14 @@ void can_data_to_leg_data(CAN_DATA *can_data, LEG_DATA_T *leg_data) {
     // Formula: (1 / Total_Reduction) * (Lead / 2PI)
     // This converts "Motor Rotation" to "Lead Screw Linear Motion"
     float rot_to_linear_factor = (1.0f / TOTAL_REDUCTION) * (SCREW_LEAD / (2.0f * 3.14159265f));
+    float direction_sign = -1.0f;
 
     // Step 3: Apply mapping
     // Position: Radians -> Meters (m)
-    leg_data->q_prismatic = motor_q_rad * rot_to_linear_factor;
+    leg_data->q_prismatic = motor_q_rad * rot_to_linear_factor * direction_sign;
 
     // Velocity: Radians/sec -> Meters/sec (m/s)
-    leg_data->qd_prismatic = motor_qd_rad * rot_to_linear_factor;
+    leg_data->qd_prismatic = motor_qd_rad * rot_to_linear_factor * direction_sign;
     
     // Supplement: Force mapping
     // Based on energy conservation P = F*v = T*w, we know F = T * (w/v)
