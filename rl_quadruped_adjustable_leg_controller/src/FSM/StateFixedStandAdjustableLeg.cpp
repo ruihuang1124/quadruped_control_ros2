@@ -38,7 +38,7 @@ void StateFixedStandAdjustableLeg::enter()
         // ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_);
         // ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(kd_);
 
-        if (i == 3 || i == 7 || i == 11 || i == 15) 
+        if (i == 12 || i == 13 || i == 14 || i == 15) 
         {
             // 对特殊关节使用特殊的 kp 和 kd
             ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_special_);
