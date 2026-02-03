@@ -203,73 +203,73 @@ rl_quadruped_adjustable_leg_controller:
     model_folder: "rl_policy"
 
     joints:
-      # - FL_hip_joint
-      # - FR_hip_joint
-      # - RL_hip_joint
-      # - RR_hip_joint
-      # - FL_thigh_joint
-      # - FR_thigh_joint
-      # - RL_thigh_joint
-      # - RR_thigh_joint
-      # - FL_calf_joint
-      # - FR_calf_joint
-      # - RL_calf_joint
-      # - RR_calf_joint
-      # - FL_box_joint
-      # - FR_box_joint
-      # - RL_box_joint
-      # - RR_box_joint
       - FL_hip_joint
-      - FL_thigh_joint
-      - FL_calf_joint
-      - FL_box_joint
       - FR_hip_joint
-      - FR_thigh_joint
-      - FR_calf_joint
-      - FR_box_joint
       - RL_hip_joint
-      - RL_thigh_joint
-      - RL_calf_joint
-      - RL_box_joint
       - RR_hip_joint
+      - FL_thigh_joint
+      - FR_thigh_joint
+      - RL_thigh_joint
       - RR_thigh_joint
+      - FL_calf_joint
+      - FR_calf_joint
+      - RL_calf_joint
       - RR_calf_joint
+      - FL_box_joint
+      - FR_box_joint
+      - RL_box_joint
       - RR_box_joint
+      # - FL_hip_joint
+      # - FL_thigh_joint
+      # - FL_calf_joint
+      # - FL_box_joint
+      # - FR_hip_joint
+      # - FR_thigh_joint
+      # - FR_calf_joint
+      # - FR_box_joint
+      # - RL_hip_joint
+      # - RL_thigh_joint
+      # - RL_calf_joint
+      # - RL_box_joint
+      # - RR_hip_joint
+      # - RR_thigh_joint
+      # - RR_calf_joint
+      # - RR_box_joint
       
 
     down_pos:
-      # - -0.01
+      - -0.01
+      - 0.01
+      - -0.01
+      - 0.01
+      - 1.27
+      - 1.27
+      - 1.27
+      - 1.27
+      - -2.8
+      - -2.8  
+      - -2.8
+      - -2.8
+      - 0.05
+      - 0.05
+      - 0.05
+      - 0.05
       # - 0.01
-      # - -0.01
+      # - 1.27
+      # - -2.8
+      # - 0.05
       # - 0.01
       # - 1.27
-      # - 1.27
-      # - 1.27
+      # - -2.8
+      # - 0.05
+      # - 0.01
       # - 1.27
       # - -2.8
-      # - -2.8  
+      # - 0.05
+      # - 0.01
+      # - 1.27
       # - -2.8
-      # - -2.8
-      # - 0.12
-      # - 0.12
-      # - 0.12
-      # - 0.12
-      - 0.01
-      - 1.27
-      - -2.8
-      - 0.05
-      - 0.01
-      - 1.27
-      - -2.8
-      - 0.05
-      - 0.01
-      - 1.27
-      - -2.8
-      - 0.05
-      - 0.01
-      - 1.27
-      - -2.8
-      - 0.05
+      # - 0.05
 
     # down_pos:
     #   - 0.0
@@ -290,39 +290,39 @@ rl_quadruped_adjustable_leg_controller:
     #   - 0.12
 
     stand_pos_adjustable_leg:
-      # - 0.01
-      # - -0.01
-      # - 0.01
-      # - -0.01
-      # - 0.60
-      # - 0.60
-      # - 0.60
-      # - 0.60
-      # - -0.95
-      # - -0.95
-      # - -0.95
-      # - -0.95
-      # - 0.075
-      # - 0.075
-      # - 0.075
-      # - 0.075
+      - 0.0
+      - -0.0
+      - 0.0
+      - -0.0
+      - 0.8
+      - 0.8
+      - 0.8
+      - 0.8
+      - -1.8
+      - -1.8
+      - -1.8
+      - -1.8
+      - 0.1
+      - 0.1
+      - 0.1
+      - 0.1
 
-      - 0.01
-      - 0.7
-      - -1.6
-      - 0.05
-      - 0.01
-      - 0.7
-      - -1.6
-      - 0.05
-      - 0.01
-      - 1.2
-      - -1.6
-      - 0.05
-      - 0.01
-      - 1.2
-      - -1.6
-      - 0.05
+      # - 0.0
+      # - 0.8
+      # - -1.8
+      # - 0.1
+      # - 0.0
+      # - 0.8
+      # - -1.8
+      # - 0.1
+      # - 0.0
+      # - 0.8
+      # - -1.8
+      # - 0.1
+      # - 0.0
+      # - 0.8
+      # - -1.8
+      # - 0.1
 
       # - 0.0
       # - 0.0

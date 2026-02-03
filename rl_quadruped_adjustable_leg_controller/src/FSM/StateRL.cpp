@@ -292,10 +292,13 @@ void StateRL::loadYaml(const std::string& config_path)
         params_.clip_actions_lower = torch::tensor(
             ReadVectorFromYaml<double>(config["clip_actions_lower"], params_.framework, rows, cols)).view({1, -1});
     }
-    params_.action_scale = config["action_scale"].as<double>();
+    // params_.action_scale = config["action_scale"].as<double>();
     params_.hip_scale_reduction = config["hip_scale_reduction"].as<double>();
     params_.hip_scale_reduction_indices = ReadVectorFromYaml<int>(config["hip_scale_reduction_indices"]);
     params_.num_of_dofs = config["num_of_dofs"].as<int>();
+    params_.action_scale = torch::tensor(
+        ReadVectorFromYaml<double>(config["action_scale"], params_.framework, rows, cols)
+    ).view({1, -1}).to(torch::kFloat);
     params_.lin_vel_scale = config["lin_vel_scale"].as<double>();
     params_.ang_vel_scale = config["ang_vel_scale"].as<double>();
     params_.dof_pos_scale = config["dof_pos_scale"].as<double>();

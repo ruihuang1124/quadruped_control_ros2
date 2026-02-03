@@ -107,7 +107,7 @@ struct ModelParams
     std::vector<int> observations_history;
     double damping;
     double stiffness;
-    double action_scale;
+    // double action_scale;
     double hip_scale_reduction;
     std::vector<int> hip_scale_reduction_indices;
     int num_of_dofs;
@@ -123,6 +123,7 @@ struct ModelParams
     torch::Tensor rl_kp;
     torch::Tensor commands_scale;
     torch::Tensor default_dof_pos;
+    torch::Tensor action_scale;
 };
 
 struct Observations
