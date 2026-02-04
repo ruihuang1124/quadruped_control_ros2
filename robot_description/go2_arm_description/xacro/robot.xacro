@@ -129,14 +129,14 @@
         <parent link="trunk"/>
         <child link="nuc_link"/>
         <!-- xyz: Adjust this to move the NUC.  -->
-        <origin xyz="-0.02298 0 0.057" rpy="0 0 0"/>
+        <origin xyz="-0.0 0 0.057" rpy="0 0 0"/>
     </joint>
 
     <link name="nuc_link">
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="file://$(find go2_arm_description)/meshes/trunk_nuc.dae" scale="1 1 1"/>
+                <mesh filename="file://$(find go2_arm_description)/meshes/trunk_nuc_low.dae" scale="1 1 1"/>
             </geometry>
             <!-- <material name="dark_grey">
                 <color rgba="0.2 0.2 0.2 1.0"/>
@@ -145,14 +145,14 @@
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <box size="0.2041 0.1 0.115"/>
+                <box size="0.23 0.0852 0.1093888"/>
             </geometry>
         </collision>
         <inertial>
-            <origin rpy="0 0 0" xyz="0.003772 0.000002 0.0072569"/>
-            <mass value="0.979"/> <!-- Estimated mass of NUC -->
+            <origin rpy="0 0 0" xyz="-0.07447 0.000077 0.061821"/>
+            <mass value="0.743"/> <!-- Estimated mass of NUC -->
             <!-- Approximate inertia for a box -->
-            <inertia ixx="0.001768616" ixy="0.000065" ixz="0.000543365" iyy="0.003780411" iyz="0.000036" izz="0.003871411"/>
+            <inertia ixx="0.001044864" ixy="0.000087" ixz="0.000113779" iyy="0.00157080" iyz="0.000012" izz="0.001487421"/>
         </inertial>
     </link>
     <!-- ============================================================ -->
