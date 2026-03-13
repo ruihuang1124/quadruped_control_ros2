@@ -32,13 +32,6 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     imu_states_.resize(info.sensors[0].state_interfaces.size(), 0);
     // foot_contact_states_.resize(info.sensors[1].state_interfaces.size(), 0);
 
-    limit_abad_.min = -1.80; 
-    limit_abad_.max =  1.80;
-    limit_hip_.min = -1.0;
-    limit_hip_.max =  4.0;
-    limit_knee_.min = -3.8;
-    limit_knee_.max = -0.5;
-
     node_ = rclcpp::Node::make_shared("ros2_control_arcdog");
     // subscription
     // joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
@@ -46,12 +39,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
         "imu", rclcpp::SensorDataQoS(), std::bind(&HardwareArcdog::imu_callback, this, std::placeholders::_1));
     // publish
-    auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
+    // auto qos = rclcpp::QoS(rclcpp::KeepLast(1), rmw_qos_profile_sensor_data);
     // actuator_cmd_publisher_ = node_->create_publisher<custom_msgs::msg::ActuatorCmds>("actuators_cmds", qos);
-    joint_commands_pub_ = node_->create_publisher<custom_msgs::msg::JointCommands>(
-    "joint_commands",  // 话题名称
-    qos  // QoS 队列大小
-    );
 
     motor_mode_ = 1;
     motor_activation_server_ = node_->create_service<custom_msgs::srv::ExecuteMotorActivation>(
@@ -120,11 +109,6 @@ return_type HardwareArcdog::read(const rclcpp::Time & /*time*/, const rclcpp::Du
 {
     // read motor states through tty and the imu info will be updated with imucallback().
     custom_msgs::msg::JointStates* joints_data = get_joint_states_msgtype();
-
-    if (joints_data != nullptr) {
-        check_joint_limits(joints_data);
-    }
-
     if (rclcpp::ok())
     {
         for (size_t i = 0; i < LEG_AMOUNT; i++)
@@ -172,35 +156,6 @@ return_type HardwareArcdog::write(const rclcpp::Time & /*time*/, const rclcpp::D
         joints_command->tau_hip_ff[i] = joint_effort_commands_[info_.joints[1 + i*3].name];
         joints_command->tau_knee_ff[i] = joint_effort_commands_[info_.joints[2 + i*3].name];
     }
-
-    auto ros_msg = std::make_unique<custom_msgs::msg::JointCommands>();
-    ros_msg->header.stamp = node_->now();
-    for (size_t i = 0; i < LEG_AMOUNT; i++) {
-        // 位置命令
-        ros_msg->q_des_abad[i] = joint_position_commands_[info_.joints[0 + i*3].name];
-        ros_msg->q_des_hip[i] = joint_position_commands_[info_.joints[1 + i*3].name];
-        ros_msg->q_des_knee[i] = joint_position_commands_[info_.joints[2 + i*3].name];
-        
-        // 速度命令
-        ros_msg->qd_des_abad[i] = joint_velocity_commands_[info_.joints[0 + i*3].name];
-        ros_msg->qd_des_hip[i] = joint_velocity_commands_[info_.joints[1 + i*3].name];
-        ros_msg->qd_des_knee[i] = joint_velocity_commands_[info_.joints[2 + i*3].name];
-        
-        // 力矩前馈
-        ros_msg->tau_abad_ff[i] = joint_effort_commands_[info_.joints[0 + i*3].name];
-        ros_msg->tau_hip_ff[i] = joint_effort_commands_[info_.joints[1 + i*3].name];
-        ros_msg->tau_knee_ff[i] = joint_effort_commands_[info_.joints[2 + i*3].name];
-
-        // PID增益
-        ros_msg->kp_abad[i] = joint_kp_commands_[info_.joints[0 + i*3].name];
-        ros_msg->kp_hip[i] = joint_kp_commands_[info_.joints[1 + i*3].name];
-        ros_msg->kp_knee[i] = joint_kp_commands_[info_.joints[2 + i*3].name];
-        ros_msg->kd_abad[i] = joint_kd_commands_[info_.joints[0 + i*3].name];
-        ros_msg->kd_hip[i] = joint_kd_commands_[info_.joints[1 + i*3].name];
-        ros_msg->kd_knee[i] = joint_kd_commands_[info_.joints[2 + i*3].name];
-        // ... 其他增益命令 ...
-    }
-    joint_commands_pub_->publish(std::move(ros_msg));
 
     bool motor_mode_flag = false; // true if we want the motor move. activated_values input TODO.
     switch (motor_mode_) {
@@ -323,66 +278,6 @@ void HardwareArcdog::motor_activation_callback(const custom_msgs::srv::ExecuteMo
     }
     motor_mode_ = req->motor_mode;
     res->result_status = res->SUCCEEDED;
-}
-
-void HardwareArcdog::check_joint_limits(const custom_msgs::msg::JointStates* joints_data)
-{
-    
-    // 缓冲检查，如果运行周期小于 1600 次，直接跳过检查，不执行后续逻辑
-    if (iterations_ <= 1600) {
-        return;
-    }
-
-    // 如果电机已经是失能状态(1)，则不需要重复检查和报错
-    if (motor_mode_ == 1) {
-        return;
-    }
-
-    bool limit_violated = false;
-    std::string violated_joint_name = "";
-    double violated_value = 0.0;
-
-    // 遍历 4 条腿
-    for (size_t i = 0; i < LEG_AMOUNT; i++)
-    {
-        // 1. 检查 Abad (侧摆)
-        if (joints_data->q_abad[i] < limit_abad_.min || joints_data->q_abad[i] > limit_abad_.max) {
-            limit_violated = true;
-            violated_joint_name = "Leg " + std::to_string(i) + " Abad";
-            violated_value = joints_data->q_abad[i];
-            break; 
-        }
-
-        // 2. 检查 Hip (大腿)
-        if (joints_data->q_hip[i] < limit_hip_.min || joints_data->q_hip[i] > limit_hip_.max) {
-            limit_violated = true;
-            violated_joint_name = "Leg " + std::to_string(i) + " Hip";
-            violated_value = joints_data->q_hip[i];
-            break;
-        }
-
-        // 3. 检查 Knee (膝盖)
-        if (joints_data->q_knee[i] < limit_knee_.min || joints_data->q_knee[i] > limit_knee_.max) {
-            limit_violated = true;
-            violated_joint_name = "Leg " + std::to_string(i) + " Knee";
-            violated_value = joints_data->q_knee[i];
-            break;
-        }
-    }
-
-    if (limit_violated)
-    {
-        // 强制切换到失能模式
-        motor_mode_ = 1;
-        
-        // 打印红色致命错误日志
-        RCLCPP_FATAL(node_->get_logger(), 
-            "JOINT LIMIT VIOLATED! Emergency Stop Triggered. Joint: %s, Value: %f", 
-            violated_joint_name.c_str(), violated_value);
-            
-        // 可选：你也可以在这里清空所有的 command，防止恢复后瞬间跳变
-        // for (auto & cmd : joint_effort_commands_) cmd.second = 0.0;
-    }
 }
 
 

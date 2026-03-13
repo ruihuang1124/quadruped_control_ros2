@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.8)
 project(mujoco_simulator)
 
+cmake_minimum_required(VERSION 3.8)
+project(mujoco_simulator)
+
 # 设置 C++20 标准
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options(-Wall -Wextra -Wpedantic -Wno-sign-compare -Wno-missing-field-initializers -Wno-unused-variable)
 endif()
 
 # 明确指定使用 C++20
@@ -17,7 +20,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(custom_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(mujoco REQUIRED)
+set(mujoco_DIR "$ENV{HOME}/.mujoco/mujoco-3.2.7")
+include_directories(${mujoco_DIR}/include)
+link_directories(${mujoco_DIR}/lib)
+#find_package(mujoco REQUIRED)
 
 file(GLOB_RECURSE source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
 

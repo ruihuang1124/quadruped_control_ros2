@@ -146,7 +146,8 @@ namespace ArcLab
             jointState.header.stamp = rclcpp::Clock().now();
             for (int i = 0; i < sim_->m_->njnt; i++)
             {
-                if (sim_->m_->jnt_type[i] == mjtJoint::mjJNT_HINGE)
+                if (sim_->m_->jnt_type[i] == mjtJoint::mjJNT_HINGE ||
+                    sim_->m_->jnt_type[i] == mjtJoint::mjJNT_SLIDE)
                 {
                     std::string jnt_name(mj_id2name(sim_->m_, mjtObj::mjOBJ_JOINT, i));
                     jointState.name.emplace_back(jnt_name);

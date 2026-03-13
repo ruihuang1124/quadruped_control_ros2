@@ -1,6 +1,4 @@
-//
-// Created by lbt on 24-12-3.
-//
+
 #include <rclcpp/rclcpp.hpp>
 #include "mujoco/mujoco.h"
 #include "mujoco_node.h"
@@ -31,7 +29,6 @@
 #include "piper_mujoco_msg_handler.h"
 #include "qm_mujoco_msg_handler.h"
 #include "qw_mujoco_msg_handler.h"
-#include "adjustable_leg_mujoco_msg_handler.h" 
 
 #define MUJOCO_PLUGIN_DIR "mujoco_plugin"
 
@@ -148,7 +145,7 @@ namespace
           realpath.get()[written] = '\0';
           success = true;
         }
-        else if (written == -1)
+        else if (static_cast<ssize_t>(written) == -1)
         {
           if (errno == EINVAL)
           {
@@ -600,7 +597,7 @@ int main(int argc, char *argv[])
   mjvPerturb pert;
   mjv_defaultPerturb(&pert);
 
-  int robot_type = 4; // 0 for quadruped; 1 for piper; 2 for quadruped with piper; 3 for quadruped with wheel
+  int robot_type = 3; // 0 for quadruped; 1 for piper; 2 for quadruped with piper; 3 for quadruped with wheel
   if (robot_type == 0){
     // simulate object encapsulates the UI
     auto sim = std::make_unique<mj::Simulate>(
@@ -669,25 +666,6 @@ int main(int argc, char *argv[])
     // start physics thread
     std::thread physicsthreadhandle(&PhysicsThread, sim.get(), xml_filename);
     auto spin_func = [](std::shared_ptr<ArcLab::QWMujocoMsgHandler> node_ptr)
-    {
-      rclcpp::spin(node_ptr);
-    };
-    auto spin_thread = std::thread(spin_func, message_handle);
-    // start simulation UI loop (blocking call)
-    sim->RenderLoop();
-    spin_thread.join();
-    physicsthreadhandle.join();
-  } else if (robot_type == 4) {
-    // simulate object encapsulates the UI
-    auto sim = std::make_unique<mj::Simulate>(
-        std::make_unique<mj::GlfwAdapter>(),
-        &cam, &opt, &pert, /* is_passive = */ false);
-    auto message_handle = std::make_shared<ArcLab::AdjustableLegMujocoMsgHandler>(sim.get());
-    const char *xml_filename = strdup(message_handle->xml_file_path().c_str());
-
-    // start physics thread
-    std::thread physicsthreadhandle(&PhysicsThread, sim.get(), xml_filename);
-    auto spin_func = [](std::shared_ptr<ArcLab::AdjustableLegMujocoMsgHandler> node_ptr)
     {
       rclcpp::spin(node_ptr);
     };

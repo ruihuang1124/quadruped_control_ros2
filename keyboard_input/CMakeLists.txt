@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(custom_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -23,7 +24,7 @@ if(BUILD_TESTING)
 endif()
 
 add_executable(keyboard_publisher src/keyboard_publisher.cpp)
-ament_target_dependencies(keyboard_publisher rclcpp std_msgs)
+ament_target_dependencies(keyboard_publisher rclcpp std_msgs custom_msgs)
 
 install(TARGETS
   keyboard_publisher
