@@ -11,10 +11,10 @@ from launch_ros.substitutions import FindPackageShare
 from launch.actions import ExecuteProcess
 
 
-# //test123123123
 
 
-def launch_s123123etup(context, *args, **kwargs):
+
+def launch_setup(context, *args, **kwargs):
     package_description = context.launch_configurations['pkg_description']
     pkg_path = os.path.join(get_package_share_directory(package_description))
 
