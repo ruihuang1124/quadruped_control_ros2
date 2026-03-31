@@ -41,6 +41,7 @@ protected:
     JointLimit limit_abad_;
     JointLimit limit_hip_;
     JointLimit limit_knee_;
+    JointLimit limit_prismatic_; // 新增 prismatic 的限位结构体
     
     // 用于过滤限位噪音的计时变量
     bool is_violating_limits_ = false;      // 标记当前是否处于超限状态

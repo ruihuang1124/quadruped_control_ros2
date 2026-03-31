@@ -1,7 +1,3 @@
-//
-// Created by biao on 24-9-9.
-//
-
 // #include "hardware_arcdog/HardwareArcdog.h"
 #include "hardware_arcdog_adjustable_leg/HardwareArcdog_adjustable_leg.h"
 #include <rclcpp/logging.hpp>
@@ -39,6 +35,9 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     limit_hip_.max =  400.0;
     limit_knee_.min = -300.8;
     limit_knee_.max = 110.5;
+    // 新增 prismatic 限位初始化（请根据实际硬件参数修改这两个值）
+    limit_prismatic_.min = -0.0; 
+    limit_prismatic_.max =  0.05;
 
     node_ = rclcpp::Node::make_shared("ros2_control_arcdog");
     // subscription
@@ -382,6 +381,14 @@ void HardwareArcdog_adjustable_leg::check_joint_limits(const custom_msgs::msg::J
             current_violation = true;
             violated_joint_name = "Leg " + std::to_string(i) + " Knee";
             violated_value = joints_data->q_knee[i];
+            break;
+        }
+
+        // 4. 检查 Prismatic (伸缩)
+        if (joints_data->q_prismatic[i] < limit_prismatic_.min || joints_data->q_prismatic[i] > limit_prismatic_.max) {
+            current_violation = true;
+            violated_joint_name = "Leg " + std::to_string(i) + " Prismatic";
+            violated_value = joints_data->q_prismatic[i];
             break;
         }
     }
