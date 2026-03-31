@@ -41,6 +41,11 @@ protected:
     JointLimit limit_abad_;
     JointLimit limit_hip_;
     JointLimit limit_knee_;
+    
+    // 用于过滤限位噪音的计时变量
+    bool is_violating_limits_ = false;      // 标记当前是否处于超限状态
+    rclcpp::Time violation_start_time_;     // 记录开始超限的时间戳
+
     void imu_callback(const sensor_msgs::msg::Imu imu_state);
     void motor_activation_callback(const custom_msgs::srv::ExecuteMotorActivation::Request::SharedPtr req,
                                    const custom_msgs::srv::ExecuteMotorActivation::Response::SharedPtr res);

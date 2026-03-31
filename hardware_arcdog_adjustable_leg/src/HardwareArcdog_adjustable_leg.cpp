@@ -350,10 +350,11 @@ void HardwareArcdog_adjustable_leg::check_joint_limits(const custom_msgs::msg::J
 
     // 如果电机已经是失能状态(1)，则不需要重复检查和报错
     if (motor_mode_ == 1) {
+        is_violating_limits_ = false; // 确保在失能状态下重置标志位，防止重新使能后误触
         return;
     }
 
-    bool limit_violated = false;
+    bool current_violation = false;
     std::string violated_joint_name = "";
     double violated_value = 0.0;
 
@@ -362,7 +363,7 @@ void HardwareArcdog_adjustable_leg::check_joint_limits(const custom_msgs::msg::J
     {
         // 1. 检查 Abad (侧摆)
         if (joints_data->q_abad[i] < limit_abad_.min || joints_data->q_abad[i] > limit_abad_.max) {
-            limit_violated = true;
+            current_violation = true;
             violated_joint_name = "Leg " + std::to_string(i) + " Abad";
             violated_value = joints_data->q_abad[i];
             break; 
@@ -370,7 +371,7 @@ void HardwareArcdog_adjustable_leg::check_joint_limits(const custom_msgs::msg::J
 
         // 2. 检查 Hip (大腿)
         if (joints_data->q_hip[i] < limit_hip_.min || joints_data->q_hip[i] > limit_hip_.max) {
-            limit_violated = true;
+            current_violation = true;
             violated_joint_name = "Leg " + std::to_string(i) + " Hip";
             violated_value = joints_data->q_hip[i];
             break;
@@ -378,25 +379,53 @@ void HardwareArcdog_adjustable_leg::check_joint_limits(const custom_msgs::msg::J
 
         // 3. 检查 Knee (膝盖)
         if (joints_data->q_knee[i] < limit_knee_.min || joints_data->q_knee[i] > limit_knee_.max) {
-            limit_violated = true;
+            current_violation = true;
             violated_joint_name = "Leg " + std::to_string(i) + " Knee";
             violated_value = joints_data->q_knee[i];
             break;
         }
     }
 
-    if (limit_violated)
+    if (current_violation)
     {
-        // 强制切换到失能模式
-        motor_mode_ = 1;
-        
-        // 打印红色致命错误日志
-        RCLCPP_FATAL(node_->get_logger(), 
-            "JOINT LIMIT VIOLATED! Emergency Stop Triggered. Joint: %s, Value: %f", 
-            violated_joint_name.c_str(), violated_value);
+        if (!is_violating_limits_) {
+            // 刚刚检测到超限，记录开始时间，并设置标志位
+            is_violating_limits_ = true;
+            violation_start_time_ = node_->now();
             
-        // 可选：你也可以在这里清空所有的 command，防止恢复后瞬间跳变
-        // for (auto & cmd : joint_effort_commands_) cmd.second = 0.0;
+            // 打印一条警告信息（使用 Throttle 防止刷屏，每 500ms 打印一次）
+            RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 500,
+                "Joint limit exceeded detected (%s: %f). Waiting 1.5s to confirm...", 
+                violated_joint_name.c_str(), violated_value);
+        } else {
+            // 已经在超限状态中，计算持续时间
+            double duration = (node_->now() - violation_start_time_).seconds();
+            
+            if (duration >= 1.5) {
+                // 持续时间达到或超过 1.5 秒，确认不是噪音，触发急停！
+                // 强制切换到失能模式
+                motor_mode_ = 1;
+                
+                // 打印红色致命错误日志
+                RCLCPP_FATAL(node_->get_logger(), 
+                    "JOINT LIMIT VIOLATED FOR 1.5 SECONDS! Emergency Stop Triggered. Joint: %s, Value: %f", 
+                    violated_joint_name.c_str(), violated_value);
+                    
+                // 可选：你也可以在这里清空所有的 command，防止恢复后瞬间跳变
+                // for (auto & cmd : joint_effort_commands_) cmd.second = 0.0;
+                
+                // 触发后重置标志位
+                is_violating_limits_ = false;
+            }
+        }
+    }
+    else
+    {
+        // 当前没有超限。如果之前处于超限计时状态，说明是噪音或已恢复，重置计时器
+        if (is_violating_limits_) {
+            // RCLCPP_INFO(node_->get_logger(), "Joint returned to safe limits. False alarm filtered.");
+            is_violating_limits_ = false;
+        }
     }
 }
 
