@@ -36,8 +36,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     limit_knee_.min = -300.8;
     limit_knee_.max = 110.5;
     // 新增 prismatic 限位初始化（请根据实际硬件参数修改这两个值）
-    limit_prismatic_.min = -0.0; 
-    limit_prismatic_.max =  0.05;
+    limit_prismatic_.min = -0.015; 
+    limit_prismatic_.max =  0.065;
 
     node_ = rclcpp::Node::make_shared("ros2_control_arcdog");
     // subscription

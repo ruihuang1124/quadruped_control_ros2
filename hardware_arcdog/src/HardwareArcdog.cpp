@@ -32,12 +32,12 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
     imu_states_.resize(info.sensors[0].state_interfaces.size(), 0);
     // foot_contact_states_.resize(info.sensors[1].state_interfaces.size(), 0);
 
-    limit_abad_.min = -1.80; 
-    limit_abad_.max =  1.80;
-    limit_hip_.min = -1.0;
-    limit_hip_.max =  4.0;
-    limit_knee_.min = -3.8;
-    limit_knee_.max = -0.5;
+    limit_abad_.min = -0.96; //55°
+    limit_abad_.max =  0.96; //55°
+    limit_hip_.min = -0.436; //25°
+    limit_hip_.max =  1.6; //80°
+    limit_knee_.min = -3.00; //171°
+    limit_knee_.max = -0.022; 
 
     node_ = rclcpp::Node::make_shared("ros2_control_arcdog");
     // subscription

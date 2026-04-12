@@ -183,35 +183,13 @@ namespace rl_quadruped_adjustable_leg_controller
         sub_joy_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
             "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
-                // // Handle message
-                // ctrl_interfaces_.control_inputs_.lx = 0.5*msg->axes[1];
-                // ctrl_interfaces_.control_inputs_.ly = 0.34*msg->axes[0];
-                // ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
-                // if (msg->buttons[10]) // RB
-                // {
-                //     if (msg->buttons[3]) // Y
-                //     {
-                //         ctrl_interfaces_.control_inputs_.command = 2;
-                //     }
-                //     else if (msg->buttons[0]) // A
-                //     {
-                //         ctrl_interfaces_.control_inputs_.command = 1;
-                //     } else if (msg->buttons[1]) // B
-                //     {
-                //         ctrl_interfaces_.control_inputs_.command = 0;
-                //     } else if (msg->buttons[2]) // X
-                //     {
-                //         ctrl_interfaces_.control_inputs_.command = 3;
-                //     }
-                // }
-
-                // Handle message for xbox wireless controller
+                // Handle message
                 ctrl_interfaces_.control_inputs_.lx = 0.5*msg->axes[1];
-                ctrl_interfaces_.control_inputs_.ly = 0.5*msg->axes[0];
-                ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
-                if (msg->buttons[6]) // RB
+                ctrl_interfaces_.control_inputs_.ly = 0.34*msg->axes[0];
+                ctrl_interfaces_.control_inputs_.rx = -1*msg->axes[2];
+                if (msg->buttons[10]) // RB
                 {
-                    if (msg->buttons[9]) // Y
+                    if (msg->buttons[3]) // Y
                     {
                         ctrl_interfaces_.control_inputs_.command = 2;
                     }
@@ -221,11 +199,33 @@ namespace rl_quadruped_adjustable_leg_controller
                     } else if (msg->buttons[1]) // B
                     {
                         ctrl_interfaces_.control_inputs_.command = 0;
-                    } else if (msg->buttons[3]) // X
+                    } else if (msg->buttons[2]) // X
                     {
                         ctrl_interfaces_.control_inputs_.command = 3;
                     }
-                } //for xbox wireless controller
+                }
+
+                // // Handle message for xbox wireless controller
+                // ctrl_interfaces_.control_inputs_.lx = 0.5*msg->axes[1];
+                // ctrl_interfaces_.control_inputs_.ly = 0.5*msg->axes[0];
+                // ctrl_interfaces_.control_inputs_.rx = msg->axes[2];
+                // if (msg->buttons[6]) // RB
+                // {
+                //     if (msg->buttons[9]) // Y
+                //     {
+                //         ctrl_interfaces_.control_inputs_.command = 2;
+                //     }
+                //     else if (msg->buttons[0]) // A
+                //     {
+                //         ctrl_interfaces_.control_inputs_.command = 1;
+                //     } else if (msg->buttons[1]) // B
+                //     {
+                //         ctrl_interfaces_.control_inputs_.command = 0;
+                //     } else if (msg->buttons[3]) // X
+                //     {
+                //         ctrl_interfaces_.control_inputs_.command = 3;
+                //     }
+                // } //for xbox wireless controller
             });
 
         return CallbackReturn::SUCCESS;
