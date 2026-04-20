@@ -1,4 +1,4 @@
-model_name: "policy1222new.pt"
+model_name: "policy_2026-04-21_01-45-50.pt"
 #model_name: "only_quad_policy.pt"
 framework: "isaacsim"
 rows: 4
@@ -16,18 +16,18 @@ clip_actions_upper: [60, 60, 60,
                      60, 60, 60,
                      60, 60, 60,
                      60, 60, 60]
-rl_kp: [45, 45, 45,
-        45, 50, 50,
-        50, 50, 60,
-        60, 60, 60]
-rl_kd: [1.5, 1.5, 1.5,
-        1.5, 1.5, 1.5,
+rl_kp: [45, 50, 60,
+        45, 50, 60,
+        45, 50, 60,
+        45, 50, 60]
+rl_kd: [1.5, 1.5, 2.0,
         1.5, 1.5, 2.0,
-        2.0, 2.0, 2.0]
+        1.5, 1.5, 2.0,
+        1.5, 1.5, 2.0]
 hip_scale_reduction: 1.0
 hip_scale_reduction_indices: [1, 4, 7, 10]
 num_of_dofs: 12
-action_scale: 0.1
+action_scale: 0.25
 
 lin_vel_scale: 2.0
 ang_vel_scale: 0.25
