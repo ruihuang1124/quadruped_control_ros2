@@ -1,4 +1,4 @@
-model_name: "policy_2026-04-22_09-59-19.pt"
+model_name: "policy_2026-04-22_17-29-21.pt"
 #model_name: "only_quad_policy.pt"
 framework: "isaacsim"
 rows: 4
