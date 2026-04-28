@@ -5,9 +5,11 @@
 #ifndef STATERL_H
 #define STATERL_H
 
-#include <common/ObservationBuffer.h>
+// #include <common/ObservationBuffer.h> // 【修改】不再需要原来的 ObservationBuffer
 #include <rl_quadruped_controller/control/CtrlComponent.h>
 #include <torch/script.h>
+#include <deque>
+#include <map>
 
 #include <std_msgs/msg/float32_multi_array.hpp>
 
@@ -147,6 +149,9 @@ public:
     FSMStateName checkChange() override;
 
 private:
+    // 【新增】获取当前帧的各个独立观测项
+    std::map<std::string, torch::Tensor> computeCurrentObsTerms();
+
     torch::Tensor computeObservation();
 
     void loadYaml(const std::string& config_path);
@@ -185,8 +190,11 @@ private:
     RobotCommand<double> robot_command_;
 
     // history buffer
-    std::shared_ptr<ObservationBuffer> history_obs_buf_;
-    torch::Tensor history_obs_;
+    // 【修改】废弃旧的 ObservationBuffer，使用按特征分类的独立历史缓冲区
+    // std::shared_ptr<ObservationBuffer> history_obs_buf_;
+    // torch::Tensor history_obs_;
+    std::map<std::string, std::deque<torch::Tensor>> obs_history_map_;
+    int history_length_ = 1;
 
     // rl module
     torch::jit::script::Module model_;

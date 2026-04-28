@@ -84,10 +84,14 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
     // read params from yaml
     loadYaml(model_path);
 
+    // 获取历史长度 (替换了原有的 history_obs_buf_ 初始化)
     if (!params_.observations_history.empty())
     {
-        history_obs_buf_ = std::make_shared<ObservationBuffer>(1, params_.num_observations,
-                                                               params_.observations_history.size());
+        history_length_ = params_.observations_history.size();
+    }
+    else
+    {
+        history_length_ = 1;
     }
 
     RCLCPP_INFO(node_->get_logger(), "Model loading: %s", params_.model_name.c_str());
@@ -149,8 +153,24 @@ void StateRL::enter()
     control_.yaw = 0.0;
 
     // history
-    if (!params_.observations_history.empty()) {
-        history_obs_buf_->clear();
+    // 在初始化历史缓冲区前，先获取一次真实状态，避免全填 0 导致突变
+    getState();
+    if (enable_estimator_) {
+        obs_.lin_vel = torch::from_blob(estimator_->getVelocity().data(), {3}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    }
+    obs_.ang_vel = torch::tensor(robot_state_.imu.gyroscope).unsqueeze(0);
+    obs_.commands = torch::tensor({{control_.x, control_.y, control_.yaw}});
+    obs_.base_quat = torch::tensor(robot_state_.imu.quaternion).unsqueeze(0);
+    obs_.dof_pos = torch::tensor(robot_state_.motor_state.q).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
+    obs_.dof_vel = torch::tensor(robot_state_.motor_state.dq).narrow(0, 0, params_.num_of_dofs).unsqueeze(0);
+
+    // 初始化按特征分类的历史缓冲区
+    obs_history_map_.clear();
+    std::map<std::string, torch::Tensor> init_terms = computeCurrentObsTerms();
+    for (const auto& obs_name : params_.observations) {
+        for (int i = 0; i < history_length_; ++i) {
+            obs_history_map_[obs_name].push_back(init_terms[obs_name]);
+        }
     }
 
     running_ = true;
@@ -190,43 +210,72 @@ FSMStateName StateRL::checkChange()
     }
 }
 
-torch::Tensor StateRL::computeObservation()
+// 单独计算当前帧的各个观测项
+std::map<std::string, torch::Tensor> StateRL::computeCurrentObsTerms()
 {
-    std::vector<torch::Tensor> obs_list;
-
+    std::map<std::string, torch::Tensor> terms;
     for (const std::string& observation : params_.observations)
     {
         if (observation == "lin_vel")
         {
-            obs_list.push_back(obs_.lin_vel * params_.lin_vel_scale);
+            terms["lin_vel"] = obs_.lin_vel * params_.lin_vel_scale;
         }
         else if (observation == "ang_vel")
         {
-            obs_list.push_back(obs_.ang_vel * params_.ang_vel_scale);
+            terms["ang_vel"] = obs_.ang_vel * params_.ang_vel_scale;
         }
         else if (observation == "gravity_vec")
         {
-            obs_list.push_back(quatRotateInverse(obs_.base_quat, obs_.gravity_vec, params_.framework));
+            terms["gravity_vec"] = quatRotateInverse(obs_.base_quat, obs_.gravity_vec, params_.framework);
         }
         else if (observation == "commands")
         {
-            obs_list.push_back(obs_.commands * params_.commands_scale);
+            terms["commands"] = obs_.commands * params_.commands_scale;
         }
         else if (observation == "dof_pos")
         {
-            obs_list.push_back((obs_.dof_pos - params_.default_dof_pos) * params_.dof_pos_scale);
+            terms["dof_pos"] = (obs_.dof_pos - params_.default_dof_pos) * params_.dof_pos_scale;
         }
         else if (observation == "dof_vel")
         {
-            obs_list.push_back(obs_.dof_vel * params_.dof_vel_scale);
+            terms["dof_vel"] = obs_.dof_vel * params_.dof_vel_scale;
         }
         else if (observation == "actions")
         {
-            obs_list.push_back(obs_.actions);
+            terms["actions"] = obs_.actions;
         }
     }
+    return terms;
+}
 
-    const torch::Tensor obs = cat(obs_list, 1);
+// 按 Isaac Lab 的排布方式拼接历史观测
+torch::Tensor StateRL::computeObservation()
+{
+    std::map<std::string, torch::Tensor> current_terms = computeCurrentObsTerms();
+    std::vector<torch::Tensor> final_obs_list;
+
+    // 遍历每一个特征（例如：先处理ang_vel，再处理gravity_vec...）
+    for (const std::string& obs_name : params_.observations)
+    {
+        if (history_length_ > 1) {
+            // 【关键修复】：Isaac Lab 的时间顺序是 [t-9, t-8, ... t-1, t]
+            // 所以必须把最新帧放在末尾 (push_back)，把最老帧从头部移除 (pop_front)
+            obs_history_map_[obs_name].push_back(current_terms[obs_name]);
+            obs_history_map_[obs_name].pop_front();
+        } else {
+            obs_history_map_[obs_name][0] = current_terms[obs_name];
+        }
+
+        // 把这个特征的历史拼接起来
+        std::vector<torch::Tensor> term_history_vec(obs_history_map_[obs_name].begin(), obs_history_map_[obs_name].end());
+        torch::Tensor term_flat = torch::cat(term_history_vec, 1);
+        
+        // 加入最终的列表
+        final_obs_list.push_back(term_flat);
+    }
+
+    // 最后把所有特征的历史块拼接起来，完美匹配 Isaac Lab 的内存排布！
+    const torch::Tensor obs = torch::cat(final_obs_list, 1).to(torch::kFloat32);
 
     // std::cout << "Observation: " << obs << std::endl;
     torch::Tensor clamped_obs = clamp(obs, -params_.clip_obs, params_.clip_obs);
@@ -330,19 +379,9 @@ torch::Tensor StateRL::quatRotateInverse(const torch::Tensor& q, const torch::Te
 torch::Tensor StateRL::forward()
 {
     torch::autograd::GradMode::set_enabled(false);
-    torch::Tensor clamped_obs = computeObservation();
-    torch::Tensor actions;
-
-    if (!params_.observations_history.empty())
-    {
-        history_obs_buf_->insert(clamped_obs);
-        history_obs_ = history_obs_buf_->getObsVec(params_.observations_history);
-        actions = model_.forward({history_obs_}).toTensor();
-    }
-    else
-    {
-        actions = model_.forward({clamped_obs}).toTensor();
-    }
+    
+    torch::Tensor final_obs = computeObservation();
+    torch::Tensor actions = model_.forward({final_obs}).toTensor();
 
     if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
     {
