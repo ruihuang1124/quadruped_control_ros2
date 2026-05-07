@@ -2,7 +2,18 @@ cmake_minimum_required(VERSION 3.8)
 project(ocs2_quadruped_controller)
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic)
+    # 保留严重警告，但屏蔽掉我们已经知晓且无害的警告
+    add_compile_options(
+        -Wall 
+        -Wextra 
+        -Wpedantic 
+        -Wno-unused-parameter 
+        -Wno-sign-compare 
+        -Wno-deprecated-declarations 
+        -Wno-unused-result 
+        -Wno-unknown-pragmas
+        -Wno-maybe-uninitialized
+    )
 endif ()
 
 set(CMAKE_BUILD_TYPE Release)
@@ -19,6 +30,7 @@ set(CONTROLLER_INCLUDE_DEPENDS
         angles
         nav_msgs
         qpOASES
+        tf2_geometry_msgs
 )
 
 # find dependencies

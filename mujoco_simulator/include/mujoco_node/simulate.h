@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <mujoco/mjui.h>
+#include <mujoco/mjvisualize.h>
 #include <mujoco/mujoco.h>
 #include "platform_ui_adapter.h"
 

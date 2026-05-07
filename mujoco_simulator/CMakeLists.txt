@@ -17,7 +17,26 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(custom_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(mujoco REQUIRED)
+# ========================================================
+# 1. 注释掉原有的 find_package
+# find_package(mujoco REQUIRED)
+
+# 2. 强制系统包含 MuJoCo 的头文件路径 (解决 mujoco/mujoco.h 找不到的问题)
+include_directories("/home/hku-tty/.mujoco/mujoco-3.2.7/include")
+
+# 3. 手动声明 mujoco::mujoco 目标供链接使用
+add_library(mujoco::mujoco SHARED IMPORTED)
+set_target_properties(mujoco::mujoco PROPERTIES
+  IMPORTED_LOCATION "/home/hku-tty/.mujoco/mujoco-3.2.7/lib/libmujoco.so"
+)
+
+# 4. 兼容处理：防止有些代码直接 link "mujoco" 而不是 "mujoco::mujoco"
+add_library(mujoco SHARED IMPORTED)
+set_target_properties(mujoco PROPERTIES
+  IMPORTED_LOCATION "/home/hku-tty/.mujoco/mujoco-3.2.7/lib/libmujoco.so"
+)
+# ========================================================
+
 
 file(GLOB_RECURSE source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
 

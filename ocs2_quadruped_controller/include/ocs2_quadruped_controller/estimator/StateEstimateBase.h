@@ -7,7 +7,7 @@
 
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
-#include <realtime_tools/realtime_tools/realtime_publisher.h>
+#include <realtime_tools/realtime_publisher.hpp>
 
 #include <ocs2_centroidal_model/CentroidalModelInfo.h>
 #include <ocs2_legged_robot/common/ModelSettings.h>

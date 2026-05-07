@@ -11,7 +11,7 @@ def generate_launch_description():
     # 设置参数的默认值和描述
     robot_pkg = DeclareLaunchArgument(
         "robot_pkg",
-        default_value="sirius_wheel_description", # sirius_diff_description sirius_wheel_description arcdog_description, piper_description sirius_description sirius_mid_v3_description quadruped_manipulator_description
+        default_value="go2_description", # sirius_diff_description sirius_wheel_description arcdog_description, piper_description sirius_description sirius_mid_v3_description quadruped_manipulator_description
         description="package for robot description",
     )
 
