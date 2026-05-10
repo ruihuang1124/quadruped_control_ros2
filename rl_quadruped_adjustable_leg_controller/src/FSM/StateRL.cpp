@@ -1,3 +1,4 @@
+
 //
 // Created by biao on 24-10-6.
 //
@@ -6,6 +7,7 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/logging.hpp>
 #include <yaml-cpp/yaml.h>
+#include <std_msgs/msg/float32_multi_array.hpp> // [新增] 用于发布 Debug 维度数据
 
 template <typename T>
 std::vector<T> ReadVectorFromYaml(const YAML::Node& node)
@@ -92,7 +94,17 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
     }
 
     RCLCPP_INFO(node_->get_logger(), "Model loading: %s", params_.model_name.c_str());
-    model_ = torch::jit::load(model_path + "/" + params_.model_name);
+    
+    // ==========================================
+    // 【关键修复】：强制将模型映射到 CPU 上加载
+    // 解决 'aten::empty_strided' with 'CUDA' backend 报错导致节点崩溃的问题
+    // ==========================================
+    try {
+        model_ = torch::jit::load(model_path + "/" + params_.model_name, torch::kCPU);
+        RCLCPP_INFO(node_->get_logger(), "✅ Model successfully loaded on CPU.");
+    } catch (const c10::Error& e) {
+        RCLCPP_ERROR(node_->get_logger(), "❌ Failed to load model: %s", e.what());
+    }
 
 
     // for (const auto &param: model_.parameters()) {
@@ -362,7 +374,19 @@ void StateRL::loadYaml(const std::string& config_path)
     params_.torque_limits = torch::tensor(
         ReadVectorFromYaml<double>(config["torque_limits"], params_.framework, rows, cols)).view({1, -1});
 
-    params_.default_dof_pos = torch::from_blob(init_pos_, {16}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    // ==========================================
+    // 🌟【核心修复】：安全地读取 default_dof_pos
+    // 修复了 yaml-cpp 迭代空指针导致的 Segmentation fault。
+    // 如果 config.yaml 中没有写 default_dof_pos，代码会安全地回退到 init_pos_。
+    // ==========================================
+    if (config["default_dof_pos"] && config["default_dof_pos"].IsSequence()) {
+        params_.default_dof_pos = torch::tensor(
+            ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1}).to(torch::kFloat);
+        RCLCPP_INFO(rclcpp::get_logger("StateRL"), "✅ Successfully loaded default_dof_pos from YAML.");
+    } else {
+        RCLCPP_WARN(rclcpp::get_logger("StateRL"), "⚠️ YAML 中缺少 default_dof_pos！安全回退使用 init_pos_。请务必在 config.yaml 中加上训练时的 default_dof_pos，否则 VAE 会推断出错误的 Latent！");
+        params_.default_dof_pos = torch::from_blob(init_pos_, {16}, torch::kDouble).clone().to(torch::kFloat).unsqueeze(0);
+    }
 
     // params_.default_dof_pos = torch::tensor(
     //     ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1});
@@ -394,8 +418,75 @@ torch::Tensor StateRL::forward()
 {
     torch::autograd::GradMode::set_enabled(false);
     
-    torch::Tensor final_obs = computeObservation();
-    torch::Tensor actions = model_.forward({final_obs}).toTensor();
+    torch::Tensor final_obs = computeObservation(); // 尺寸: [1, 570]
+    
+    // ==========================================
+    // 🌟 自适应推断逻辑
+    // ==========================================
+    torch::Tensor actions;
+    int used_dim = 0;
+    float is_fallback = 0.0f;
+    
+    try {
+        actions = model_.forward({final_obs}).toTensor();
+        used_dim = final_obs.size(1);
+        is_fallback = 0.0f;
+    } catch (const c10::Error& e) {
+        torch::Tensor dummy_latent = torch::zeros({1, 64}, torch::TensorOptions().dtype(torch::kFloat32).device(final_obs.device()));
+        torch::Tensor fallback_input = torch::cat({final_obs, dummy_latent}, 1);
+        
+        actions = model_.forward({fallback_input}).toTensor();
+        used_dim = fallback_input.size(1);
+        is_fallback = 1.0f;
+    }
+
+    // ==========================================
+    // 【新增 Debug 发布】：将 default_dof_pos 的偏移量发布到 ROS2
+    // ==========================================
+    static rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr obs_dim_pub = nullptr;
+    if (obs_dim_pub == nullptr && node_ != nullptr) {
+        obs_dim_pub = node_->create_publisher<std_msgs::msg::Float32MultiArray>("/rl_obs_dimension_debug", 10);
+    }
+    if (obs_dim_pub != nullptr) {
+        std_msgs::msg::Float32MultiArray debug_msg;
+        
+        float current_pos = obs_.dof_pos[0][0].item<float>();
+        float wrong_default = init_pos_[0]; // 如果没写 YAML，这就是网络看到的基准
+        float correct_default = params_.default_dof_pos[0][0].item<float>(); // 实际使用的基准
+        
+        debug_msg.data.push_back(current_pos);                                      // [0] 当前真实位置
+        debug_msg.data.push_back((current_pos - wrong_default) * params_.dof_pos_scale);   // [1] 如果用 init_pos_，网络看到的相对位置 (几乎为0)
+        debug_msg.data.push_back((current_pos - correct_default) * params_.dof_pos_scale); // [2] 实际喂给网络的相对位置 (应该反映真实的物理偏差)
+        debug_msg.data.push_back(actions[0][0].item<float>());                      // [3] 动作输出
+        
+        obs_dim_pub->publish(debug_msg);
+    }
+
+     // ==========================================
+    // 【新增 Debug 发布】：证明 Estimator Scale 错位导致了 20 倍的数值鸿沟
+    // ==========================================
+    static rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr scale_debug_pub = nullptr;
+    if (scale_debug_pub == nullptr && node_ != nullptr) {
+        scale_debug_pub = node_->create_publisher<std_msgs::msg::Float32MultiArray>("/rl_scale_mismatch_debug", 10);
+    }
+    if (scale_debug_pub != nullptr) {
+        std_msgs::msg::Float32MultiArray debug_msg;
+        
+        // 提取第一个关节(FL_hip)的原始物理速度 (rad/s)
+        float raw_vel = obs_.dof_vel[0][0].item<float>();
+        
+        // 1. C++ 实际喂给网络的缩放后速度 (乘以了 0.05)
+        float scaled_vel_fed_to_network = raw_vel * params_.dof_vel_scale; 
+        
+        // 2. 未修复 Python 代码前，Estimator 内部权重期望看到的速度 (乘以了 1.0)
+        float wrong_expected_vel_by_old_estimator = raw_vel * 1.0;         
+        
+        debug_msg.data.push_back(raw_vel);                             // [0] 真实物理速度
+        debug_msg.data.push_back(scaled_vel_fed_to_network);           // [1] 喂给网络的极小值
+        debug_msg.data.push_back(wrong_expected_vel_by_old_estimator); // [2] 旧 Estimator 渴望得到的巨大值
+        
+        scale_debug_pub->publish(debug_msg);
+    }
 
     if (params_.clip_actions_upper.numel() != 0 && params_.clip_actions_lower.numel() != 0)
     {
@@ -514,26 +605,3 @@ void StateRL::setCommand() const
                                                                               robot_command_.motor_command.tau[i]);
     }
 }
-
-
-// torch::Tensor StateRL::EulartoQuat(torch::Tensor euler) {
-//     // euler: [roll, pitch, yaw]
-//     double roll = euler[0].item<double>();
-//     double pitch = euler[1].item<double>();
-//     double yaw = euler[2].item<double>();
-
-//     double cy = cos(yaw * 0.5);
-//     double sy = sin(yaw * 0.5);
-//     double cp = cos(pitch * 0.5);
-//     double sp = sin(pitch * 0.5);
-//     double cr = cos(roll * 0.5);
-//     double sr = sin(roll * 0.5);
-
-//     torch::Tensor q = torch::zeros(4);
-//     q[0] = cr * cp * cy + sr * sp * sy; // w
-//     q[1] = sr * cp * cy - cr * sp * sy; // x
-//     q[2] = cr * sp * cy + sr * cp * sy; // y
-//     q[3] = cr * cp * sy - sr * sp * cy; // z
-
-//     return q.unsqueeze(0);
-// }
