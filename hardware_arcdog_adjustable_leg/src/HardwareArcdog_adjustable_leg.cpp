@@ -408,8 +408,8 @@ void HardwareArcdog_adjustable_leg::check_joint_limits(const custom_msgs::msg::J
             // 已经在超限状态中，计算持续时间
             double duration = (node_->now() - violation_start_time_).seconds();
             
-            if (duration >= 1.5) {
-                // 持续时间达到或超过 1.5 秒，确认不是噪音，触发急停！
+            if (duration >= 0.5) {
+                // 持续时间达到或超过 0.5 秒，确认不是噪音，触发急停！
                 // 强制切换到失能模式
                 motor_mode_ = 1;
                 
