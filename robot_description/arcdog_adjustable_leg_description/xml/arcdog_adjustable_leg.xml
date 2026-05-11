@@ -24,7 +24,8 @@
         <motor ctrlrange="-45.43 45.43"/>
       </default>
       <default class="prismatic">
-        <joint type="slide" axis="0 0 1" range="0 0.13" damping="0.05"/>
+        <!-- <joint type="slide" axis="0 0 1" range="0 0.06" damping="10.0" armature="0.1"/> -->
+        <joint type="slide" axis="0 0 1" range="-0.05 0.10" damping="10.0" armature="0.1"/>
         <motor ctrlrange="-200 200"/>
       </default>
       <default class="visual">
@@ -33,8 +34,9 @@
       <default class="collision">
         <geom group="3"/>
         <default class="foot">
-          <geom size="0.0235" pos="-0.001 0 -0.1591" priority="1" condim="6"
-            friction="0.4 0.02 0.01"/>
+          <!-- 修改点：将摩擦系数从 0.4 提升至 2.0，彻底解决打滑问题 -->
+          <geom size="0.0235" pos="-0.001 0 -0.1651" priority="1" condim="6"
+            friction="1.0 0.04 0.01"/>
         </default>
       </default>
     </default>
@@ -78,16 +80,18 @@
           <geom size="0.12225 0.020 0.033985" pos="0 0 -0.12225" quat="0.707107 0 0.707107 0" type="box" class="collision" />
           <!-- <geom size="0.0495 0.01913" quat="0.707107 0.707107 0 0" type="cylinder" class="collision" /> -->
           <body name="FL_calf" pos="0 0 -0.2445">
-            <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.700" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <!-- <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" /> -->
             <joint name="FL_calf_joint" class="knee" />
             <geom mesh="calf_mirror" material="gray" class="visual" />
             <geom size="0.0965 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="FL_box" pos="0 0 -0.193">
-              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+            <body name="FL_box" pos="0 0 -0.133">
+              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.200" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+              <!-- <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" /> -->
               <joint name="FL_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
               <geom size="0.0075 0.01 0.08455" pos="0 0 -0.0965" quat="0 0 0 1" type="box" class="collision" />
-              <geom pos="0 0 -0.1591" mesh="foot" class="visual" material="black" />
+              <geom pos="0 0 -0.1651" mesh="foot" class="visual" material="black" />
               <geom name="FL_foot" class="foot" />
               <body name="FL_foot"/>
             </body>
@@ -107,12 +111,14 @@
           <geom size="0.12225 0.020 0.033985" pos="0 0 -0.12225" quat="0.707107 0 0.707107 0" type="box" class="collision" />
           <!-- <geom size="0.0495 0.01913" quat="0.707107 0.707107 0 0" type="cylinder" class="collision" /> -->
           <body name="FR_calf" pos="0 0 -0.2445">
-            <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.700" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <!-- <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" /> -->
             <joint name="FR_calf_joint" class="knee" />
             <geom mesh="calf" material="gray" class="visual" />
             <geom size="0.0965 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="FR_box" pos="0 0 -0.193">
-              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+            <body name="FR_box" pos="0 0 -0.133">
+              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.200" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+              <!-- <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" /> -->
               <joint name="FR_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
               <geom size="0.0075 0.01 0.08455" pos="0 0 -0.0965" quat="0 0 0 1" type="box" class="collision" />
@@ -136,13 +142,15 @@
           <geom size="0.12225 0.020 0.033985" pos="0 0 -0.12225" quat="0.707107 0 0.707107 0" type="box" class="collision" />
           <!-- <geom size="0.0495 0.01913" quat="0.707107 0.707107 0 0" type="cylinder" class="collision" /> -->
           <body name="RL_calf" pos="0 0 -0.2445">
-            <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.700" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <!-- <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" /> -->
             <joint name="RL_calf_joint" class="knee" />
             <geom mesh="calf_mirror" material="gray" class="visual" />
             <geom size="0.0965 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="RL_box" pos="0 0 -0.193">
-              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
-              <joint name="RL_box_joint" class="prismatic" />
+            <body name="RL_box" pos="0 0 -0.133">
+              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.200" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+             <!-- <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" /> -->
+             <joint name="RL_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
               <geom size="0.0075 0.01 0.08455" pos="0 0 -0.0965" quat="0 0 0 1" type="box" class="collision" />
               <geom pos="0 0 -0.1651" mesh="foot" class="visual" material="black" />
@@ -166,12 +174,14 @@
           <geom size="0.12225 0.020 0.033985" pos="0 0 -0.12225" quat="0.707107 0 0.707107 0" type="box" class="collision" />
           <!-- <geom size="0.0495 0.01913" quat="0.707107 0.707107 0 0" type="cylinder" class="collision" /> -->
           <body name="RR_calf" pos="0 0 -0.2445">
-           <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+           <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.700" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" />
+            <!-- <inertial pos="-0.000681132 0 -0.141397" quat="0.707094 -0.00418023 -0.00418023 0.707094" mass="0.273" diaginertia="9.30304e-4 9.25714e-4 3.62187e-5" /> -->
             <joint name="RR_calf_joint" class="knee" />
             <geom mesh="calf" material="gray" class="visual" />
             <geom size="0.0965 0.01 0.01" pos="0 0 -0.11852" quat="0.707107 0 0.707107 0" type="box" class="collision" />
-            <body name="RR_box" pos="0 0 -0.193">
-              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+            <body name="RR_box" pos="0 0 -0.133">
+              <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.200" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" />
+              <!-- <inertial pos="-0 0 -0.105" quat="1 0 0 0" mass="0.132" diaginertia="2.84096807e-4 2.62510200e-4 5.16070090e-5" /> -->
               <joint name="RR_box_joint" class="prismatic" />
               <geom mesh="adjustable_leg" material="gray" class="visual" />
               <geom size="0.0075 0.01 0.08455" pos="0 0 -0.0965" quat="0 0 0 1" type="box" class="collision" />
