@@ -34,8 +34,8 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn Hardwa
 
     limit_abad_.min = -0.96; //55°
     limit_abad_.max =  0.96; //55°
-    limit_hip_.min = -0.436; //25°
-    limit_hip_.max =  1.6; //80°
+    limit_hip_.min = -1.436; //just a big value
+    limit_hip_.max =  2.6; //justa a big value
     limit_knee_.min = -3.00; //171°
     limit_knee_.max = -0.022; 
 

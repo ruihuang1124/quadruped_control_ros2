@@ -1,4 +1,4 @@
-model_name: "policy_2026-04-22_17-29-21.pt"
+model_name: "policy_2026-04-29_23-57-15.pt"
 #model_name: "only_quad_policy.pt"
 framework: "isaacsim"
 rows: 4
@@ -6,7 +6,8 @@ cols: 3
 decimation: 4
 num_observations: 45
 observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
-observations_history: [0]
+# observations_history: [0]
+observations_history: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 clip_obs: 60.0
 clip_actions_lower: [-60, -60, -60,
                      -60, -60, -60,
@@ -16,10 +17,10 @@ clip_actions_upper: [60, 60, 60,
                      60, 60, 60,
                      60, 60, 60,
                      60, 60, 60]
-rl_kp: [45, 50, 60,
-        45, 50, 60,
-        45, 50, 60,
-        45, 50, 60]
+rl_kp: [50, 55, 65,
+        50, 55, 65,
+        50, 55, 65,
+        50, 55, 65]
 rl_kd: [1.5, 1.5, 2.0,
         1.5, 1.5, 2.0,
         1.5, 1.5, 2.0,
