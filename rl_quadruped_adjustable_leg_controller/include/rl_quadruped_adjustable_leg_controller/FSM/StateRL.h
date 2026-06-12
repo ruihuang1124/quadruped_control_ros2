@@ -126,6 +126,8 @@ struct ModelParams
     torch::Tensor commands_scale;
     torch::Tensor default_dof_pos;
     torch::Tensor action_scale;
+    torch::Tensor output_dof_pos_lower;
+    torch::Tensor output_dof_pos_upper;
 };
 
 struct Observations
@@ -209,6 +211,7 @@ private:
     std::thread rl_thread_;
     bool running_ = false;
     bool updated_ = false;
+    int output_clamp_warning_counter_ = 0;
 
     // output buffer
     torch::Tensor output_torques;

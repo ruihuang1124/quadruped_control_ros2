@@ -390,6 +390,20 @@ void StateRL::loadYaml(const std::string& config_path)
 
     // params_.default_dof_pos = torch::tensor(
     //     ReadVectorFromYaml<double>(config["default_dof_pos"], params_.framework, rows, cols)).view({1, -1});
+    if (config["output_dof_pos_lower"] && config["output_dof_pos_upper"]
+        && config["output_dof_pos_lower"].IsSequence() && config["output_dof_pos_upper"].IsSequence())
+    {
+        params_.output_dof_pos_lower = torch::tensor(
+            ReadVectorFromYaml<double>(config["output_dof_pos_lower"], params_.framework, rows, cols)).view({1, -1}).to(torch::kFloat);
+        params_.output_dof_pos_upper = torch::tensor(
+            ReadVectorFromYaml<double>(config["output_dof_pos_upper"], params_.framework, rows, cols)).view({1, -1}).to(torch::kFloat);
+        RCLCPP_INFO(rclcpp::get_logger("StateRL"), "✅ Loaded final output_dof_pos clamp from YAML.");
+    }
+    else
+    {
+        params_.output_dof_pos_lower = torch::tensor({}).view({1, -1});
+        params_.output_dof_pos_upper = torch::tensor({}).view({1, -1});
+    }
 }
 
 torch::Tensor StateRL::quatRotateInverse(const torch::Tensor& q, const torch::Tensor& v, const std::string& framework)
@@ -576,6 +590,20 @@ void StateRL::runModel()
     // output_torques = clamp(output_torques, -(params_.torque_limits), params_.torque_limits);
 
     output_dof_pos_ = actions_scaled + params_.default_dof_pos;
+    if (params_.output_dof_pos_lower.numel() != 0 && params_.output_dof_pos_upper.numel() != 0)
+    {
+        const torch::Tensor unclamped_output_dof_pos = output_dof_pos_.clone();
+        output_dof_pos_ = clamp(output_dof_pos_, params_.output_dof_pos_lower, params_.output_dof_pos_upper);
+
+        const float max_clamp_delta = torch::max(torch::abs(output_dof_pos_ - unclamped_output_dof_pos)).item<float>();
+        if (max_clamp_delta > 1.0e-5f && output_clamp_warning_counter_++ % 200 == 0)
+        {
+            RCLCPP_WARN(
+                rclcpp::get_logger("StateRL"),
+                "RL output_dof_pos was clamped. max_delta=%.5f. Check policy box_joint targets.",
+                max_clamp_delta);
+        }
+    }
 
     for (int i = 0; i < params_.num_of_dofs; ++i)
     {
