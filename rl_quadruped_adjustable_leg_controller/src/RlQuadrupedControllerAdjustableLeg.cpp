@@ -189,7 +189,11 @@ namespace rl_quadruped_adjustable_leg_controller
                 ctrl_interfaces_.control_inputs_.rx = -1*msg->axes[2];
                 if (msg->buttons[10]) // RB
                 {
-                    if (msg->buttons[3]) // Y
+                    if (msg->buttons[9] && msg->buttons[3]) // RB + LB + Y
+                    {
+                        ctrl_interfaces_.control_inputs_.command = 4;
+                    }
+                    else if (msg->buttons[3]) // Y
                     {
                         ctrl_interfaces_.control_inputs_.command = 2;
                     }
@@ -276,6 +280,14 @@ namespace rl_quadruped_adjustable_leg_controller
         // state_list_.fixedStand = std::make_shared<StateFixedStand>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_);
         state_list_.fixedStandAdjustableLeg = std::make_shared<StateFixedStandAdjustableLeg>(ctrl_interfaces_, stand_pos_adjustable_leg_, stand_kp_, stand_kd_, stand_kp_prismatic_joint, stand_kd_prismatic_joint);
         state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_adjustable_leg_);
+        state_list_.rlPolicy2 = std::make_shared<StateRL>(
+            ctrl_interfaces_,
+            ctrl_component_,
+            stand_pos_adjustable_leg_,
+            FSMStateName::RLPOLICY2,
+            "rl policy2",
+            "model_folder_policy2",
+            "model_name_policy2");
 
         // Initialize FSM
         current_state_ = state_list_.passiveAdjustableLeg;
@@ -331,6 +343,8 @@ namespace rl_quadruped_adjustable_leg_controller
             return state_list_.fixedStandAdjustableLeg;
         case FSMStateName::RL:
             return state_list_.rl;
+        case FSMStateName::RLPOLICY2:
+            return state_list_.rlPolicy2;
         default:
             return state_list_.invalid;
         }

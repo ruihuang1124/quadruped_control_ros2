@@ -148,7 +148,11 @@ class StateRL final : public FSMState
 public:
     explicit StateRL(CtrlInterfaces& ctrl_interfaces,
                      CtrlComponent& ctrl_component,
-                     const std::vector<double>& target_pos);
+                     const std::vector<double>& target_pos,
+                     FSMStateName state_name = FSMStateName::RL,
+                     const std::string& state_name_string = "rl",
+                     const std::string& model_folder_parameter = "model_folder",
+                     const std::string& model_name_key = "");
 
     void enter() override;
 
@@ -186,6 +190,8 @@ private:
     std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node_;
     std::string robot_pkg_ = "arcdog_adjustable_leg_description";
     std::string model_folder_ = "rl_policy";
+    std::string model_folder_parameter_ = "model_folder";
+    std::string model_name_key_;
 
     bool enable_estimator_;
     std::shared_ptr<Estimator>& estimator_;

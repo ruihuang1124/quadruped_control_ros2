@@ -29,6 +29,7 @@ namespace rl_quadruped_adjustable_leg_controller
         // std::shared_ptr<StateFixedStand> fixedStand;
         std::shared_ptr<StateFixedStandAdjustableLeg> fixedStandAdjustableLeg;
         std::shared_ptr<StateRL> rl;
+        std::shared_ptr<StateRL> rlPolicy2;
     };
 
     class LeggedGymController final : public controller_interface::ControllerInterface
@@ -105,9 +106,9 @@ namespace rl_quadruped_adjustable_leg_controller
             0.0, 0.67, -1.3, 0.12
         };
 
-        double stand_kp_ = 100.0;
+        double stand_kp_ = 200.0;
         double stand_kd_ = 3.5;
-        double stand_kp_prismatic_joint = 10.0;
+        double stand_kp_prismatic_joint = 4000.0;
         double stand_kd_prismatic_joint = 2.0;
         double feet_force_threshold_ = 20.0;
 

@@ -51,24 +51,30 @@ std::vector<T> ReadVectorFromYaml(const YAML::Node& node, const std::string& fra
 
 StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
                  CtrlComponent& ctrl_component,
-                 const std::vector<double>& target_pos) :
-    FSMState(FSMStateName::RL, "rl", ctrl_interfaces),
+                 const std::vector<double>& target_pos,
+                 FSMStateName state_name,
+                 const std::string& state_name_string,
+                 const std::string& model_folder_parameter,
+                 const std::string& model_name_key) :
+    FSMState(state_name, state_name_string, ctrl_interfaces),
     node_(ctrl_component.node_),
+    model_folder_parameter_(model_folder_parameter),
+    model_name_key_(model_name_key),
     enable_estimator_(ctrl_component.enable_estimator_),
     estimator_(ctrl_component.estimator_)
 {
     if (!node_->has_parameter("robot_pkg")) {
         node_->declare_parameter("robot_pkg", robot_pkg_);
     }
-    if (!node_->has_parameter("model_folder")) {
-        node_->declare_parameter("model_folder", model_folder_);
+    if (!node_->has_parameter(model_folder_parameter_)) {
+        node_->declare_parameter(model_folder_parameter_, model_folder_);
     }
     if (!node_->has_parameter("use_rl_thread")) {
         node_->declare_parameter("use_rl_thread", use_rl_thread_);
     }
 
     robot_pkg_ = node_->get_parameter("robot_pkg").as_string();
-    model_folder_ = node_->get_parameter("model_folder").as_string();
+    model_folder_ = node_->get_parameter(model_folder_parameter_).as_string();
     use_rl_thread_ = node_->get_parameter("use_rl_thread").as_bool();
 
     RCLCPP_INFO(node_->get_logger(), "Using robot model from %s", robot_pkg_.c_str());
@@ -93,7 +99,9 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
         history_length_ = 1;
     }
 
-    RCLCPP_INFO(node_->get_logger(), "Model loading: %s", params_.model_name.c_str());
+    RCLCPP_INFO(
+        node_->get_logger(), "Model loading for %s: %s/%s",
+        state_name_string.c_str(), model_folder_.c_str(), params_.model_name.c_str());
     
     // ==========================================
     // 【关键修复】：强制将模型映射到 CPU 上加载
@@ -142,6 +150,10 @@ StateRL::StateRL(CtrlInterfaces& ctrl_interfaces,
 
 void StateRL::enter()
 {
+    RCLCPP_INFO(
+        node_->get_logger(), "Entering %s with model: %s/%s",
+        state_name_string.c_str(), model_folder_.c_str(), params_.model_name.c_str());
+
     // Init observations
     obs_.lin_vel = torch::tensor({{0.0, 0.0, 0.0}});
     obs_.ang_vel = torch::tensor({{0.0, 0.0, 0.0}});
@@ -224,7 +236,7 @@ FSMStateName StateRL::checkChange()
     case 2:
         return FSMStateName::FIXEDSTANDADJUSTABLELEG;
     default:
-        return FSMStateName::RL;
+        return state_name;
     }
 }
 
@@ -322,9 +334,22 @@ void StateRL::loadYaml(const std::string& config_path)
         return;
     }
 
-    params_.model_name = config["model_name"].as<std::string>();
-
-    params_.model_name = config["model_name"].as<std::string>();
+    const std::string model_name_key = model_name_key_.empty() ? "model_name" : model_name_key_;
+    if (config[model_name_key] && config[model_name_key].IsScalar())
+    {
+        params_.model_name = config[model_name_key].as<std::string>();
+    }
+    else
+    {
+        if (!model_name_key_.empty())
+        {
+            RCLCPP_WARN(
+                rclcpp::get_logger("StateRL"),
+                "YAML key '%s' is missing. Falling back to 'model_name'.",
+                model_name_key.c_str());
+        }
+        params_.model_name = config["model_name"].as<std::string>();
+    }
     params_.framework = config["framework"].as<std::string>();
     const int rows = config["rows"].as<int>();
     const int cols = config["cols"].as<int>();

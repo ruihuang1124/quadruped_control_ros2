@@ -201,6 +201,7 @@ rl_quadruped_adjustable_leg_controller:
     robot_pkg: "arcdog_adjustable_leg_description"
     use_rl_thread: true
     model_folder: "rl_policy"
+    model_folder_policy2: "rl_policy"
 
     joints:
       - FL_hip_joint

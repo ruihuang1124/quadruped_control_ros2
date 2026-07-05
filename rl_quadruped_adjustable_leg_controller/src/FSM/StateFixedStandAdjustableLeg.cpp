@@ -175,6 +175,8 @@ FSMStateName StateFixedStandAdjustableLeg::checkChange() {
             return FSMStateName::FIXEDDOWNADJUSTABLELEG;
         case 3:
             return FSMStateName::RL;
+        case 4:
+            return FSMStateName::RLPOLICY2;
         default:
             return FSMStateName::FIXEDSTANDADJUSTABLELEG;
     }

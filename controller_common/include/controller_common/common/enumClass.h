@@ -23,6 +23,7 @@ enum class FSMStateName
 
     OCS2,
     RL,
+    RLPOLICY2,
     QMFIXEDDOWN,
     QMFIXEDSTAND,
     QMPASSIVE,
