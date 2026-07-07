@@ -128,6 +128,12 @@ struct ModelParams
     torch::Tensor action_scale;
     torch::Tensor output_dof_pos_lower;
     torch::Tensor output_dof_pos_upper;
+    bool rear_hip_guard_enabled = false;
+    bool rear_hip_guard_policy2_only = true;
+    double rear_hip_guard_min_cmd_x = 0.05;
+    double rear_hip_guard_min_abs = 0.06;
+    double rear_hip_guard_blend = 1.0;
+    int rear_hip_guard_warning_interval = 200;
 };
 
 struct Observations
@@ -218,6 +224,7 @@ private:
     bool running_ = false;
     bool updated_ = false;
     int output_clamp_warning_counter_ = 0;
+    int rear_hip_guard_warning_counter_ = 0;
 
     // output buffer
     torch::Tensor output_torques;

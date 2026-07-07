@@ -4,6 +4,8 @@
 //
 
 #include "rl_quadruped_adjustable_leg_controller/FSM/StateRL.h"
+#include <algorithm>
+#include <cmath>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <rclcpp/logging.hpp>
 #include <yaml-cpp/yaml.h>
@@ -429,6 +431,34 @@ void StateRL::loadYaml(const std::string& config_path)
         params_.output_dof_pos_lower = torch::tensor({}).view({1, -1});
         params_.output_dof_pos_upper = torch::tensor({}).view({1, -1});
     }
+    params_.rear_hip_guard_enabled = config["rear_hip_guard_enabled"]
+        ? config["rear_hip_guard_enabled"].as<bool>()
+        : false;
+    params_.rear_hip_guard_policy2_only = config["rear_hip_guard_policy2_only"]
+        ? config["rear_hip_guard_policy2_only"].as<bool>()
+        : true;
+    params_.rear_hip_guard_min_cmd_x = config["rear_hip_guard_min_cmd_x"]
+        ? config["rear_hip_guard_min_cmd_x"].as<double>()
+        : 0.05;
+    params_.rear_hip_guard_min_abs = config["rear_hip_guard_min_abs"]
+        ? config["rear_hip_guard_min_abs"].as<double>()
+        : 0.06;
+    params_.rear_hip_guard_blend = config["rear_hip_guard_blend"]
+        ? config["rear_hip_guard_blend"].as<double>()
+        : 1.0;
+    params_.rear_hip_guard_warning_interval = config["rear_hip_guard_warning_interval"]
+        ? config["rear_hip_guard_warning_interval"].as<int>()
+        : 200;
+    if (params_.rear_hip_guard_enabled)
+    {
+        RCLCPP_WARN(
+            rclcpp::get_logger("StateRL"),
+            "Rear hip guard is ENABLED for highstep validation. min_abs=%.4f blend=%.3f min_cmd_x=%.3f policy2_only=%s",
+            params_.rear_hip_guard_min_abs,
+            params_.rear_hip_guard_blend,
+            params_.rear_hip_guard_min_cmd_x,
+            params_.rear_hip_guard_policy2_only ? "true" : "false");
+    }
 }
 
 torch::Tensor StateRL::quatRotateInverse(const torch::Tensor& q, const torch::Tensor& v, const std::string& framework)
@@ -615,6 +645,52 @@ void StateRL::runModel()
     // output_torques = clamp(output_torques, -(params_.torque_limits), params_.torque_limits);
 
     output_dof_pos_ = actions_scaled + params_.default_dof_pos;
+    const bool rear_hip_guard_state_enabled =
+        !params_.rear_hip_guard_policy2_only || state_name == FSMStateName::RLPOLICY2;
+    if (params_.rear_hip_guard_enabled && rear_hip_guard_state_enabled
+        && params_.num_of_dofs >= 4 && control_.x > params_.rear_hip_guard_min_cmd_x)
+    {
+        const float original_rl = output_dof_pos_[0][2].item<float>();
+        const float original_rr = output_dof_pos_[0][3].item<float>();
+        const float min_abs = static_cast<float>(std::max(0.0, params_.rear_hip_guard_min_abs));
+        const float blend = static_cast<float>(std::min(1.0, std::max(0.0, params_.rear_hip_guard_blend)));
+        const float guarded_rl = std::max(original_rl, min_abs);
+        const float guarded_rr = std::min(original_rr, -min_abs);
+        output_dof_pos_[0][2] = original_rl * (1.0f - blend) + guarded_rl * blend;
+        output_dof_pos_[0][3] = original_rr * (1.0f - blend) + guarded_rr * blend;
+
+        const float max_guard_delta = std::max(
+            std::abs(output_dof_pos_[0][2].item<float>() - original_rl),
+            std::abs(output_dof_pos_[0][3].item<float>() - original_rr));
+        if (max_guard_delta > 1.0e-5f
+            && rear_hip_guard_warning_counter_++ % std::max(1, params_.rear_hip_guard_warning_interval) == 0)
+        {
+            RCLCPP_WARN(
+                rclcpp::get_logger("StateRL"),
+                "Rear hip guard adjusted highstep targets. RL %.4f->%.4f, RR %.4f->%.4f",
+                original_rl,
+                output_dof_pos_[0][2].item<float>(),
+                original_rr,
+                output_dof_pos_[0][3].item<float>());
+        }
+
+        static rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr rear_hip_guard_pub = nullptr;
+        if (rear_hip_guard_pub == nullptr && node_ != nullptr) {
+            rear_hip_guard_pub = node_->create_publisher<std_msgs::msg::Float32MultiArray>(
+                "/rl_highstep_rear_hip_guard_debug",
+                10);
+        }
+        if (rear_hip_guard_pub != nullptr) {
+            std_msgs::msg::Float32MultiArray debug_msg;
+            debug_msg.data.push_back(original_rl);
+            debug_msg.data.push_back(output_dof_pos_[0][2].item<float>());
+            debug_msg.data.push_back(original_rr);
+            debug_msg.data.push_back(output_dof_pos_[0][3].item<float>());
+            debug_msg.data.push_back(max_guard_delta);
+            debug_msg.data.push_back(static_cast<float>(control_.x));
+            rear_hip_guard_pub->publish(debug_msg);
+        }
+    }
     if (params_.output_dof_pos_lower.numel() != 0 && params_.output_dof_pos_upper.numel() != 0)
     {
         const torch::Tensor unclamped_output_dof_pos = output_dof_pos_.clone();
