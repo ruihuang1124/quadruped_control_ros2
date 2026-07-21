@@ -29,6 +29,7 @@ set(dependencies
         ament_index_cpp
         controller_common
         sensor_msgs
+        std_msgs
 )
 
 # find dependencies
@@ -95,6 +96,7 @@ ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 if (BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
+    find_package(ament_cmake_pytest REQUIRED)
     # the following line skips the linter which checks for copyrights
     # comment the line when a copyright and license is added to all source files
     set(ament_cmake_copyright_FOUND TRUE)
@@ -103,6 +105,22 @@ if (BUILD_TESTING)
     # a copyright and license is added to all source files
     set(ament_cmake_cpplint_FOUND TRUE)
     ament_lint_auto_find_test_dependencies()
+    ament_add_pytest_test(
+            state_rl_deployment_contract
+            test/test_state_rl_deployment_contract.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    ament_add_pytest_test(
+            control_input_realtime_contract
+            test/test_control_input_realtime_contract.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    ament_add_pytest_test(
+            fixed_motion_policy2_adapter
+            test/test_fixed_motion_policy2_adapter.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    ament_add_pytest_test(
+            teacher_virtual_terrain_adapter
+            test/test_teacher_virtual_terrain_adapter.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif ()
 
 ament_package()

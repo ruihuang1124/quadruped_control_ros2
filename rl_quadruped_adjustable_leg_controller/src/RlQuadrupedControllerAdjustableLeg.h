@@ -4,7 +4,11 @@
 
 #ifndef LEGGEDGYMCONTROLLER_H
 #define LEGGEDGYMCONTROLLER_H
+#include <cstdint>
+#include <mutex>
+
 #include <controller_interface/controller_interface.hpp>
+#include <realtime_tools/realtime_buffer.hpp>
 #include <rl_quadruped_adjustable_leg_controller/FSM/StateRL.h>
 #include <std_msgs/msg/string.hpp>
 #include <sensor_msgs/msg/joy.hpp>
@@ -65,7 +69,15 @@ namespace rl_quadruped_adjustable_leg_controller
             const rclcpp_lifecycle::State& previous_state) override;
 
     private:
+        struct ControlInputSnapshot
+        {
+            control_input_msgs::msg::Inputs inputs{};
+            std::uint64_t sequence{0};
+            std::uint64_t command_sequence{0};
+        };
+
         std::shared_ptr<FSMState> getNextState(FSMStateName stateName) const;
+        void applyLatestControlInputSnapshot();
 
         CtrlComponent ctrl_component_;
         CtrlInterfaces ctrl_interfaces_;
@@ -134,6 +146,15 @@ namespace rl_quadruped_adjustable_leg_controller
         // rclcpp::Subscription<control_input_msgs::msg::PoseCmdInputs>::SharedPtr pose_control_input_subscription_;
         rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscription_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_joy_;
+
+        // Subscription callbacks are non-real-time writers. They merge their
+        // updates while holding this mutex and publish one coherent snapshot.
+        // The control update loop reads the snapshot without blocking.
+        std::mutex control_input_writer_mutex_;
+        ControlInputSnapshot pending_control_input_{};
+        realtime_tools::RealtimeBuffer<ControlInputSnapshot> control_input_buffer_{};
+        std::uint64_t last_applied_control_input_sequence_{0};
+        std::uint64_t last_applied_control_command_sequence_{0};
 
         FSMMode mode_ = FSMMode::NORMAL;
         std::string state_name_;

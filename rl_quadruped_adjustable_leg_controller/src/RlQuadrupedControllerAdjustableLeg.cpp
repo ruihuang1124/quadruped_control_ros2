@@ -62,6 +62,8 @@ namespace rl_quadruped_adjustable_leg_controller
     controller_interface::return_type LeggedGymController::
     update(const rclcpp::Time& time, const rclcpp::Duration& period)
     {
+        applyLatestControlInputSnapshot();
+
         if (ctrl_component_.enable_estimator_)
         {
             if (ctrl_component_.robot_model_ == nullptr)
@@ -95,6 +97,33 @@ namespace rl_quadruped_adjustable_leg_controller
         }
 
         return controller_interface::return_type::OK;
+    }
+
+    void LeggedGymController::applyLatestControlInputSnapshot()
+    {
+        const ControlInputSnapshot* const snapshot = control_input_buffer_.readFromRT();
+        if (snapshot == nullptr || snapshot->sequence == last_applied_control_input_sequence_)
+        {
+            return;
+        }
+
+        // Axis fields are never written by FSM states, so every new complete
+        // callback snapshot may replace them as one coherent set.
+        ctrl_interfaces_.control_inputs_.lx = snapshot->inputs.lx;
+        ctrl_interfaces_.control_inputs_.ly = snapshot->inputs.ly;
+        ctrl_interfaces_.control_inputs_.rx = snapshot->inputs.rx;
+        ctrl_interfaces_.control_inputs_.ry = snapshot->inputs.ry;
+
+        // FSM enter() methods consume commands by writing a neutral value into
+        // ctrl_interfaces_.control_inputs_. A Joy axis-only message must not
+        // resurrect the previously consumed command, so command_sequence only
+        // advances when a callback explicitly supplies a new command.
+        if (snapshot->command_sequence != last_applied_control_command_sequence_)
+        {
+            ctrl_interfaces_.control_inputs_.command = snapshot->inputs.command;
+            last_applied_control_command_sequence_ = snapshot->command_sequence;
+        }
+        last_applied_control_input_sequence_ = snapshot->sequence;
     }
 
     controller_interface::CallbackReturn LeggedGymController::on_init()
@@ -172,42 +201,54 @@ namespace rl_quadruped_adjustable_leg_controller
         control_input_subscription_ = get_node()->create_subscription<control_input_msgs::msg::Inputs>(
             "/control_input", 10, [this](const control_input_msgs::msg::Inputs::SharedPtr msg)
             {
-                // Handle message
-                ctrl_interfaces_.control_inputs_.command = msg->command;
-                ctrl_interfaces_.control_inputs_.lx = msg->lx;
-                ctrl_interfaces_.control_inputs_.ly = msg->ly;
-                ctrl_interfaces_.control_inputs_.rx = msg->rx;
-                ctrl_interfaces_.control_inputs_.ry = msg->ry;
+                std::lock_guard<std::mutex> lock(control_input_writer_mutex_);
+                pending_control_input_.inputs = *msg;
+                ++pending_control_input_.sequence;
+                ++pending_control_input_.command_sequence;
+                control_input_buffer_.writeFromNonRT(pending_control_input_);
             });
 
         sub_joy_ = get_node()->create_subscription<sensor_msgs::msg::Joy>(
             "/joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg)
             {
-                // Handle message
-                ctrl_interfaces_.control_inputs_.lx = 0.5*msg->axes[1];
-                ctrl_interfaces_.control_inputs_.ly = 0.34*msg->axes[0];
-                ctrl_interfaces_.control_inputs_.rx = -1*msg->axes[2];
+                std::lock_guard<std::mutex> lock(control_input_writer_mutex_);
+                pending_control_input_.inputs.lx = 0.5*msg->axes[1];
+                pending_control_input_.inputs.ly = 0.34*msg->axes[0];
+                pending_control_input_.inputs.rx = -1*msg->axes[2];
+                bool command_updated = false;
                 if (msg->buttons[10]) // RB
                 {
                     if (msg->buttons[9] && msg->buttons[3]) // RB + LB + Y
                     {
-                        ctrl_interfaces_.control_inputs_.command = 4;
+                        pending_control_input_.inputs.command = 4;
+                        command_updated = true;
                     }
                     else if (msg->buttons[3]) // Y
                     {
-                        ctrl_interfaces_.control_inputs_.command = 2;
+                        pending_control_input_.inputs.command = 2;
+                        command_updated = true;
                     }
                     else if (msg->buttons[0]) // A
                     {
-                        ctrl_interfaces_.control_inputs_.command = 1;
+                        pending_control_input_.inputs.command = 1;
+                        command_updated = true;
                     } else if (msg->buttons[1]) // B
                     {
-                        ctrl_interfaces_.control_inputs_.command = 0;
+                        pending_control_input_.inputs.command = 0;
+                        command_updated = true;
                     } else if (msg->buttons[2]) // X
                     {
-                        ctrl_interfaces_.control_inputs_.command = 3;
+                        pending_control_input_.inputs.command = 3;
+                        command_updated = true;
                     }
                 }
+
+                ++pending_control_input_.sequence;
+                if (command_updated)
+                {
+                    ++pending_control_input_.command_sequence;
+                }
+                control_input_buffer_.writeFromNonRT(pending_control_input_);
 
                 // // Handle message for xbox wireless controller
                 // ctrl_interfaces_.control_inputs_.lx = 0.5*msg->axes[1];
@@ -279,11 +320,13 @@ namespace rl_quadruped_adjustable_leg_controller
         state_list_.fixedDownAdjustableLeg = std::make_shared<StateFixedDownAdjustableLeg>(ctrl_interfaces_, down_pos_, stand_kp_, stand_kd_, stand_kp_prismatic_joint, stand_kd_prismatic_joint);
         // state_list_.fixedStand = std::make_shared<StateFixedStand>(ctrl_interfaces_, stand_pos_, stand_kp_, stand_kd_);
         state_list_.fixedStandAdjustableLeg = std::make_shared<StateFixedStandAdjustableLeg>(ctrl_interfaces_, stand_pos_adjustable_leg_, stand_kp_, stand_kd_, stand_kp_prismatic_joint, stand_kd_prismatic_joint);
-        state_list_.rl = std::make_shared<StateRL>(ctrl_interfaces_, ctrl_component_, stand_pos_adjustable_leg_);
+        state_list_.rl = std::make_shared<StateRL>(
+            ctrl_interfaces_, ctrl_component_, stand_pos_adjustable_leg_, joint_names_);
         state_list_.rlPolicy2 = std::make_shared<StateRL>(
             ctrl_interfaces_,
             ctrl_component_,
             stand_pos_adjustable_leg_,
+            joint_names_,
             FSMStateName::RLPOLICY2,
             "rl policy2",
             "model_folder_policy2",
@@ -302,6 +345,10 @@ namespace rl_quadruped_adjustable_leg_controller
     controller_interface::CallbackReturn LeggedGymController::on_deactivate(
         const rclcpp_lifecycle::State& /*previous_state*/)
     {
+        if (current_state_)
+        {
+            current_state_->exit();
+        }
         release_interfaces();
         return CallbackReturn::SUCCESS;
     }

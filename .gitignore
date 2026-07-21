@@ -1,1 +1,41 @@
-.vscode
+# Editor and OS-local metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python caches and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ROS 2 / colcon output.  These directories are reproducible and must not be
+# committed from either the repository root or an individual package.
+/build/
+/install/
+/log/
+**/log/
+
+# Local CMake artifacts produced by ad-hoc in-source builds
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Manual safety copies.  Git history is the source of truth; keep these files
+# on disk if they are still useful, but do not offer them for commits.
+**/__backups__/
+*.orig
+*.rej
+*.bak
+*.before_*
+*_before_*
+* copy*.*
+
+# Historical policy exports copied into the active policy directory during
+# local deployment experiments.  Already tracked policies remain tracked.
+/robot_description/arcdog_adjustable_leg_description/config/rl_policy/policy_*.pt
+/robot_description/arcdog_description/config/rl_policy/policy_*.pt

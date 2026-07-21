@@ -20,14 +20,20 @@
     <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
 
-    <geom pos="1.2 0 0.04" type="box"  size="0.1 2 0.04" quat="1.0 0 0 0"/>
-    <geom pos="1.6 0 0.04" type="box"  size="0.1 2 0.04" quat="1.0 0 0 0"/>
+    <!--
+    ================= Highstep box terrain probes =================
+    IsaacLab source:
+      HIGHSTEP_TERRAINS_CFG.sub_terrains["box"].box_height_range = (0.04, 0.35)
+      Fixed Mujoco probe mapping: height = 0.04 + (level / 10.0) * (0.35 - 0.04)
+      L3  -> 0.133 m
+      L7  -> 0.257 m
+      L10 -> 0.350 m
+    MuJoCo box size is half extent, so pos_z and size_z are both height / 2.
+    Front edge of each 3.0 m platform is at x = 1.20 m.
+    -->
+    <geom name="highstep_box_L3_h0133"  pos="2.70 -4.00 0.0665" type="box" size="1.50 1.50 0.0665" rgba="0.35 0.70 0.95 1" friction="2.0"/>
+    <geom name="highstep_box_L7_h0257"  pos="2.70  4.00 0.1285" type="box" size="1.50 1.50 0.1285" rgba="0.95 0.70 0.30 1" friction="2.0"/>
+    <geom name="highstep_box_L10_h0350" pos="2.70  0.00 0.1750" type="box" size="1.50 1.50 0.1750" rgba="0.95 0.40 0.35 1" friction="2.0"/>
 
-    <geom pos="2.3 0 0.02" type="box"  size="0.2 2 0.15" quat="1.0 0 0 0"/>
-    <geom pos="2.6 0 0.02" type="box"  size="0.22 2 0.3" quat="1.0 0 0 0"/>
-    <geom pos="2.8 0 0.02" type="box"  size="0.23 2 0.45" quat="1.0 0 0 0"/>
-    <geom pos="3 0 0.02" type="box"  size="0.24 2 0.6" quat="1.0 0 0 0"/>
-    <geom pos="3.2 0 0.02" type="box"  size="0.25 2 0.75" quat="1.0 0 0 0"/>
-    <geom pos="3.4 0 0.02" type="box"  size="0.26 2 0.9" quat="1.0 0 0 0"/>
   </worldbody>
 </mujoco>

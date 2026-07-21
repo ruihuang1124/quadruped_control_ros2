@@ -1,21 +1,25 @@
 #!/bin/bash
 
+set -e
+
 robot=arcdog_adjustable_leg
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+package_dir="$(cd -- "${script_dir}/.." && pwd)"
 
 build_urdf() {
 
-  xacro_dir="/home/lxq/colcon_ws/src/quadruped_control_ros2/robot_description/"$robot"_description/xacro"
-  urdf_dir="/home/lxq/colcon_ws/src/quadruped_control_ros2/robot_description/"$robot"_description/urdf"
+  xacro_dir="${package_dir}/xacro"
+  urdf_dir="${package_dir}/urdf"
 
-  if [ -d $xacro_dir ]; then
+  if [ -d "$xacro_dir" ]; then
     echo "==== Building: $robot | Simulator: $1 ===="
 
     if [ "$1" == "none" ]; then
-      xacro $xacro_dir/robot.xacro simulator:="$1" >$urdf_dir/"$robot".urdf
-      check_urdf $urdf_dir/$robot.urdf
+      xacro "$xacro_dir/robot.xacro" simulator:="$1" >"$urdf_dir/$robot.urdf"
+      check_urdf "$urdf_dir/$robot.urdf"
     else
-      xacro $xacro_dir/robot.xacro simulator:="$1" >$urdf_dir/"$robot"_"$1".urdf
-      check_urdf $urdf_dir/"$robot"_"$1".urdf
+      xacro "$xacro_dir/robot.xacro" simulator:="$1" >"$urdf_dir/${robot}_$1.urdf"
+      check_urdf "$urdf_dir/${robot}_$1.urdf"
     fi
 
   else
@@ -24,20 +28,22 @@ build_urdf() {
   fi
 }
 
-## Get current folder and make sure it is *scripts*
-curr_folder=${PWD##*/}
-if [ "$curr_folder" != "scripts" ]; then
-  echo "ERROR: you need to run the script from the arcdog_description/scripts directory."
-  echo "$curr_folder"
-  exit 1
-fi
-
 # rm -f "$PWD"/../urdf/quadrupedal_robot/$robot/*.urdf
 # rm -f "$PWD"/../urdf/quadrupedal_robot/$robot/arcdog_test.urdf
 # mkdir -p "$PWD"/../urdf/quadrupedal_robot/$robot
 
 #build_urdf ocs2
-build_urdf test
+# build_urdf test
 # build_urdf mujoco
+
+# 检查是否传入了参数，如果没有传入，给一个默认值（比如 test）或者报错退出
+if [ -z "${1:-}" ]; then
+  echo "Usage: ./build.sh <simulator_name>"
+  echo "Example: ./build.sh ocs2"
+  exit 1
+fi
+
+# 将终端传入的第一个参数 $1 传递给 build_urdf 函数
+build_urdf "$1"
 
 exit 0

@@ -1,0 +1,4 @@
+rl_quadruped_adjustable_leg_controller:
+  ros__parameters:
+    diagnostic_soft_gates_log_only: true
+    diagnostic_runtime_backend: "mujoco"

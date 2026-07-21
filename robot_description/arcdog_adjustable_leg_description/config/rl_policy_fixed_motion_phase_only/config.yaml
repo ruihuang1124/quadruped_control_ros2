@@ -1,5 +1,12 @@
-model_name: "policy_2026-04-10_21-14-55.pt"
-model_name_policy2: "policy_2026-04-10_21-14-55.pt"
+model_name_policy2: "raw_action_student_dagger_round2_14ccb3e8.jit.pt"
+policy2_fixed_motion_enabled: true
+policy2_one_shot_enabled: true
+# A one-shot may only start after the Fixed Stand FSM has converged and the
+# measured state is still close to its declared stand target.
+policy2_trigger_revolute_tolerance: 0.35
+policy2_trigger_box_tolerance: 0.015
+policy2_trigger_revolute_velocity_limit: 0.75
+policy2_trigger_box_velocity_limit: 0.04
 framework: "isaacsim"
 rows: 4
 cols: 4
@@ -26,36 +33,45 @@ clip_actions_upper: [60, 60, 60, 60,
 #                      45, 45, 45,
 #                      45, 45, 45,
 #                      45, 45, 45]
-                     
+
 # rl_kp: [45, 45, 45, 45,
 #         50, 50, 50, 50,
 #         60, 60, 60, 60,
 #         1000, 1000, 1000, 1000]
 
-rl_kp: [50, 55, 65, 2,
-        50, 55, 65, 2,
-        50, 55, 65, 2,
-        50, 55, 65, 2]
+rl_kp: [45, 50, 70, 8000,
+        45, 50, 70, 8000,
+        45, 50, 70, 8000,
+        45, 50, 70, 8000]
 
 # rl_kd: [1.5, 1.5, 1.5, 1.5,
 #         1.5, 1.5, 1.5, 1.5,
 #         2.0, 2.0, 2.0, 2.0,
 #         10.0, 10.0, 10.0, 10.0]
 
-rl_kd: [1.5, 1.5, 2.5, 2.5,
-        1.5, 1.5, 2.5, 2.5,
-        1.5, 1.5, 2.5, 3.0,
-        1.5, 1.5, 2.5, 3.0]
+rl_kd: [1.5, 1.5, 2.0, 1.0,
+        1.5, 1.5, 2.0, 1.0,
+        1.5, 1.5, 2.0, 1.0,
+        1.5, 1.5, 2.0, 1.0]
 hip_scale_reduction: 1.0
 hip_scale_reduction_indices: [0, 1, 2, 3]
 num_of_dofs: 16
 # action_scale: 0.25
+# action_scale: [0.2, 0.2, 0.2, 0.02,
+#                0.2, 0.2, 0.2, 0.02,
+#                0.2, 0.2, 0.2, 0.02,
+#                0.2, 0.2, 0.2, 0.02]
+# action_scale: [0.25, 0.25, 0.25, 0.02,
+#                0.25, 0.25, 0.25, 0.02,
+#                0.25, 0.25, 0.25, 0.02,
+#                0.25, 0.25, 0.25, 0.02]
 action_scale: [0.1, 0.1, 0.1, 0.02,
                0.1, 0.1, 0.1, 0.02,
                0.1, 0.1, 0.1, 0.02,
                0.1, 0.1, 0.1, 0.02]
 
-# Final target envelope after action_scale + default_dof_pos.
+# Final joint target clamp after action_scale + default_dof_pos.
+# Keep revolute joints wide for debugging, but protect the prismatic box joints.
 output_dof_pos_lower: [-60.0, -60.0, -60.0, 0.0,
                        -60.0, -60.0, -60.0, 0.0,
                        -60.0, -60.0, -60.0, 0.0,
@@ -65,9 +81,12 @@ output_dof_pos_upper: [60.0, 60.0, 60.0, 0.06,
                        60.0, 60.0, 60.0, 0.06,
                        60.0, 60.0, 60.0, 0.06]
 
-# Mandatory physical target envelope. These values follow the checked-in
-# adjustable-leg robot description; verify the exact onboard convention before
-# motor activation. Machine-specific policy names and gains remain local.
+# Mandatory hardware target envelope, applied after the optional policy envelope
+# above. Values are written leg-major here and transposed by StateRL into the
+# controller order (FL/FR/RL/RR for each joint type). These values match this
+# source tree's xacro/URDF as of the 2026-07-12 audit; verify them against the
+# exact onboard robot description before activating motors. StateRL fails closed
+# if either field is absent, malformed, or inconsistent.
 physical_dof_pos_lower: [-1.2217304763960306, -1.5708, -2.775073510670984, 0.0,
                          -1.2217304763960306, -1.5708, -2.775073510670984, 0.0,
                          -1.2217304763960306, -1.5708, -2.775073510670984, 0.0,
@@ -76,6 +95,16 @@ physical_dof_pos_upper: [1.2217304763960306, 3.4907, -0.6457718232379019, 0.06,
                          1.2217304763960306, 3.4907, -0.6457718232379019, 0.06,
                          1.2217304763960306, 3.4907, -0.6457718232379019, 0.06,
                          1.2217304763960306, 3.4907, -0.6457718232379019, 0.06]
+
+# Optional highstep validation guard. Keep disabled for normal deployment.
+# When enabled on the highstep policy, it prevents the rear hips from collapsing
+# toward the centerline immediately after policy switch.
+rear_hip_guard_enabled: false
+rear_hip_guard_policy2_only: true
+rear_hip_guard_min_cmd_x: 0.05
+rear_hip_guard_min_abs: 0.06
+rear_hip_guard_blend: 1.0
+rear_hip_guard_warning_interval: 200
 
 lin_vel_scale: 2.0
 ang_vel_scale: 0.25
@@ -92,4 +121,4 @@ torque_limits: [40.0, 40.0, 40.0, 40,
 default_dof_pos: [0.0, 0.7, -1.3, 0.03,
                   0.0, 0.7, -1.3, 0.03,
                   0.0, 0.7, -1.3, 0.03,
-                  0.0, 0.7, -1.3, 0.03]
+                  0.00, 0.7, -1.3, 0.03]

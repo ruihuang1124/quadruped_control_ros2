@@ -277,5 +277,12 @@
   <keyframe>
     <key name="home" qpos="0 0 0.35 1 0 0 0 0 0.9 -1.8 2 0 0.9 -1.8 2 0 0.9 -1.8 2 0 0.9 -1.8 2"
       ctrl="0 0.9 -1.8 2 0 0.9 -1.8 2 0 0.9 -1.8 2 0 0.9 -1.8 2" />
+    <!-- Exact joint q/dq carried across the approved manual R boundary
+         (source control step 839), reordered from Isaac action order into
+         MuJoCo's per-leg joint order.  Root pose reproduces the approved
+         0.55 m edge gap against the x=1.20 m platform front edge. -->
+    <key name="highstep_b300_contract_start"
+      qpos="0.65 0 0.44 1 0 0 0 0.1975599229 0.6464785337 -1.3426415920 0.0229980294 0.2744115889 0.7154185176 -1.3581618071 0.0353659987 0.3135349751 0.7971844673 -1.2585310936 0.0325565822 -0.2091307789 0.5376236439 -1.1646499634 0.0266456921"
+      qvel="0 0 0 0 0 0 -0.0712107196 1.8758925200 -2.8663997650 -0.2698323429 -0.0423095301 -0.1792650074 -0.1255981028 -0.0015531695 -0.0369157605 -0.1548131555 -0.2258787751 -0.0138619617 -0.0381572768 -0.5836446881 0.7860876322 -0.0531845316" />
   </keyframe>
 </mujoco>

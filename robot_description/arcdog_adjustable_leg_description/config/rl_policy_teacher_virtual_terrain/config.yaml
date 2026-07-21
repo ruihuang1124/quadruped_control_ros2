@@ -1,12 +1,18 @@
-model_name: "policy_2026-04-10_21-14-55.pt"
-model_name_policy2: "policy_2026-04-10_21-14-55.pt"
+model_name_policy2: "teacher_b300_priv_actor.pt"
+teacher_virtual_terrain_enabled: true
+teacher_virtual_reference_model: "teacher_b300_virtual_terrain_reference.pt"
+# Continuous calibration: the existing controller produces 0.5 at full stick;
+# the accepted Teacher contract is 0.7200000286. No latch or playback is used.
+teacher_policy2_command_x_gain: 1.4400000572
+teacher_adapter_min_confidence: 0.35
+policy2_fixed_motion_enabled: false
+policy2_one_shot_enabled: false
 framework: "isaacsim"
 rows: 4
 cols: 4
 decimation: 4
 num_observations: 57
 observations: ["ang_vel", "gravity_vec", "commands", "dof_pos", "dof_vel", "actions"]
-# observations_history: [0]
 observations_history: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 clip_obs: 60.0
 clip_actions_lower: [-60, -60, -60, -60,
@@ -17,45 +23,21 @@ clip_actions_upper: [60, 60, 60, 60,
                      60, 60, 60, 60,
                      60, 60, 60, 60,
                      60, 60, 60, 60]
-
-# clip_actions_lower: [-45, -45, -45,
-#                      -45, -45, -45,
-#                      -45, -45, -45,
-#                      -45, -45, -45]
-# clip_actions_upper: [45, 45, 45,
-#                      45, 45, 45,
-#                      45, 45, 45,
-#                      45, 45, 45]
-                     
-# rl_kp: [45, 45, 45, 45,
-#         50, 50, 50, 50,
-#         60, 60, 60, 60,
-#         1000, 1000, 1000, 1000]
-
-rl_kp: [50, 55, 65, 2,
-        50, 55, 65, 2,
-        50, 55, 65, 2,
-        50, 55, 65, 2]
-
-# rl_kd: [1.5, 1.5, 1.5, 1.5,
-#         1.5, 1.5, 1.5, 1.5,
-#         2.0, 2.0, 2.0, 2.0,
-#         10.0, 10.0, 10.0, 10.0]
-
-rl_kd: [1.5, 1.5, 2.5, 2.5,
-        1.5, 1.5, 2.5, 2.5,
-        1.5, 1.5, 2.5, 3.0,
-        1.5, 1.5, 2.5, 3.0]
+rl_kp: [45, 50, 70, 8000,
+        45, 50, 70, 8000,
+        45, 50, 70, 8000,
+        45, 50, 70, 8000]
+rl_kd: [1.5, 1.5, 2.0, 1.0,
+        1.5, 1.5, 2.0, 1.0,
+        1.5, 1.5, 2.0, 1.0,
+        1.5, 1.5, 2.0, 1.0]
 hip_scale_reduction: 1.0
 hip_scale_reduction_indices: [0, 1, 2, 3]
 num_of_dofs: 16
-# action_scale: 0.25
 action_scale: [0.1, 0.1, 0.1, 0.02,
                0.1, 0.1, 0.1, 0.02,
                0.1, 0.1, 0.1, 0.02,
                0.1, 0.1, 0.1, 0.02]
-
-# Final target envelope after action_scale + default_dof_pos.
 output_dof_pos_lower: [-60.0, -60.0, -60.0, 0.0,
                        -60.0, -60.0, -60.0, 0.0,
                        -60.0, -60.0, -60.0, 0.0,
@@ -64,10 +46,6 @@ output_dof_pos_upper: [60.0, 60.0, 60.0, 0.06,
                        60.0, 60.0, 60.0, 0.06,
                        60.0, 60.0, 60.0, 0.06,
                        60.0, 60.0, 60.0, 0.06]
-
-# Mandatory physical target envelope. These values follow the checked-in
-# adjustable-leg robot description; verify the exact onboard convention before
-# motor activation. Machine-specific policy names and gains remain local.
 physical_dof_pos_lower: [-1.2217304763960306, -1.5708, -2.775073510670984, 0.0,
                          -1.2217304763960306, -1.5708, -2.775073510670984, 0.0,
                          -1.2217304763960306, -1.5708, -2.775073510670984, 0.0,
@@ -76,19 +54,21 @@ physical_dof_pos_upper: [1.2217304763960306, 3.4907, -0.6457718232379019, 0.06,
                          1.2217304763960306, 3.4907, -0.6457718232379019, 0.06,
                          1.2217304763960306, 3.4907, -0.6457718232379019, 0.06,
                          1.2217304763960306, 3.4907, -0.6457718232379019, 0.06]
-
+rear_hip_guard_enabled: false
+rear_hip_guard_policy2_only: true
+rear_hip_guard_min_cmd_x: 0.05
+rear_hip_guard_min_abs: 0.06
+rear_hip_guard_blend: 1.0
+rear_hip_guard_warning_interval: 200
 lin_vel_scale: 2.0
 ang_vel_scale: 0.25
 dof_pos_scale: 1.0
 dof_vel_scale: 0.05
-
 commands_scale: [1.0, 1.0, 1.0]
-
-torque_limits: [40.0, 40.0, 40.0, 40,
-                40.0, 40.0, 40.0, 40,
-                40.0, 40.0, 40.0, 40,
-                40.0, 40.0, 40.0, 40]
-
+torque_limits: [40.0, 40.0, 40.0, 40.0,
+                40.0, 40.0, 40.0, 40.0,
+                40.0, 40.0, 40.0, 40.0,
+                40.0, 40.0, 40.0, 40.0]
 default_dof_pos: [0.0, 0.7, -1.3, 0.03,
                   0.0, 0.7, -1.3, 0.03,
                   0.0, 0.7, -1.3, 0.03,

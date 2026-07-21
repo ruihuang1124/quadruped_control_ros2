@@ -171,12 +171,12 @@
 
         <!-- 添加 prismatic joint -->
         <joint name="${name}_box_joint" type="prismatic">
-            <origin rpy="0 0 0" xyz="0 0 ${-calf_length}"/> <!-- 根据 calf 的长度调整位置 -->
+            <origin rpy="0 0 0" xyz="0 0 -0.133"/> <!-- 根据 calf 的长度调整位置 -->
             <parent link="${name}_calf"/>
             <child link="${name}_box"/>
             <axis xyz="0 0 1"/> <!-- 定义滑动轴 -->
             <dynamics damping="${damping}" friction="${friction}"/>
-            <limit effort="${box_effort_max}" velocity="${box_velocity_max}" lower="0" upper="${calf_length}"/> <!-- 定义限制条件 -->
+            <limit effort="${box_effort_max}" velocity="${box_velocity_max}" lower="0" upper="0.06"/> <!-- 定义限制条件 -->
         </joint>
 
         <joint name="${name}_foot_fixed" type="fixed">

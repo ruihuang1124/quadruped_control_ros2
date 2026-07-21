@@ -27,7 +27,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare(package_description),
             "config",
-            "robot_control.yaml",
+            "robot_control_E7700.yaml",
         ]
     )
 

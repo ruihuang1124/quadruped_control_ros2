@@ -17,6 +17,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(custom_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(mujoco REQUIRED)
 
 file(GLOB_RECURSE source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
@@ -24,7 +25,7 @@ file(GLOB_RECURSE source ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_S
 add_executable(${PROJECT_NAME} ${source})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)  # 确保使用 C++20 特性
 
-ament_target_dependencies(${PROJECT_NAME} rclcpp custom_msgs sensor_msgs)
+ament_target_dependencies(${PROJECT_NAME} rclcpp custom_msgs sensor_msgs std_srvs)
 target_link_libraries(${PROJECT_NAME} mujoco glfw)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -42,5 +43,13 @@ install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}/
 )
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(
+    highstep_contract_diagnostic
+    test/test_highstep_contract_diagnostic.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 
 ament_package()
